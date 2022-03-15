@@ -165,7 +165,7 @@ jobs:
       uses: actions-js/push@master
       with:
         github_token: ${{secrets.GITHUB_TOKEN}}
-        branch: __${{env.NEXT_VERSION}}.${{github.run_number}}
+        branch: HEAD:refs/heads/__${{env.NEXT_VERSION}}.${{github.run_number}}
 
     - name: Configure
       shell: pwsh
