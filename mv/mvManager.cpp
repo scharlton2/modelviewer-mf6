@@ -68,11 +68,13 @@ using std::ofstream;
 using std::pow;
 
 // This must be below vtkStandardNewMacro
+#if defined(_MSC_VER)
 #include <afx.h>
 #if defined(_DEBUG) && defined(MV_DEBUG_MEMORY_LEAKS)
 #define new DEBUG_NEW
 #undef THIS_FILE
 static char THIS_FILE[] = __FILE__;
+#endif
 #endif
 
 // This must be below <afx.h>

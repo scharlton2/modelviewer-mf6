@@ -2,7 +2,7 @@
 #include <string.h>
 
 // This must be below vtkStandardNewMacro
-#if defined(_DEBUG) && defined(MV_DEBUG_MEMORY_LEAKS)
+#if defined(_MSC_VER) && defined(_DEBUG) && defined(MV_DEBUG_MEMORY_LEAKS)
 #include <afx.h>
 #define new DEBUG_NEW
 #undef THIS_FILE
