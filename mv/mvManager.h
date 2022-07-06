@@ -6,6 +6,7 @@
 #include <Math.h>
 #include <typeinfo>
 #include <algorithm>
+#include <string>
 
 class mvCustomAppendPolyData;
 class mvGUISettings;
@@ -64,7 +65,7 @@ public:
 
     // Data set and animation control
     // void ClearData();
-    char                              *LoadData(char *modelType, char *dataFileList);
+    std::string                        LoadData(char *modelType, char *dataFileList);
     char                              *GetDataFileList() const;
     int                                HasVectorData() const;
     int                                HasPathlineData() const;
@@ -89,7 +90,7 @@ public:
     int                                GetActiveScalarDataType() const { return m_ActiveDataType; }
     char                              *GetActiveScalarDataName() const;
     int                                GetPrimaryScalarMode() const;
-    char                              *GetModelName() const;
+    std::string                        GetModelName() const;
     int                                GetTimeLabelOption() const;
     void                               SetTimePointTo(int timePointIndex);
     void                               AdvanceOneTimePoint();

@@ -439,7 +439,7 @@ int CMvDoc::GetNumberOfTimePoints()
     return m_Manager->GetNumberOfTimePoints();
 }
 
-char *CMvDoc::GetModelName()
+std::string CMvDoc::GetModelName()
 {
     return m_Manager->GetModelName();
 }
@@ -541,7 +541,7 @@ void CMvDoc::OnLoadData()
     char selectedModel[20];
     // This version of Model View is customized to display only Modflow 6 results.
     // In other words, the variable "selectedModel" is set to "Modflow 6"
-    strcpy(selectedModel, Modflow6DataSource::GetNameStatic());
+    strcpy(selectedModel, Modflow6DataSource::GetNameStatic().c_str());
 
     // Display dialog box for user to specify data files for the
     // selected model. Note that memory for dataFileList is allocated
@@ -554,14 +554,14 @@ void CMvDoc::OnLoadData()
 
     // Load data
     BeginWaitCursor();
-    char *errorMsg = m_Manager->LoadData(selectedModel, dataFileList);
+    std::string errorMsg = m_Manager->LoadData(selectedModel, dataFileList);
     delete[] dataFileList;
     EndWaitCursor();
 
     // Check for error in reading data files
-    if (errorMsg != 0)
+    if (!errorMsg.empty())
     {
-        AfxMessageBox(errorMsg);
+        AfxMessageBox(errorMsg.c_str());
         return;
     }
 

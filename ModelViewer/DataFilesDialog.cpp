@@ -15,7 +15,7 @@ using std::ofstream;
 
 char *DataFilesDialog::GetDataFileList(char *model)
 {
-    if (stricmp(model, Modflow6DataSource::GetNameStatic()) == 0)
+    if (stricmp(model, Modflow6DataSource::GetNameStatic().c_str()) == 0)
     {
         return GetModflow6DataFiles();
     }

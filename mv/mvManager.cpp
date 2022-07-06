@@ -596,7 +596,7 @@ mvManager::~mvManager()
     }
 }
 
-char *mvManager::LoadData(char *modelName, char *dataFileList)
+std::string mvManager::LoadData(char *modelName, char *dataFileList)
 {
     // Reading data from a file is done in "Deserialize".
 
@@ -608,8 +608,8 @@ char *mvManager::LoadData(char *modelName, char *dataFileList)
 
     m_WarningMessage[0] = '\0';
 
-    char *errMsg        = newDataSource->LoadData(dataFileList);
-    if (errMsg != 0)
+    std::string errMsg  = newDataSource->LoadData(dataFileList);
+    if (!errMsg.empty())
     {
         delete newDataSource;
         return errMsg;
@@ -1201,7 +1201,7 @@ char *mvManager::LoadData(char *modelName, char *dataFileList)
         SetSolidDisplayToBlocky();
     }
 
-    return 0;
+    return std::string();
 }
 
 void mvManager::ApplyDefaultSettings()
@@ -1545,7 +1545,7 @@ int mvManager::GetPrimaryScalarMode() const
     }
 }
 
-char *mvManager::GetModelName() const
+std::string mvManager::GetModelName() const
 {
     if (m_DataSource)
     {
@@ -1553,7 +1553,7 @@ char *mvManager::GetModelName() const
     }
     else
     {
-        return "";
+        return std::string();
     }
 }
 
@@ -5238,10 +5238,10 @@ void mvManager::Deserialize(const char *fileName, mvGUISettings *gui, std::strin
 
     // Load the data and set up the visualization pipeline
 
-    char *err = LoadData(modelName, dataFileList);
+    std::string err = LoadData(modelName, dataFileList);
     delete[] dataFileList;
 
-    if (err != 0)
+    if (!err.empty())
     {
         delete hashTable;
         errorMsg = err;

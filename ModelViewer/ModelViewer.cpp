@@ -201,7 +201,7 @@ BOOL CModelViewerApp::OnIdle(LONG lCount)
     {
         CMvDoc* pDoc = (CMvDoc*)(pFrame->GetActiveView()->GetDocument());
         pStatusBar->SetPaneText(pStatusBar->CommandToIndex(ID_INDICATOR_MODEL_NAME),
-                                pDoc->GetModelName());
+                                pDoc->GetModelName().c_str());
         pStatusBar->SetPaneText(pStatusBar->CommandToIndex(ID_INDICATOR_DATA_NAME),
                                 pDoc->GetDataName());
     }

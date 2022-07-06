@@ -54,7 +54,7 @@ public:
     int                                GetNumberOfTimePoints();
     void                               GetScalarDataRange(double* range);
     void                               GetVectorMagnitudeRange(double* range);
-    char*                              GetModelName();
+    std::string                        GetModelName();
     char*                              GetDataName();
     GridType                           GetGridType();
 

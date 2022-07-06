@@ -6,6 +6,8 @@
 #include "mvLinkList.h"
 #include "mvDefine.h"
 
+#include <string>
+
 using namespace std;
 
 class MV_EXPORT Modflow6DataSource : public mvDataSource
@@ -14,15 +16,15 @@ public:
     Modflow6DataSource();
     virtual ~Modflow6DataSource();
 
-    static char  *GetNameStatic() { return "Modflow 6"; }
-    virtual char *GetName() { return GetNameStatic(); }
-    virtual int   GetPrimaryScalarMode() { return MV_CELL_SCALARS; }
-    virtual GridType GetGridType() { return m_GridType; }
+    static std::string  GetNameStatic() { return "Modflow 6"; }
+    virtual std::string GetName() { return GetNameStatic(); }
+    virtual int         GetPrimaryScalarMode() { return MV_CELL_SCALARS; }
+    virtual GridType    GetGridType() { return m_GridType; }
     //   virtual int AreAllCellsActive() { return 0; }
-    virtual char *LoadData(char *dataFileList);
-    virtual void  AdvanceOneTimePoint() { SetTimePointTo(-1); }
-    virtual void  SetTimePointTo(int timePointIndex);
-    virtual void  SetScalarDataTypeTo(int dataTypeIndex)
+    virtual std::string LoadData(char *dataFileList);
+    virtual void        AdvanceOneTimePoint() { SetTimePointTo(-1); }
+    virtual void        SetTimePointTo(int timePointIndex);
+    virtual void        SetScalarDataTypeTo(int dataTypeIndex)
     { /*Not used*/
     }
     virtual int  GetModelFeatureDisplayMode() { return MV_DISPLAY_MODEL_FEATURES_AS_CELLS; }
@@ -88,13 +90,13 @@ protected:
     double      m_yorigin;
     double      m_angrot;
 
-    char       *ExtractModflowOutputFileNames(char *nameFile, char *gridFile, char *headFile, char *budgetFile);
-    char       *CreateDisGrid(char *gridFile);
-    char       *CreateDisvGrid(char *gridFile);
-    char       *CreateDisuGrid(char *gridFile);
-    char       *CountHead(char *dataType);
+    std::string ExtractModflowOutputFileNames(char *nameFile, char *gridFile, char *headFile, char *budgetFile);
+    std::string CreateDisGrid(char *gridFile);
+    std::string CreateDisvGrid(char *gridFile);
+    std::string CreateDisuGrid(char *gridFile);
+    std::string CountHead(char *dataType);
     void        GetTimePoints(double *timePoints, int *periods, int *steps);
-    char       *CountBudgetAndFeatures();
+    std::string CountBudgetAndFeatures();
     int         PracticallyEqual(double value1, double value2);
     int         IsModelFeature(char *flowType);
     void        ExtractFileName(char *aString);
