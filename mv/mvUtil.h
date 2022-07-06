@@ -37,7 +37,7 @@ public:
 
     static void   ReplaceTabWithWhiteSpace(char *aString);
 
-    static double mvUtil::Fortran_atof(char *aString);
+    static double Fortran_atof(char *aString);
     static void   ExtractFirstString(char *aString, char *FirstString);
 
     static char  *NextNonSpaceChar(char *str, int len);
