@@ -1524,7 +1524,7 @@ char **mvManager::GetDataTypeLabels() const
     }
 }
 
-char *mvManager::GetActiveScalarDataName() const
+const char *mvManager::GetActiveScalarDataName() const
 {
     if (!m_DataSource)
     {

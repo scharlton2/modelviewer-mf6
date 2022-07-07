@@ -88,7 +88,7 @@ public:
     int                                GetCurrentTimePointIndex() const { return m_TimePointIndex; }
     void                               SetScalarDataTypeTo(int dataTypeIndex);
     int                                GetActiveScalarDataType() const { return m_ActiveDataType; }
-    char                              *GetActiveScalarDataName() const;
+    const char *                       GetActiveScalarDataName() const;
     int                                GetPrimaryScalarMode() const;
     std::string                        GetModelName() const;
     int                                GetTimeLabelOption() const;

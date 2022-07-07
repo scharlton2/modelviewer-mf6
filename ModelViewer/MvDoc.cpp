@@ -444,7 +444,7 @@ std::string CMvDoc::GetModelName()
     return m_Manager->GetModelName();
 }
 
-char *CMvDoc::GetDataName()
+const char *CMvDoc::GetDataName() const
 {
     return m_Manager->GetActiveScalarDataName();
 }

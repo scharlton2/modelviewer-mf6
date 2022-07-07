@@ -55,7 +55,7 @@ public:
     void                               GetScalarDataRange(double* range);
     void                               GetVectorMagnitudeRange(double* range);
     std::string                        GetModelName();
-    char*                              GetDataName();
+    const char*                        GetDataName() const;
     GridType                           GetGridType();
 
     // Callback functions for modeless dialog boxes (tools)
