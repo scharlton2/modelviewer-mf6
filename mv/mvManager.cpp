@@ -75,6 +75,10 @@ static char THIS_FILE[] = __FILE__;
 #endif
 #endif
 
+#if !defined(MAX_PATH)
+constexpr auto MAX_PATH = 4096;
+#endif
+
 
 mvManager::mvManager()
 {
