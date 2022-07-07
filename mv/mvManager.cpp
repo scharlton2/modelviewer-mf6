@@ -57,8 +57,6 @@
 #include "vtkUnstructuredGrid.h"
 #include "vtkWedge.h"
 
-#include <direct.h>
-
 #include "mvDefine.h"
 
 #include <sstream>
