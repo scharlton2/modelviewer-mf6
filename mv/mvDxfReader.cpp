@@ -78,7 +78,7 @@ void mvDxfReader::SetFileName(char *filename)
     }
     if (m_FileName != 0)
     {
-        if (stricmp(m_FileName, filename) == 0)
+        if (mvUtil::stricmp(m_FileName, filename) == 0)
         {
             return;
         }
@@ -151,7 +151,7 @@ int mvDxfReader::Read(char *errMsg)
     do
     {
         if (fgets(buffer, 1024, fdxf) == 0) break;
-        if (stricmp(buffer, "$ucsorg\n") == 0)
+        if (mvUtil::stricmp(buffer, "$ucsorg\n") == 0)
         {
             for (;;)
             {
@@ -194,31 +194,31 @@ int mvDxfReader::Read(char *errMsg)
         {
             break;
         }
-        if (!stricmp(buffer, "polyline\n"))
+        if (!mvUtil::stricmp(buffer, "polyline\n"))
         {
             process_poly(lines);
         }
-        else if (!stricmp(buffer, "lwpolyline\n"))
+        else if (!mvUtil::stricmp(buffer, "lwpolyline\n"))
         {
             process_lwpoly(lines);
         }
-        else if (!stricmp(buffer, "line\n"))
+        else if (!mvUtil::stricmp(buffer, "line\n"))
         {
             process_line(lines);
         }
-        else if (!stricmp(buffer, "text\n"))
+        else if (!mvUtil::stricmp(buffer, "text\n"))
         {
             process_text();
         }
-        else if (!stricmp(buffer, "circle\n"))
+        else if (!mvUtil::stricmp(buffer, "circle\n"))
         {
             process_circle(lines);
         }
-        else if (!stricmp(buffer, "arc\n"))
+        else if (!mvUtil::stricmp(buffer, "arc\n"))
         {
             process_arc(lines);
         }
-        else if (!stricmp(buffer, "endsec\n"))
+        else if (!mvUtil::stricmp(buffer, "endsec\n"))
         {
             break;
         }
@@ -289,12 +289,12 @@ void mvDxfReader::get_layer_info(void)
     do
     {
         if (fgets(buffer, 1024, fdxf) == 0) goto ProcessLayers;
-        if (stricmp(buffer, "tables\n") == 0)
+        if (mvUtil::stricmp(buffer, "tables\n") == 0)
         {
             do
             {
                 if (fgets(buffer, 1024, fdxf) == 0) goto ProcessLayers;
-                if (stricmp(buffer, "layer\n") == 0)
+                if (mvUtil::stricmp(buffer, "layer\n") == 0)
                 {
                     for (;;)
                     {
@@ -321,7 +321,7 @@ void mvDxfReader::get_layer_info(void)
                         }
                     }
                 }
-                else if (stricmp(buffer, "endsec\n") == 0)
+                else if (mvUtil::stricmp(buffer, "endsec\n") == 0)
                 {
                     goto ProcessLayers;
                 }
@@ -362,7 +362,7 @@ int mvDxfReader::get_layer(char *lname)
 
     for (i = 0; i < num_layers; i++)
     {
-        if (stricmp(layer_name[i], lname) == 0)
+        if (mvUtil::stricmp(layer_name[i], lname) == 0)
         {
             return layer_color[i];
         }
@@ -397,7 +397,7 @@ int mvDxfReader::find_entity(void)
                     {
                         return 0;
                     }
-                    if (stricmp(buffer, "entities\n") == 0)
+                    if (mvUtil::stricmp(buffer, "entities\n") == 0)
                     {
                         fgets(buffer, 1024, fdxf);
                         return 1;
@@ -409,7 +409,7 @@ int mvDxfReader::find_entity(void)
                 return 0;
             }
         }
-        if (stricmp(buffer, "entities\n") == 0)
+        if (mvUtil::stricmp(buffer, "entities\n") == 0)
         {
             fgets(buffer, 1024, fdxf);
             return 1;

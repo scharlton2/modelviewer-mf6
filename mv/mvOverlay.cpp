@@ -1,4 +1,5 @@
 #include "mvOverlay.h"
+#include "mvUtil.h"
 #include "shapefil.h"
 #include "vtkPolyData.h"
 #include "vtkClipPolyData.h"
@@ -163,7 +164,7 @@ void mvOverlay::SetFileName(const char *filename)
     }
     if (m_FileName != 0)
     {
-        if (stricmp(m_FileName, filename) == 0)
+        if (mvUtil::stricmp(m_FileName, filename) == 0)
         {
             return;
         }

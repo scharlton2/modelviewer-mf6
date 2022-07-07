@@ -412,3 +412,37 @@ void mvUtil::RemoveDoubleQuotes(char* aString)
 		memmove(aString, aString + 1, len - 1);
 	}
 }
+
+int mvUtil::stricmp(const char *a, const char *b)
+{
+    int na;
+    int nb;
+    int result;
+    assert(a != nullptr);
+    assert(b != nullptr);
+    do
+    {
+        na     = tolower(*a++);
+        nb     = tolower(*b++);
+        result = na - nb;
+    } while (result == 0 && na != '\0');
+    return result;
+}
+
+int mvUtil::strnicmp(const char *a, const char *b, size_t n)
+{
+    int na;
+    int nb;
+    int result;
+    if (n == 0) return 0;
+    assert(a != nullptr);
+    assert(b != nullptr);
+    size_t m = n;
+    do
+    {
+        na     = tolower(*a++);
+        nb     = tolower(*b++);
+        result = na - nb;
+    } while (result == 0 && na != '\0' && --m != 0);
+    return result;
+}

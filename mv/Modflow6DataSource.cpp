@@ -406,7 +406,7 @@ std::string Modflow6DataSource::ExtractModflowOutputFileNames(char *nameFile,
         mvUtil::TrimRight(aline);
         if (strlen(aline) > 0 && aline[0] != '#')
         {
-            if (!_strnicmp(aline, "dis6 ", 5))
+            if (!mvUtil::strnicmp(aline, "dis6 ", 5))
             {
                 strcpy(gridFile, aline + 5);
                 mvUtil::TrimLeft(gridFile);
@@ -414,7 +414,7 @@ std::string Modflow6DataSource::ExtractModflowOutputFileNames(char *nameFile,
                 strcat(gridFile, ".grb");
                 m_GridType = GridType::MV_STRUCTURED_GRID;
             }
-            else if (!_strnicmp(aline, "disv6 ", 6))
+            else if (!mvUtil::strnicmp(aline, "disv6 ", 6))
             {
                 strcpy(gridFile, aline + 6);
                 mvUtil::TrimLeft(gridFile);
@@ -422,7 +422,7 @@ std::string Modflow6DataSource::ExtractModflowOutputFileNames(char *nameFile,
                 strcat(gridFile, ".grb");
                 m_GridType = GridType::MV_LAYERED_GRID;
             }
-            else if (!_strnicmp(aline, "disu6 ", 5))
+            else if (!mvUtil::strnicmp(aline, "disu6 ", 6))
             {
                 strcpy(gridFile, aline + 5);
                 mvUtil::TrimLeft(gridFile);
@@ -430,7 +430,7 @@ std::string Modflow6DataSource::ExtractModflowOutputFileNames(char *nameFile,
                 ExtractFileName(gridFile);
                 m_GridType = GridType::MV_UNSTRUCTURED_GRID;
             }
-            if (!_strnicmp(aline, "oc6 ", 4))
+            if (!mvUtil::strnicmp(aline, "oc6 ", 4))
             {
                 strcpy(ocFile, aline + 4);
                 mvUtil::TrimLeft(ocFile);
@@ -463,7 +463,7 @@ std::string Modflow6DataSource::ExtractModflowOutputFileNames(char *nameFile,
             if (!_strnicmp(aline, "head ", 5))
             {
                 p = mvUtil::NextNonSpaceChar(aline + 5, (int)strlen(aline) - 5);
-                if (!_strnicmp(p, "fileout ", 8))
+                if (!mvUtil::strnicmp(p, "fileout ", 8))
                 {
                     strcpy(headFile, p + 8);
                     mvUtil::TrimLeft(headFile);
@@ -471,10 +471,10 @@ std::string Modflow6DataSource::ExtractModflowOutputFileNames(char *nameFile,
                     mvUtil::RemoveDoubleQuotes(headFile);
                 }
             }
-            if (!_strnicmp(aline, "budget ", 7))
+            if (!mvUtil::strnicmp(aline, "budget ", 7))
             {
                 p = mvUtil::NextNonSpaceChar(aline + 7, (int)strlen(aline) - 7);
-                if (!_strnicmp(p, "fileout ", 8))
+                if (!mvUtil::strnicmp(p, "fileout ", 8))
                 {
                     strcpy(budgetFile, p + 8);
                     mvUtil::TrimLeft(budgetFile);
@@ -482,10 +482,10 @@ std::string Modflow6DataSource::ExtractModflowOutputFileNames(char *nameFile,
                     mvUtil::RemoveDoubleQuotes(budgetFile);
                 }
             }
-            if (!_strnicmp(aline, "end ", 4))
+            if (!mvUtil::strnicmp(aline, "end ", 4))
             {
                 p = mvUtil::NextNonSpaceChar(aline + 4, (int)strlen(aline) - 4);
-                if (!_strnicmp(p, "options ", 8))
+                if (!mvUtil::strnicmp(p, "options ", 8))
                 {
                     break;
                 }

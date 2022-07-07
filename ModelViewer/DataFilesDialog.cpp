@@ -1,5 +1,6 @@
 #include "ModelViewer.h"
 #include "DataFilesDialog.h"
+#include "mvUtil.h"
 #include <fstream>
 #include <stdio.h>
 #include <string.h>
@@ -15,7 +16,7 @@ using std::ofstream;
 
 char *DataFilesDialog::GetDataFileList(char *model)
 {
-    if (stricmp(model, Modflow6DataSource::GetNameStatic().c_str()) == 0)
+    if (mvUtil::stricmp(model, Modflow6DataSource::GetNameStatic().c_str()) == 0)
     {
         return GetModflow6DataFiles();
     }

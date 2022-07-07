@@ -17,6 +17,10 @@ public:
     static void   interp3d(double *cellDraw, double *ptDraw, double *dx, double *dy, double *zc,
                            int numCol, int numRow, int numLay, double drawNull, double znull, int *useLayer = 0);
 
+    static int    stricmp(const char *a, const char *b);
+
+    static int    strnicmp(const char *a, const char *b, size_t n);
+
     static int    ExtractNumber(ifstream *in, int *buffer);
 
     static int    ExtractNumber(ifstream *in, double *buffer);

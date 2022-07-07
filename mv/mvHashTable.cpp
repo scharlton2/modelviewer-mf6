@@ -1,4 +1,5 @@
 #include "mvHashTable.h"
+#include "mvUtil.h"
 #include <string.h>
 #include <stdlib.h>
 
@@ -76,7 +77,7 @@ char *mvHashTable::GetHashTableValue(char *key)
     {
         return 0;
     }
-    while ((pos) && (stricmp(pos->key, key) != 0))
+    while ((pos) && (mvUtil::stricmp(pos->key, key) != 0))
     {
         pos = pos->next;
     }

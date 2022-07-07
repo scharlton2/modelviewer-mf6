@@ -3,6 +3,7 @@
 #define MV_MODFLOW6
 
 #include "mvModelList.h"
+#include "mvUtil.h"
 
 #ifdef MV_MODFLOW6
 #include "Modflow6DataSource.h"
@@ -44,7 +45,7 @@ void mvModelList::GetModelNames(char **buffer)
 mvDataSource *mvModelList::CreateDataSource(char *model)
 {
 #ifdef MV_MODFLOW6
-    if (stricmp(model, Modflow6DataSource::GetNameStatic().c_str()) == 0)
+    if (mvUtil::stricmp(model, Modflow6DataSource::GetNameStatic().c_str()) == 0)
     {
         return new Modflow6DataSource;
     }
