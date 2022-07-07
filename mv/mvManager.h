@@ -3,7 +3,7 @@
 
 #include "mvDataSource.h"
 #include "vtkSmartPointer.h"
-#include <Math.h>
+#include <math.h>
 #include <typeinfo>
 #include <algorithm>
 #include <string>
