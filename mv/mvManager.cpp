@@ -79,6 +79,9 @@ static char THIS_FILE[] = __FILE__;
 constexpr auto MAX_PATH = 4096;
 #endif
 
+#if !defined(VERIFY)
+#define VERIFY(f) ((void)(f))
+#endif
 
 mvManager::mvManager()
 {
