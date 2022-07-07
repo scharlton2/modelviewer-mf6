@@ -11,6 +11,11 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
+#if defined(_MSC_VER)
+// This must be below <afx.h>
+#include <shlwapi.h>
+#endif
+
 void mvUtil::interp2d(double *x, double *y, double *z, double *dx, double *dy, double *zc,
                       int numRow, int numCol, double znull)
 {
@@ -444,4 +449,34 @@ int mvUtil::strnicmp(const char *a, const char *b, size_t n)
         result = na - nb;
     } while (result == 0 && na != '\0' && --m != 0);
     return result;
+}
+
+int mvUtil::PathAppendA(char *path, const char *more)
+{
+#if defined(_MSC_VER)
+    return ::PathAppendA(path, more);
+#else
+    // @qt_todo
+    return 0;
+#endif
+}
+
+int mvUtil::PathCanonicalizeA(char *buf, const char *path)
+{
+#if defined(_MSC_VER)
+    return ::PathCanonicalizeA(buf, path);
+#else
+    // @qt_todo
+    return 0;
+#endif
+}
+
+int mvUtil::PathFileExistsA(const char *path)
+{
+#if defined(_MSC_VER)
+    return ::PathFileExistsA(path);
+#else
+    // @qt_todo
+    return 0;
+#endif
 }

@@ -75,8 +75,6 @@ static char THIS_FILE[] = __FILE__;
 #endif
 #endif
 
-// This must be below <afx.h>
-#include <shlwapi.h>
 
 mvManager::mvManager()
 {
@@ -5207,9 +5205,9 @@ void mvManager::Deserialize(const char *fileName, mvGUISettings *gui, std::strin
         if (strlen(buffer))
         {
             strcpy(szDest, dirname.c_str());
-            VERIFY(PathAppend(szDest, buffer));
-            VERIFY(PathCanonicalize(fullpath, szDest));
-            if (!PathFileExists(fullpath))
+            VERIFY(mvUtil::PathAppendA(szDest, buffer));
+            VERIFY(mvUtil::PathCanonicalizeA(fullpath, szDest));
+            if (!mvUtil::PathFileExistsA(fullpath))
             {
                 delete hashTable;
                 delete[] dataFileList;

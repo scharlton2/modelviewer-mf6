@@ -35,6 +35,12 @@ public:
 
     static void   ToLowerCase(char *aString);
 
+    static int    PathAppendA(char *path, const char *more);
+
+    static int    PathCanonicalizeA(char *buf, const char *path);
+
+    static int    PathFileExistsA(const char *path);
+
     static void   RemoveQuotes(char *sString);
 
     static void   RemoveDoubleQuotes(char *sString);
