@@ -19,6 +19,8 @@ public:
 
     static int    stricmp(const char *a, const char *b);
 
+    static char * strlwr(char *str);
+
     static int    strnicmp(const char *a, const char *b, size_t n);
 
     static int    ExtractNumber(ifstream *in, int *buffer);
@@ -50,7 +52,7 @@ public:
     static double Fortran_atof(char *aString);
     static void   ExtractFirstString(char *aString, char *FirstString);
 
-    static char  *NextNonSpaceChar(char *str, int len);
+    static char * NextNonSpaceChar(char *str, int len);
 
     static void   Wavelength2RGBA(double wavelength, double *RGB);
 };

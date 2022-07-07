@@ -401,24 +401,29 @@ void mvUtil::Wavelength2RGBA(double wavelength, double *RGBA)
 
 void mvUtil::RemoveQuotes(char* aString)
 {
-	size_t len = strlen(aString);
-	if (aString[0] == '\'' && aString[len - 1] == '\'') {
-		aString[len - 1] = '\0';
-		memmove(aString, aString + 1, len - 1);
-	}
+    size_t len = strlen(aString);
+    if (aString[0] == '\'' && aString[len - 1] == '\'')
+    {
+        aString[len - 1] = '\0';
+        memmove(aString, aString + 1, len - 1);
+    }
 }
 
 void mvUtil::RemoveDoubleQuotes(char* aString)
 {
-	size_t len = strlen(aString);
-	if (aString[0] == '"' && aString[len - 1] == '"') {
-		aString[len - 1] = '\0';
-		memmove(aString, aString + 1, len - 1);
-	}
+    size_t len = strlen(aString);
+    if (aString[0] == '"' && aString[len - 1] == '"')
+    {
+        aString[len - 1] = '\0';
+        memmove(aString, aString + 1, len - 1);
+    }
 }
 
 int mvUtil::stricmp(const char *a, const char *b)
 {
+#if defined(_MSC_VER)
+    return _stricmp(a, b);
+#else
     int na;
     int nb;
     int result;
@@ -431,10 +436,14 @@ int mvUtil::stricmp(const char *a, const char *b)
         result = na - nb;
     } while (result == 0 && na != '\0');
     return result;
+#endif
 }
 
 int mvUtil::strnicmp(const char *a, const char *b, size_t n)
 {
+#if defined(_MSC_VER)
+    return _strnicmp(a, b, n);
+#else
     int na;
     int nb;
     int result;
@@ -449,6 +458,7 @@ int mvUtil::strnicmp(const char *a, const char *b, size_t n)
         result = na - nb;
     } while (result == 0 && na != '\0' && --m != 0);
     return result;
+#endif
 }
 
 int mvUtil::PathAppendA(char *path, const char *more)
@@ -478,5 +488,20 @@ int mvUtil::PathFileExistsA(const char *path)
 #else
     // @qt_todo
     return 0;
+#endif
+}
+
+char *mvUtil::strlwr(char *str)
+{
+#if defined(_MSC_VER)
+    return _strlwr(str);
+#else
+    char *c;
+    assert(str != nullptr);
+    for (c = str; *c != '\0'; ++c)
+    {
+        *c = tolower(*c);
+    }
+    return str;
 #endif
 }

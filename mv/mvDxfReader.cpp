@@ -542,7 +542,7 @@ void mvDxfReader::process_poly(mvLinkList *lines)
     do
     {
         fgets(buffer2, 1024, fdxf);
-        if (strstr(strlwr(buffer2), "vertex"))
+        if (strstr(mvUtil::strlwr(buffer2), "vertex"))
         {
             vert_num++;
             do
