@@ -460,7 +460,7 @@ std::string Modflow6DataSource::ExtractModflowOutputFileNames(char *nameFile,
         mvUtil::TrimRight(aline);
         if (strlen(aline) > 0 && aline[0] != '#')
         {
-            if (!_strnicmp(aline, "head ", 5))
+            if (!mvUtil::strnicmp(aline, "head ", 5))
             {
                 p = mvUtil::NextNonSpaceChar(aline + 5, (int)strlen(aline) - 5);
                 if (!mvUtil::strnicmp(p, "fileout ", 8))
