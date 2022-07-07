@@ -2,7 +2,6 @@
 #include <math.h>
 #include <string.h>
 #include <stdlib.h>
-#include <XSTRING>
 
 // This must be below vtkStandardNewMacro
 #if defined(_MSC_VER) && defined(_DEBUG) && defined(MV_DEBUG_MEMORY_LEAKS)
