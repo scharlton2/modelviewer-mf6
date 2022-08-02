@@ -1,0 +1,50 @@
+{
+  "version": 2,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 20,
+    "patch": 0
+  },
+  "configurePresets": [
+    {
+      "name": "default",
+      "displayName": "default qt-vtk build",
+      "description": "TODO desc",
+      "generator": "Visual Studio 16 2019",
+      "binaryDir": "${sourceDir}/_${presetName}",
+      "cacheVariables": {
+        "VTK_DIR": "C:/QT-VTK-9.1.0-leaks-vs2019-x64/lib/cmake/vtk-9.1",
+        "Qt5_DIR": "C:/qt/5.15.2/msvc2019_64/lib/cmake/Qt5"
+      },
+      "environment": {
+      },
+      "vendor": {
+        "example.com/ExampleIDE/1.0": {
+          "autoFormat": true
+        }
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "default",
+      "configurePreset": "default"
+    }
+  ],
+  "testPresets": [
+    {
+      "name": "default",
+      "configurePreset": "default",
+      "environment": {
+        "PATH": "C:/QT-VTK-9.1.0-leaks-vs2019-x64/bin;C:/Qt/5.15.2/msvc2019_64/bin;$penv{PATH}"
+      },
+      "output": {"outputOnFailure": true},
+      "execution": {"noTestsAction": "error", "stopOnFailure": true}
+    }
+  ],
+  "vendor": {
+    "example.com/ExampleIDE/1.0": {
+      "autoFormat": false
+    }
+  }
+}

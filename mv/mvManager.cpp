@@ -67,7 +67,7 @@ using std::pow;
 
 // This must be below vtkStandardNewMacro
 #if defined(_MSC_VER)
-#include <afx.h>
+//#include <afx.h>
 #if defined(_DEBUG) && defined(MV_DEBUG_MEMORY_LEAKS)
 #define new DEBUG_NEW
 #undef THIS_FILE

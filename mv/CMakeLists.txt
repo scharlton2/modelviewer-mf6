@@ -2,12 +2,12 @@ cmake_minimum_required(VERSION 3.20)
 
 project (
   mv
-  VERSION ${MvProject${VTK_SUFFIX}_VERSION_MAJOR}.${MvProject${VTK_SUFFIX}_VERSION_MINOR}.${MvProject${VTK_SUFFIX}_VERSION_PATCH}
+  # # # VERSION ${MvProject${VTK_SUFFIX}_VERSION_MAJOR}.${MvProject${VTK_SUFFIX}_VERSION_MINOR}.${MvProject${VTK_SUFFIX}_VERSION_PATCH}
   LANGUAGES CXX C
 )
 
-# This sets 'Use MFC in a Shared DLL' -- automatically sets _AFXDLL
-set(CMAKE_MFC_FLAG 2)
+# # # # This sets 'Use MFC in a Shared DLL' -- automatically sets _AFXDLL
+# # # set(CMAKE_MFC_FLAG 2)
 
 add_library(mv
   Modflow6DataSource.cpp
@@ -77,7 +77,7 @@ generate_export_header(mv
 target_compile_definitions(mv PRIVATE $<$<CONFIG:Debug>:_DEBUG>)
 
 # @TODO clean this up
-target_compile_definitions(mv PRIVATE MV_USE_VTKMFCWINDOW)
+# # # target_compile_definitions(mv PRIVATE MV_USE_VTKMFCWINDOW)
 target_compile_definitions(mv PRIVATE _WIN32_WINNT=_WIN32_WINNT_WIN7)
 
 if (MV_DEBUG_MEMORY_LEAKS)
@@ -94,6 +94,9 @@ if (WIN32)
 endif()
 
 target_link_libraries(mv ${VTK_LIBRARIES})
+if (WIN32)
+  target_link_libraries(mv Shlwapi)
+endif()
 
 # precompiled headers
 target_precompile_headers(mv
@@ -181,10 +184,10 @@ target_precompile_headers(mv
 
 if (MSVC AND BUILD_SHARED_LIBS)
   add_custom_command(TARGET mv POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E make_directory $<TARGET_FILE_DIR:ModelViewer>
+    COMMAND ${CMAKE_COMMAND} -E make_directory $<TARGET_FILE_DIR:QModelViewer>
   )
   add_custom_command(TARGET mv POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:mv> $<TARGET_FILE_DIR:ModelViewer>
+    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:mv> $<TARGET_FILE_DIR:QModelViewer>
   )
 endif()
 

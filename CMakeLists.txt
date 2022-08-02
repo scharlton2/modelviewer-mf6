@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.20)
 
 project (
-  MvProject${VTK_SUFFIX}
+  QMvProject${VTK_SUFFIX}
   VERSION 1.1.0
   LANGUAGES CXX C
 )
@@ -35,7 +35,8 @@ if (${VTK_VERSION} VERSION_EQUAL "6.3")
       vtkFiltersStatistics
       vtkfreetype
       vtkftgl
-      vtkGUISupportMFC
+      # vtkGUISupportMFC
+      vtkGUISupportQt
       vtkImagingCore
       vtkImagingFourier
       vtkImagingHybrid
@@ -82,7 +83,8 @@ if (${VTK_VERSION} VERSION_EQUAL "9.1")
       fmt
       freetype
       glew
-      GUISupportMFC
+      # GUISupportMFC
+      GUISupportQt
       ImagingCore
       ImagingSources
       InteractionStyle
@@ -125,23 +127,24 @@ if (${VTK_VERSION} VERSION_LESS "9.0")
 endif()
 
 # check for MFC
-find_package(MFC REQUIRED)
-if (NOT MFC_FOUND)
-  message(FATAL_ERROR "MFC not found, please install Visual Studio Community 2019 / C++ MFC for latest v142 build tools (x86 & x64).")
-endif()
+# # # find_package(MFC REQUIRED)
+# # # if (NOT MFC_FOUND)
+# # #   message(FATAL_ERROR "MFC not found, please install Visual Studio Community 2019 / C++ MFC for latest v142 build tools (x86 & x64).")
+# # # endif()
 
-option(MV_DEBUG_MEMORY_LEAKS "Build for memory debugging" OFF)
-mark_as_advanced(MV_DEBUG_MEMORY_LEAKS)
-if (MV_DEBUG_MEMORY_LEAKS)
-  set(BUILD_SHARED_LIBS OFF)
-else()
-  set(BUILD_SHARED_LIBS ON)
-endif()
+# # # option(MV_DEBUG_MEMORY_LEAKS "Build for memory debugging" OFF)
+# # # mark_as_advanced(MV_DEBUG_MEMORY_LEAKS)
+# # # if (MV_DEBUG_MEMORY_LEAKS)
+# # #   set(BUILD_SHARED_LIBS OFF)
+# # # else()
+# # #   set(BUILD_SHARED_LIBS ON)
+# # # endif()
 
-add_subdirectory(doc)
-add_subdirectory(examples)
+###add_subdirectory(doc)
+###add_subdirectory(examples)
 add_subdirectory(mv)
-add_subdirectory(ModelViewer)
+###add_subdirectory(ModelViewer)
+add_subdirectory(QModelViewer)
 
 # set default startup directory
-set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT ModelViewer)
+set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT QModelViewer)

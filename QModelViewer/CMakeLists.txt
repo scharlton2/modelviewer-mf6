@@ -1,0 +1,107 @@
+cmake_minimum_required(VERSION 3.12 FATAL_ERROR)
+
+if(POLICY CMP0020)
+  cmake_policy(SET CMP0020 NEW)
+  cmake_policy(SET CMP0071 NEW)
+endif()
+
+PROJECT(QModelViewer)
+
+find_package(VTK
+  COMPONENTS 
+    CommonColor
+    CommonCore
+    FiltersSources
+    GUISupportQt
+    InteractionStyle
+    RenderingContextOpenGL2
+    RenderingCore
+    RenderingFreeType
+    RenderingGL2PSOpenGL2
+    RenderingOpenGL2
+    GUISupportQt
+    RenderingQt
+)
+
+if(NOT VTK_FOUND)
+  message(FATAL_ERROR "QModelViewer: Unable to find the VTK build folder.")
+endif()
+
+if(NOT(TARGET VTK::GUISupportQt))
+  message(FATAL_ERROR "QModelViewer: VTK not built with Qt support.")
+endif()
+
+if(NOT DEFINED VTK_QT_VERSION)
+  set(VTK_QT_VERSION 5)
+endif()
+
+set(qt_components Core Gui Widgets)
+if(${VTK_QT_VERSION} VERSION_GREATER_EQUAL 6)
+  list(APPEND qt_components OpenGLWidgets)
+endif()
+list(SORT qt_components)
+# We have ui files, so this will also bring in the macro:
+#   qt5_wrap_ui or qt_wrap_ui from Widgets.
+find_package(Qt${VTK_QT_VERSION} QUIET
+  REQUIRED COMPONENTS ${qt_components}
+)
+
+foreach(_qt_comp IN LISTS qt_components)
+  list(APPEND qt_modules "Qt${VTK_QT_VERSION}::${_qt_comp}")
+endforeach()
+
+message(STATUS "VTK_VERSION: ${VTK_VERSION}, Qt Version: ${Qt${VTK_QT_VERSION}Widgets_VERSION}")
+
+# Instruct CMake to run moc and uic automatically when needed.
+set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTOUIC ON)
+set(CMAKE_AUTORCC ON)
+
+include_directories(${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR})
+
+set(UI_FILES mainwindow.ui displaysizedialog.ui)
+set(HXX_FILES mainwindow.h resource.h mvdoc.h mvview.h displaysizedialog.h)
+set(CXX_FILES mainwindow.cpp main.cpp mvdoc.cpp mvview.cpp displaysizedialog.cpp)
+set(QRC_FILES modelviewer.qrc)
+
+source_group("Resources"
+  FILES
+    ${UI_FILES}
+)
+
+# For VTK versions greater than or equal to 8.90.0:
+#  CMAKE_AUTOUIC is ON so we handle uic automatically for Qt targets.
+#  CMAKE_AUTOMOC is ON so we handle moc automatically for Qt targets.
+
+# Prevent a "command line is too long" failure in Windows.
+set(CMAKE_NINJA_FORCE_RESPONSE_FILE "ON" CACHE BOOL "Force Ninja to use response files.")
+
+# set icon for windows
+set(APP_ICON_RESOURCE_WINDOWS "${CMAKE_CURRENT_SOURCE_DIR}/QModelViewer.rc")
+
+# CMAKE_AUTOMOC in ON so the MOC headers will be automatically wrapped.
+add_executable(QModelViewer MACOSX_BUNDLE WIN32
+  ${CXX_FILES} ${HXX_FILES} ${UI_FILES} ${QRC_FILES} ${APP_ICON_RESOURCE_WINDOWS}
+)
+
+if (Qt${VTK_QT_VERSION}Widgets_VERSION VERSION_LESS "5.11.0")
+  qt5_use_modules(QModelViewer ${qt_components})
+else()
+  target_link_libraries(QModelViewer ${qt_modules})
+endif()
+
+target_include_directories(QModelViewer PRIVATE ${CMAKE_BINARY_DIR}/mv)
+target_include_directories(QModelViewer PRIVATE ${CMAKE_SOURCE_DIR}/mv)
+
+target_link_libraries(QModelViewer ${VTK_LIBRARIES})
+target_link_libraries(QModelViewer mv)
+# target_link_libraries(QModelViewer Shlwapi)
+
+# vtk_module_autoinit is needed
+vtk_module_autoinit(
+  TARGETS QModelViewer
+  MODULES ${VTK_LIBRARIES}
+)
+
+include(CTest)
+add_test(NAME QModelViewer COMMAND QModelViewer)
