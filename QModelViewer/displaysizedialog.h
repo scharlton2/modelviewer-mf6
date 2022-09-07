@@ -19,7 +19,7 @@ public:
     explicit DisplaySizeDialog(const QSize &size, QWidget *parent = nullptr);
     ~DisplaySizeDialog();
 
-    QSize DisplaySizeDialog::size() const;
+    QSize size() const;
 
 private:
     Ui::DisplaySizeDialog *ui;
