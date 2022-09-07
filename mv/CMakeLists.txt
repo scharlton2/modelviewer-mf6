@@ -2,13 +2,11 @@ cmake_minimum_required(VERSION 3.20)
 
 project (
   mv
-  # # # VERSION ${MvProject${VTK_SUFFIX}_VERSION_MAJOR}.${MvProject${VTK_SUFFIX}_VERSION_MINOR}.${MvProject${VTK_SUFFIX}_VERSION_PATCH}
+  # VERSION ${MvProject${VTK_SUFFIX}_VERSION_MAJOR}.${MvProject${VTK_SUFFIX}_VERSION_MINOR}.${MvProject${VTK_SUFFIX}_VERSION_PATCH}
   LANGUAGES CXX C
 )
 
-# # # # This sets 'Use MFC in a Shared DLL' -- automatically sets _AFXDLL
-# # # set(CMAKE_MFC_FLAG 2)
-
+# add_library(mv SHARED
 add_library(mv
   Modflow6DataSource.cpp
   Modflow6DataSource.h
@@ -64,8 +62,12 @@ add_library(mv
   mvUtil.h
   shpopen.c
   shapefil.h
-  win32/mvSaveCurrentDirectory.cpp
-  win32/mvSaveCurrentDirectory.h
+  ##win32/mvSaveCurrentDirectory.cpp
+  ##win32/mvSaveCurrentDirectory.h
+  ##qt/mvSaveCurrentDirectory.cpp
+  ##qt/mvSaveCurrentDirectory.h
+  mvSaveCurrentDirectory.cpp
+  mvSaveCurrentDirectory.h
 )
 
 # generate mvHeader for dll linkage
@@ -182,14 +184,15 @@ target_precompile_headers(mv
     "$<$<COMPILE_LANGUAGE:CXX>:<vtkWindow.h$<ANGLE-R>>"
 )
 
-if (MSVC AND BUILD_SHARED_LIBS)
-  add_custom_command(TARGET mv POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E make_directory $<TARGET_FILE_DIR:QModelViewer>
-  )
-  add_custom_command(TARGET mv POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:mv> $<TARGET_FILE_DIR:QModelViewer>
-  )
-endif()
+# # # if (MSVC AND BUILD_SHARED_LIBS)
+# if (MSVC)
+#   add_custom_command(TARGET mv POST_BUILD
+#     COMMAND ${CMAKE_COMMAND} -E make_directory $<TARGET_FILE_DIR:QModelViewer>
+#   )
+#   add_custom_command(TARGET mv POST_BUILD
+#     COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:mv> $<TARGET_FILE_DIR:QModelViewer>
+#   )
+# endif()
 
 # install
 install(TARGETS mv

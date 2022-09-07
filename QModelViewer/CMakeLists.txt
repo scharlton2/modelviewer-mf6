@@ -5,23 +5,26 @@ if(POLICY CMP0020)
   cmake_policy(SET CMP0071 NEW)
 endif()
 
-PROJECT(QModelViewer)
-
-find_package(VTK
-  COMPONENTS 
-    CommonColor
-    CommonCore
-    FiltersSources
-    GUISupportQt
-    InteractionStyle
-    RenderingContextOpenGL2
-    RenderingCore
-    RenderingFreeType
-    RenderingGL2PSOpenGL2
-    RenderingOpenGL2
-    GUISupportQt
-    RenderingQt
+project (
+  QModelViewer
+  LANGUAGES CXX
 )
+
+# find_package(VTK
+#   COMPONENTS
+#     CommonColor
+#     CommonCore
+#     FiltersSources
+#     GUISupportQt
+#     InteractionStyle
+#     RenderingContextOpenGL2
+#     RenderingCore
+#     RenderingFreeType
+#     RenderingGL2PSOpenGL2
+#     RenderingOpenGL2
+#     GUISupportQt
+#     RenderingQt
+# )
 
 if(NOT VTK_FOUND)
   message(FATAL_ERROR "QModelViewer: Unable to find the VTK build folder.")
@@ -38,6 +41,7 @@ endif()
 set(qt_components Core Gui Widgets)
 if(${VTK_QT_VERSION} VERSION_GREATER_EQUAL 6)
   list(APPEND qt_components OpenGLWidgets)
+  list(APPEND qt_components InteractionWidgets)
 endif()
 list(SORT qt_components)
 # We have ui files, so this will also bring in the macro:
@@ -59,9 +63,9 @@ set(CMAKE_AUTORCC ON)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR})
 
-set(UI_FILES mainwindow.ui displaysizedialog.ui)
-set(HXX_FILES mainwindow.h resource.h mvdoc.h mvview.h displaysizedialog.h)
-set(CXX_FILES mainwindow.cpp main.cpp mvdoc.cpp mvview.cpp displaysizedialog.cpp)
+set(UI_FILES mainwindow.ui bitmapresolutiondialog.ui displaysizedialog.ui)
+set(HXX_FILES mainwindow.h resource.h mvdoc.h mvview.h displaysizedialog.h bitmapresolutiondialog.h)
+set(CXX_FILES mainwindow.cpp main.cpp mvdoc.cpp mvview.cpp displaysizedialog.cpp bitmapresolutiondialog.cpp qabstractview.h qabstractview.cpp)
 set(QRC_FILES modelviewer.qrc)
 
 source_group("Resources"
@@ -97,11 +101,44 @@ target_link_libraries(QModelViewer ${VTK_LIBRARIES})
 target_link_libraries(QModelViewer mv)
 # target_link_libraries(QModelViewer Shlwapi)
 
+set_target_properties(QModelViewer PROPERTIES VS_DEBUGGER_ENVIRONMENT "PATH=$(SolutionDir)\\mv\\$(Configuration);C:\\QT-VTK-9.1.0-leaks-vs2019-x64\\bin;C:\\Qt\\5.15.2\\msvc2019_64\\bin;%PATH%")
+
 # vtk_module_autoinit is needed
 vtk_module_autoinit(
   TARGETS QModelViewer
   MODULES ${VTK_LIBRARIES}
 )
 
+# install
+install(TARGETS QModelViewer
+  RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+)
+
+# install vtk dlls
+foreach(_lib ${VTK_LIBRARIES})
+  install(FILES $<TARGET_FILE:${_lib}>
+    DESTINATION ${CMAKE_INSTALL_BINDIR}
+  )
+endforeach()
+
+# install extra vtk dlls
+foreach(_lib VTK::InteractionWidgets VTK::RenderingContext2D VTK::FiltersTexture VTK::ImagingGeneral VTK::ImagingHybrid VTK::RenderingAnnotation VTK::ImagingColor)
+  install(FILES $<TARGET_FILE:${_lib}>
+    DESTINATION ${CMAKE_INSTALL_BINDIR}
+  )
+endforeach()
+
+# install VS runtimes
+include(InstallRequiredSystemLibraries)
+
 include(CTest)
 add_test(NAME QModelViewer COMMAND QModelViewer)
+
+# cmake variable debugging
+if (OFF)
+  get_cmake_property(_variableNames VARIABLES)
+  list (SORT _variableNames)
+  foreach(_variableName ${_variableNames})
+    message(STATUS "${_variableName}=${${_variableName}}")
+  endforeach()
+endif()
