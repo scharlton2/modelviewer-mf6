@@ -189,112 +189,125 @@ jobs:
         with:
           arch: x64
 
-      - name: Configure test3 with cmake
+      - name: "*** Configure modelviewer-mf6 ***"
         env:
           VTK_DIR: ${{ runner.workspace }}/qt5-vtk-${{ env.VTK_VER }}/lib/cmake
-        run: cmake -S test3 -B test3/_ninja -G "Ninja Multi-Config"
+        run: cmake -S . -B ./_ninja -G "Ninja Multi-Config"
 
-      - name: Build test3 debug with cmake
-        run: cmake --build test3/_ninja --config Debug
+      - name: "*** Build modelviewer-mf6 debug with cmake ***"
+        run: cmake --build ./_ninja --config Debug
 
-      - name: Build test3 release with cmake
-        run: cmake --build test3/_ninja --config Release
+      - name: "*** Build modelviewer-mf6 release with cmake ***"
+        run: cmake --build ./_ninja --config Release
 
-      - name: Install test3 release with cmake
-        run: cmake --install test3/_ninja --prefix ./test3/_ninja/INSTALL/. --config Release
 
-      - name: Check test3 dependencies before deploy
-        shell: cmake -P {0}
-        run: |
-          if ("${CMAKE_HOST_SYSTEM_NAME}" STREQUAL "Linux")
-            execute_process(
-              COMMAND         ldd ./test3/_ninja/Release/SimpleView
-              RESULT_VARIABLE result
-            )
-            if (NOT result EQUAL 0)
-              message(FATAL_ERROR "ldd failed")
-            endif()
-          endif()
-          if ("${CMAKE_HOST_SYSTEM_NAME}" STREQUAL "Darwin")
-            execute_process(
-              COMMAND         otool -L ./test3/_ninja/Release/SimpleView.app/Contents/MacOS/SimpleView
-              RESULT_VARIABLE result
-            )
-            if (NOT result EQUAL 0)
-              message(FATAL_ERROR "otool -L failed")
-            endif()
-            execute_process(
-              COMMAND         otool -l ./test3/_ninja/Release/SimpleView.app/Contents/MacOS/SimpleView
-              RESULT_VARIABLE result
-            )
-            if (NOT result EQUAL 0)
-              message(FATAL_ERROR "otool -l failed")
-            endif()
-          endif()
-          if ("${CMAKE_HOST_SYSTEM_NAME}" STREQUAL "Windows")
-            execute_process(
-              COMMAND         dumpbin /imports ./test3/_ninja/Release/SimpleView.exe
-              RESULT_VARIABLE result
-            )
-            if (NOT result EQUAL 0)
-              message(FATAL_ERROR "dumpbin failed")
-            endif()
-          endif()
 
-      - name: install
-        if: runner.os == 'Windows'
-        run: |
-          windeployqt test3/_ninja/INSTALL/bin/SimpleView.exe
+      # - name: Configure test3 with cmake
+      #   env:
+      #     VTK_DIR: ${{ runner.workspace }}/qt5-vtk-${{ env.VTK_VER }}/lib/cmake
+      #   run: cmake -S test3 -B test3/_ninja -G "Ninja Multi-Config"
 
-      - name: install
-        if: runner.os == 'macOS'
-        run: |
-          macdeployqt test3/_ninja/INSTALL/bin/SimpleView.app
+      # - name: Build test3 debug with cmake
+      #   run: cmake --build test3/_ninja --config Debug
 
-      - uses: actions/upload-artifact@v3
-        with:
-          name: ${{ matrix.config.aqt_host }}-artifact
-          path: ${{ github.workspace }}/test3/_ninja/INSTALL
+      # - name: Build test3 release with cmake
+      #   run: cmake --build test3/_ninja --config Release
 
-      - name: Check test3 dependencies after deploy
-        shell: cmake -P {0}
-        run: |
-          if ("${CMAKE_HOST_SYSTEM_NAME}" STREQUAL "Linux")
-            execute_process(
-              COMMAND         ldd ./test3/_ninja/Release/SimpleView
-              RESULT_VARIABLE result
-            )
-            if (NOT result EQUAL 0)
-              message(FATAL_ERROR "ldd failed")
-            endif()
-          endif()
-          if ("${CMAKE_HOST_SYSTEM_NAME}" STREQUAL "Darwin")
-            execute_process(
-              COMMAND         otool -L ./test3/_ninja/INSTALL/bin/SimpleView.app/Contents/MacOS/SimpleView
-              RESULT_VARIABLE result
-            )
-            if (NOT result EQUAL 0)
-              message(FATAL_ERROR "otool -L failed")
-            endif()
-            execute_process(
-              COMMAND         otool -l ./test3/_ninja/INSTALL/bin/SimpleView.app/Contents/MacOS/SimpleView
-              RESULT_VARIABLE result
-            )
-            if (NOT result EQUAL 0)
-              message(FATAL_ERROR "otool -l failed")
-            endif()
-          endif()
-          if ("${CMAKE_HOST_SYSTEM_NAME}" STREQUAL "Windows")
-            execute_process(
-              COMMAND         dumpbin /imports ./test3/_ninja/INSTALL/bin/SimpleView.exe
-              RESULT_VARIABLE result
-            )
-            if (NOT result EQUAL 0)
-              message(FATAL_ERROR "dumpbin failed")
-            endif()
-          endif()
+      # - name: Install test3 release with cmake
+      #   run: cmake --install test3/_ninja --prefix ./test3/_ninja/INSTALL/. --config Release
 
-      - uses: actions/upload-artifact@v3
-        with:
-          name: ${{ matrix.config.aqt_host }}-artifact
-          path: ${{ github.workspace }}/test3/_ninja/INSTALL
+      # - name: Check test3 dependencies before deploy
+      #   shell: cmake -P {0}
+      #   run: |
+      #     if ("${CMAKE_HOST_SYSTEM_NAME}" STREQUAL "Linux")
+      #       execute_process(
+      #         COMMAND         ldd ./test3/_ninja/Release/SimpleView
+      #         RESULT_VARIABLE result
+      #       )
+      #       if (NOT result EQUAL 0)
+      #         message(FATAL_ERROR "ldd failed")
+      #       endif()
+      #     endif()
+      #     if ("${CMAKE_HOST_SYSTEM_NAME}" STREQUAL "Darwin")
+      #       execute_process(
+      #         COMMAND         otool -L ./test3/_ninja/Release/SimpleView.app/Contents/MacOS/SimpleView
+      #         RESULT_VARIABLE result
+      #       )
+      #       if (NOT result EQUAL 0)
+      #         message(FATAL_ERROR "otool -L failed")
+      #       endif()
+      #       execute_process(
+      #         COMMAND         otool -l ./test3/_ninja/Release/SimpleView.app/Contents/MacOS/SimpleView
+      #         RESULT_VARIABLE result
+      #       )
+      #       if (NOT result EQUAL 0)
+      #         message(FATAL_ERROR "otool -l failed")
+      #       endif()
+      #     endif()
+      #     if ("${CMAKE_HOST_SYSTEM_NAME}" STREQUAL "Windows")
+      #       execute_process(
+      #         COMMAND         dumpbin /imports ./test3/_ninja/Release/SimpleView.exe
+      #         RESULT_VARIABLE result
+      #       )
+      #       if (NOT result EQUAL 0)
+      #         message(FATAL_ERROR "dumpbin failed")
+      #       endif()
+      #     endif()
+
+      # - name: install
+      #   if: runner.os == 'Windows'
+      #   run: |
+      #     windeployqt test3/_ninja/INSTALL/bin/SimpleView.exe
+
+      # - name: install
+      #   if: runner.os == 'macOS'
+      #   run: |
+      #     macdeployqt test3/_ninja/INSTALL/bin/SimpleView.app
+
+      # - uses: actions/upload-artifact@v3
+      #   with:
+      #     name: ${{ matrix.config.aqt_host }}-artifact
+      #     path: ${{ github.workspace }}/test3/_ninja/INSTALL
+
+      # - name: Check test3 dependencies after deploy
+      #   shell: cmake -P {0}
+      #   run: |
+      #     if ("${CMAKE_HOST_SYSTEM_NAME}" STREQUAL "Linux")
+      #       execute_process(
+      #         COMMAND         ldd ./test3/_ninja/Release/SimpleView
+      #         RESULT_VARIABLE result
+      #       )
+      #       if (NOT result EQUAL 0)
+      #         message(FATAL_ERROR "ldd failed")
+      #       endif()
+      #     endif()
+      #     if ("${CMAKE_HOST_SYSTEM_NAME}" STREQUAL "Darwin")
+      #       execute_process(
+      #         COMMAND         otool -L ./test3/_ninja/INSTALL/bin/SimpleView.app/Contents/MacOS/SimpleView
+      #         RESULT_VARIABLE result
+      #       )
+      #       if (NOT result EQUAL 0)
+      #         message(FATAL_ERROR "otool -L failed")
+      #       endif()
+      #       execute_process(
+      #         COMMAND         otool -l ./test3/_ninja/INSTALL/bin/SimpleView.app/Contents/MacOS/SimpleView
+      #         RESULT_VARIABLE result
+      #       )
+      #       if (NOT result EQUAL 0)
+      #         message(FATAL_ERROR "otool -l failed")
+      #       endif()
+      #     endif()
+      #     if ("${CMAKE_HOST_SYSTEM_NAME}" STREQUAL "Windows")
+      #       execute_process(
+      #         COMMAND         dumpbin /imports ./test3/_ninja/INSTALL/bin/SimpleView.exe
+      #         RESULT_VARIABLE result
+      #       )
+      #       if (NOT result EQUAL 0)
+      #         message(FATAL_ERROR "dumpbin failed")
+      #       endif()
+      #     endif()
+
+      # - uses: actions/upload-artifact@v3
+      #   with:
+      #     name: ${{ matrix.config.aqt_host }}-artifact
+      #     path: ${{ github.workspace }}/test3/_ninja/INSTALL
