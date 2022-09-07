@@ -94,59 +94,12 @@ jobs:
         with:
           arch: x64
 
-      - name: Build test2 with cmake
-        run: |
-          cd test2
-          mkdir _ninja
-          cd _ninja
-          cmake -G "Ninja Multi-Config" ..
-          cmake --build . --config Debug
-          cmake --build . --config Release
-
-      - name: Check dependencies
-        shell: cmake -P {0}
-        run: |
-          if ("${CMAKE_HOST_SYSTEM_NAME}" STREQUAL "Linux")
-            execute_process(
-              COMMAND         ldd ./test2/_ninja/Release/mainwindow
-              RESULT_VARIABLE result
-            )
-            if (NOT result EQUAL 0)
-              message(FATAL_ERROR "ldd failed")
-            endif()
-          endif()
-          if ("${CMAKE_HOST_SYSTEM_NAME}" STREQUAL "Darwin")
-            execute_process(
-              COMMAND         otool -L ./test2/_ninja/Release/mainwindow
-              RESULT_VARIABLE result
-            )
-            if (NOT result EQUAL 0)
-              message(FATAL_ERROR "otool failed")
-            endif()
-            execute_process(
-              COMMAND         otool -l ./test2/_ninja/Release/mainwindow
-              RESULT_VARIABLE result
-            )
-            if (NOT result EQUAL 0)
-              message(FATAL_ERROR "otool -l failed")
-            endif()
-          endif()
-          if ("${CMAKE_HOST_SYSTEM_NAME}" STREQUAL "Windows")
-            execute_process(
-              COMMAND         dumpbin /imports ./test2/_ninja/Release/mainwindow.exe
-              RESULT_VARIABLE result
-            )
-            if (NOT result EQUAL 0)
-              message(FATAL_ERROR "dumpbin failed")
-            endif()
-          endif()
-
       - name: Cache qt5-vtk
         id: cache-qt5-vtk
         uses: actions/cache@v2
         with:
           path: ${{ runner.workspace }}/qt5-vtk-${{ env.VTK_VER }}
-          key: ${{ matrix.config.os }}-qt5-vtk-${{ matrix.config.cmake_config }}-${{ hashFiles('misc/CMakePresets.json') }}
+          key: ${{ matrix.config.os }}-qt5-vtk-${{ matrix.config.cmake_config }}-${{ hashFiles('misc/CMakePresets-vtk-9.1.0-qt-5.15.2.json') }}
 
       - name: Build qt5-vtk
         if: steps.cache-qt5-vtk.outputs.cache-hit != 'true'
@@ -154,7 +107,7 @@ jobs:
           cd ${{ runner.workspace }}
           curl -L -O https://github.com/Kitware/VTK/archive/refs/tags/v${{ env.VTK_VER }}.tar.gz
           tar xzf ./v${{ env.VTK_VER }}.tar.gz
-          cp ./qt-install/misc/CMakePresets.json ./VTK-${{ env.VTK_VER }}/.
+          cp ./modelviewer-mf6/misc/CMakePresets-vtk-9.1.0-qt-5.15.2.json ./VTK-${{ env.VTK_VER }}/CMakePresets.json
           cd ./VTK-${{ env.VTK_VER }}/.
           cmake --preset ${{ matrix.config.aqt_arch }}
           cmake --build --preset ${{ matrix.config.aqt_arch }} --config ${{ matrix.config.cmake_config }}
@@ -218,14 +171,14 @@ jobs:
         uses: actions/cache@v2
         with:
           path: ${{ runner.workspace }}/qt5-vtk-${{ env.VTK_VER }}
-          key: ${{ matrix.config.os }}-qt5-vtk-Debug-${{ hashFiles('misc/CMakePresets.json') }}
+          key: ${{ matrix.config.os }}-qt5-vtk-Debug-${{ hashFiles('misc/CMakePresets-vtk-9.1.0-qt-5.15.2.json') }}
 
       - name: Cache qt5-vtk release
         id: cache-qt5-vtk-release
         uses: actions/cache@v2
         with:
           path: ${{ runner.workspace }}/qt5-vtk-${{ env.VTK_VER }}
-          key: ${{ matrix.config.os }}-qt5-vtk-Release-${{ hashFiles('misc/CMakePresets.json') }}
+          key: ${{ matrix.config.os }}-qt5-vtk-Release-${{ hashFiles('misc/CMakePresets-vtk-9.1.0-qt-5.15.2.json') }}
 
       - name: Set up Visual Studio shell
         if: runner.os == 'Windows'
