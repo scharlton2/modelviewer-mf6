@@ -217,14 +217,14 @@ jobs:
           endif()
           if ("${CMAKE_HOST_SYSTEM_NAME}" STREQUAL "Darwin")
             execute_process(
-              COMMAND         otool -L ./test3/_ninja/Release/SimpleView
+              COMMAND         otool -L ./test3/_ninja/Release/SimpleView.app/Contents/MacOS/SimpleView
               RESULT_VARIABLE result
             )
             if (NOT result EQUAL 0)
               message(FATAL_ERROR "otool -L failed")
             endif()
             execute_process(
-              COMMAND         otool -l ./test3/_ninja/Release/SimpleView
+              COMMAND         otool -l ./test3/_ninja/Release/SimpleView.app/Contents/MacOS/SimpleView
               RESULT_VARIABLE result
             )
             if (NOT result EQUAL 0)
@@ -233,7 +233,7 @@ jobs:
           endif()
           if ("${CMAKE_HOST_SYSTEM_NAME}" STREQUAL "Windows")
             execute_process(
-              COMMAND         dumpbin /imports ./test2/_ninja/Release/SimpleView.exe
+              COMMAND         dumpbin /imports ./test3/_ninja/Release/SimpleView.exe
               RESULT_VARIABLE result
             )
             if (NOT result EQUAL 0)
@@ -270,14 +270,14 @@ jobs:
           endif()
           if ("${CMAKE_HOST_SYSTEM_NAME}" STREQUAL "Darwin")
             execute_process(
-              COMMAND         otool -L ./test3/_ninja/Release/SimpleView
+              COMMAND         otool -L ./test3/_ninja/INSTALL/bin/SimpleView.app/Contents/MacOS/SimpleView
               RESULT_VARIABLE result
             )
             if (NOT result EQUAL 0)
               message(FATAL_ERROR "otool -L failed")
             endif()
             execute_process(
-              COMMAND         otool -l ./test3/_ninja/Release/SimpleView
+              COMMAND         otool -l ./test3/_ninja/INSTALL/bin/SimpleView.app/Contents/MacOS/SimpleView
               RESULT_VARIABLE result
             )
             if (NOT result EQUAL 0)
@@ -286,7 +286,7 @@ jobs:
           endif()
           if ("${CMAKE_HOST_SYSTEM_NAME}" STREQUAL "Windows")
             execute_process(
-              COMMAND         dumpbin /imports ./test3/_ninja/Release/SimpleView.exe
+              COMMAND         dumpbin /imports ./test3/_ninja/INSTALL/bin/SimpleView.exe
               RESULT_VARIABLE result
             )
             if (NOT result EQUAL 0)
