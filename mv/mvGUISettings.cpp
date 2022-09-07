@@ -52,7 +52,7 @@ mvGUISettings::mvGUISettings()
     parallelScale              = 1;
 }
 
-int mvGUISettings::Serialize(ofstream *out)
+int mvGUISettings::Serialize(ofstream *out) const
 {
     // Crop
     (*out) << "Crop bounds x inc = " << cropBoundsXDelta << endl;
