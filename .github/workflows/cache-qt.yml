@@ -2,9 +2,12 @@ name: cache-qt5-vtk
 
 on:
   push:
-    branches: [ "main" ]
+    branches:
+      - 'main'
+      - '_develop-qt-refactor'
   pull_request:
-    branches: [ "main" ]
+    branches:
+      - 'main'
 
   workflow_dispatch:
 
@@ -185,15 +188,6 @@ jobs:
         uses: egor-tensin/vs-shell@v2
         with:
           arch: x64
-
-      - name: Configure test2 with cmake
-        run: cmake -S test2 -B test2/_ninja -G "Ninja Multi-Config"
-
-      - name: Build test2 debug with cmake
-        run: cmake --build test2/_ninja --config Debug
-
-      - name: Build test2 release with cmake
-        run: cmake --build test2/_ninja --config Release
 
       - name: Configure test3 with cmake
         env:
