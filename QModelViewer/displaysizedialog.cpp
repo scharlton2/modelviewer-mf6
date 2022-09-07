@@ -23,6 +23,8 @@ DisplaySizeDialog::DisplaySizeDialog(const QSize &size, QWidget *parent)
 
     ui->heightEdit->setValidator(intValidator);
     ui->widthEdit->setValidator(intValidator);
+
+    ui->widthEdit->setFocus();
 }
 
 DisplaySizeDialog::~DisplaySizeDialog()
