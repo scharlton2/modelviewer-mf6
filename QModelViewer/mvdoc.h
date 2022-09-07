@@ -1,11 +1,23 @@
 #ifndef MVDOC_H
 #define MVDOC_H
 
+#include <list>
 #include <vector>
 #include <string>
 
 #include <QObject>
 #include <QString>
+
+#include <vtkSmartPointer.h>
+
+class mvGUISettings;
+class mvManager;
+//class mvView;
+class QAbstractView;
+class QObject;
+class QWidget;
+
+class vtkPropCollection;
 
 enum class ProjectionType {
     ptPerspective,
@@ -22,8 +34,6 @@ enum class MouseMode {
     mmJoystick
 };
 
-
-
 class MvDoc : public QObject
 {
     Q_OBJECT
@@ -36,18 +46,83 @@ public:
     //void setPathName(const QString* pathName);
 
 
-    QString dataName() const;
-    QString modelName() const;
+    QString        activeScalarName() const;
+    QString        modelName() const;
 
+    // Time Label
+    void           SetTimeLabelFontSize(int size, bool update = true);
+    int            GetTimeLabelFontSize() const;
+    void           SetTimeLabelPosition(double x, double y, bool update = true);
+    const double*  GetTimeLabelPosition() const;
+
+    // Color Bar
+    void           SetColorBarEndPoints(double valueBlue, double valueRed);
+    void           UseLinearColorBar();
+    void           UseLogColorBar();
+    void           SetColorBarSize(int width, int height, int offset, bool update = true);
+    void           SetColorBarFontSize(int fontSize, bool update = true);
+    void           SetColorBarNumberOfLabels(int numLabels, bool update = true);
+    void           SetColorBarLabelPrecision(int precision, bool update = true);
+    void           SetColorBarTextColor(double red, double green, double blue, bool update = true);
+    void           SetColorBarColorScheme(int Value);
+    int            GetColorBarWidth();
+    int            GetColorBarHeight();
+    int            GetColorBarOffset();
+    int            GetColorBarFontSize();
+    int            GetColorBarColorScheme();
+    unsigned long  GetColorBarFirstCustomColor();
+    unsigned long  GetColorBarLastCustomColor();
+    void           SetColorBarFirstCustomColor(unsigned long value);
+    void           SetColorBarLastCustomColor(unsigned long value);
+    int            GetColorBarSource();
+    void                               SetColorBarSource(int value);
+    double                             GetColorBarValueBlue() const;
+    double                             GetColorBarValueRed() const;
+
+    
+    bool                               modified() const;
+    void                               setModified(bool modifed);
+
+    bool                               isAnimating() const;
+
+	void           addView(QAbstractView* pView);
+    void           removeView(QAbstractView* pView);
+    void           updateAllViews(QAbstractView* pSender, QObject* hint = nullptr);
+
+    vtkSmartPointer<vtkPropCollection> propCollection();
+
+
+public slots:
+
+    void onShowIsosurfaces();
+    void onShowNone();
+    void onShowSolid();
+
+    void onShowVectors(QWidget* parent);
+    void onShowPathlines();
+    void onModelFeatures();
+
+    void onShowAxes();
+    void onShowGridLines();
+    void onShowGridShell();
+    void onShowBoundingBox();
+    void onShowOverlay();
+
+    void onShowTime();
+    void onShowColorBar();
 
 signals:
 
 private:
 
+    friend class MainWindow;
+
     void                     loadPreviousAppSettings();
     void                     saveCurrentAppSettings();
 
     QString                  _pathName;              // CDocument::m_strPathName
+
+    bool                     _modified;              // CDocument::m_bModified
 
 
     AnimationType            animationType;         // m_AnimationType
@@ -59,20 +134,22 @@ private:
     std::vector<std::string> modelNames;            // m_ModelNames
     std::string              defaultModel;          // m_DefaultModel
     bool                     startup;               // m_Startup
-    bool                     isAnimating;           // m_IsAnimating
-/***
-    mvGUISettings*     m_GUI;
-***/
+    bool                     _isAnimating;          // m_IsAnimating
+
+    mvGUISettings*           _gui;
 
     double                   defaultXOrigin;        // m_default_xorigin
     double                   defaultYOrigin;        // m_default_yorigin
     double                   defaultAngRot;         // m_default_angrot
 
-/***
-
     // The visualization pipeline manager
-    mvManager*         m_Manager;
+    mvManager*               _manager;
 
+    std::list<QAbstractView*> _views;
+
+
+
+/***
     // Modeless dialog boxes
     CGridDlg*          m_GridDlg;
     CColorBarDlg*      m_ColorBarDlg;
