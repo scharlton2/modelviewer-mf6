@@ -1,0 +1,353 @@
+name: cache-qt5-vtk
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+  workflow_dispatch:
+
+env:
+  AQT_TARGET: desktop
+  AQT_VER: 5.15.2
+  VTK_VER: 9.1.0
+
+# ${{ env.RUNNER_WORKSPACE }} doesn't seem to work on linux and macos
+# but ${RUNNER_WORKSPACE} is set in the environment for all os
+# therefore use ${{ runner.workspace }} instead of ${{ env.RUNNER_WORKSPACE }}
+
+jobs:
+  build:
+    name: ${{ matrix.config.name }}
+    runs-on: ${{ matrix.config.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+        - {
+            name: "cache-qt5-vtk-macos-11-debug",
+            os: macos-11,
+            cmake_config: Debug,
+            aqt_host: mac,
+            aqt_arch: clang_64
+          }
+        - {
+            name: "cache-qt5-vtk-ubuntu-20.04-debug",
+            os: ubuntu-20.04,
+            cmake_config: Debug,
+            aqt_host: linux,
+            aqt_arch: gcc_64
+          }
+        - {
+            name: "cache-qt5-vtk-windows-2019-debug",
+            os: windows-2019,
+            cmake_config: Debug,
+            aqt_host: windows,
+            aqt_arch: win64_msvc2019_64
+          }
+        - {
+            name: "cache-qt5-vtk-macos-11-release",
+            os: macos-11,
+            cmake_config: Release,
+            aqt_host: mac,
+            aqt_arch: clang_64
+          }
+        - {
+            name: "cache-qt5-vtk-ubuntu-20.04-release",
+            os: ubuntu-20.04,
+            cmake_config: Release,
+            aqt_host: linux,
+            aqt_arch: gcc_64
+          }
+        - {
+            name: "cache-qt5-vtk-windows-2019-release",
+            os: windows-2019,
+            cmake_config: Release,
+            aqt_host: windows,
+            aqt_arch: win64_msvc2019_64
+          }
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v3
+        with:
+          version: ${{ env.AQT_VER }}
+          host: ${{ matrix.config.aqt_host }}
+          target: ${{ env.AQT_TARGET }}
+          arch: ${{ matrix.config.aqt_arch }}
+          dir: ${{ runner.workspace }}
+          cache: true
+          cache-key-prefix: install-qt-action
+          tools: tools_ninja
+
+      - name: Add ninja path
+        shell: bash
+        run: |
+          echo "${IQTA_TOOLS}/Ninja" >> $GITHUB_PATH
+
+      - name: Set up Visual Studio shell
+        if: runner.os == 'Windows'
+        uses: egor-tensin/vs-shell@v2
+        with:
+          arch: x64
+
+      - name: Build test2 with cmake
+        run: |
+          cd test2
+          mkdir _ninja
+          cd _ninja
+          cmake -G "Ninja Multi-Config" ..
+          cmake --build . --config Debug
+          cmake --build . --config Release
+
+      - name: Check dependencies
+        shell: cmake -P {0}
+        run: |
+          if ("${CMAKE_HOST_SYSTEM_NAME}" STREQUAL "Linux")
+            execute_process(
+              COMMAND         ldd ./test2/_ninja/Release/mainwindow
+              RESULT_VARIABLE result
+            )
+            if (NOT result EQUAL 0)
+              message(FATAL_ERROR "ldd failed")
+            endif()
+          endif()
+          if ("${CMAKE_HOST_SYSTEM_NAME}" STREQUAL "Darwin")
+            execute_process(
+              COMMAND         otool -L ./test2/_ninja/Release/mainwindow
+              RESULT_VARIABLE result
+            )
+            if (NOT result EQUAL 0)
+              message(FATAL_ERROR "otool failed")
+            endif()
+            execute_process(
+              COMMAND         otool -l ./test2/_ninja/Release/mainwindow
+              RESULT_VARIABLE result
+            )
+            if (NOT result EQUAL 0)
+              message(FATAL_ERROR "otool -l failed")
+            endif()
+          endif()
+          if ("${CMAKE_HOST_SYSTEM_NAME}" STREQUAL "Windows")
+            execute_process(
+              COMMAND         dumpbin /imports ./test2/_ninja/Release/mainwindow.exe
+              RESULT_VARIABLE result
+            )
+            if (NOT result EQUAL 0)
+              message(FATAL_ERROR "dumpbin failed")
+            endif()
+          endif()
+
+      - name: Cache qt5-vtk
+        id: cache-qt5-vtk
+        uses: actions/cache@v2
+        with:
+          path: ${{ runner.workspace }}/qt5-vtk-${{ env.VTK_VER }}
+          key: ${{ matrix.config.os }}-qt5-vtk-${{ matrix.config.cmake_config }}-${{ hashFiles('misc/CMakePresets.json') }}
+
+      - name: Build qt5-vtk
+        if: steps.cache-qt5-vtk.outputs.cache-hit != 'true'
+        run: |
+          cd ${{ runner.workspace }}
+          curl -L -O https://github.com/Kitware/VTK/archive/refs/tags/v${{ env.VTK_VER }}.tar.gz
+          tar xzf ./v${{ env.VTK_VER }}.tar.gz
+          cp ./qt-install/misc/CMakePresets.json ./VTK-${{ env.VTK_VER }}/.
+          cd ./VTK-${{ env.VTK_VER }}/.
+          cmake --preset ${{ matrix.config.aqt_arch }}
+          cmake --build --preset ${{ matrix.config.aqt_arch }} --config ${{ matrix.config.cmake_config }}
+          cmake --install ${{ runner.workspace }}/qt5-vtk-${{ env.VTK_VER }}-build --config ${{ matrix.config.cmake_config }}
+
+
+  merge:
+    name: ${{ matrix.config.name }}
+    runs-on: ${{ matrix.config.os }}
+    needs: [build]
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+        - {
+            name: "qt5-vtk-macos-11",
+            os: macos-11,
+            aqt_host: mac,
+            aqt_arch: clang_64
+          }
+        - {
+            name: "qt5-vtk-ubuntu-20.04",
+            os: ubuntu-20.04,
+            aqt_host: linux,
+            aqt_arch: gcc_64
+          }
+        - {
+            name: "qt5-vtk-windows-2019",
+            os: windows-2019,
+            aqt_host: windows,
+            aqt_arch: win64_msvc2019_64
+          }
+
+    steps:
+      - uses: actions/checkout@v3
+
+      #
+      # Open 'PowerShell 7 for VS 2019 x64' in Windows Terminal
+      # @TODO aqt install command here (python)
+      # $env:Qt5_Dir="D:\a\qt-install\Qt\5.15.2\msvc2019_64"
+      #
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v3
+        with:
+          version: ${{ env.AQT_VER }}
+          host: ${{ matrix.config.aqt_host }}
+          target: ${{ env.AQT_TARGET }}
+          arch: ${{ matrix.config.aqt_arch }}
+          dir: ${{ runner.workspace }}
+          cache: true
+          cache-key-prefix: install-qt-action
+          tools: tools_ninja
+
+      - name: Add ninja path
+        shell: bash
+        run: |
+          echo "${IQTA_TOOLS}/Ninja" >> $GITHUB_PATH
+
+      - name: Cache qt5-vtk debug
+        id: cache-qt5-vtk-debug
+        uses: actions/cache@v2
+        with:
+          path: ${{ runner.workspace }}/qt5-vtk-${{ env.VTK_VER }}
+          key: ${{ matrix.config.os }}-qt5-vtk-Debug-${{ hashFiles('misc/CMakePresets.json') }}
+
+      - name: Cache qt5-vtk release
+        id: cache-qt5-vtk-release
+        uses: actions/cache@v2
+        with:
+          path: ${{ runner.workspace }}/qt5-vtk-${{ env.VTK_VER }}
+          key: ${{ matrix.config.os }}-qt5-vtk-Release-${{ hashFiles('misc/CMakePresets.json') }}
+
+      - name: Set up Visual Studio shell
+        if: runner.os == 'Windows'
+        uses: egor-tensin/vs-shell@v2
+        with:
+          arch: x64
+
+      - name: Configure test2 with cmake
+        run: cmake -S test2 -B test2/_ninja -G "Ninja Multi-Config"
+
+      - name: Build test2 debug with cmake
+        run: cmake --build test2/_ninja --config Debug
+
+      - name: Build test2 release with cmake
+        run: cmake --build test2/_ninja --config Release
+
+      - name: Configure test3 with cmake
+        env:
+          VTK_DIR: ${{ runner.workspace }}/qt5-vtk-${{ env.VTK_VER }}/lib/cmake
+        run: cmake -S test3 -B test3/_ninja -G "Ninja Multi-Config"
+
+      - name: Build test3 debug with cmake
+        run: cmake --build test3/_ninja --config Debug
+
+      - name: Build test3 release with cmake
+        run: cmake --build test3/_ninja --config Release
+
+      - name: Install test3 release with cmake
+        run: cmake --install test3/_ninja --prefix ./test3/_ninja/INSTALL/. --config Release
+
+      - name: Check test3 dependencies before deploy
+        shell: cmake -P {0}
+        run: |
+          if ("${CMAKE_HOST_SYSTEM_NAME}" STREQUAL "Linux")
+            execute_process(
+              COMMAND         ldd ./test3/_ninja/Release/SimpleView
+              RESULT_VARIABLE result
+            )
+            if (NOT result EQUAL 0)
+              message(FATAL_ERROR "ldd failed")
+            endif()
+          endif()
+          if ("${CMAKE_HOST_SYSTEM_NAME}" STREQUAL "Darwin")
+            execute_process(
+              COMMAND         otool -L ./test3/_ninja/Release/SimpleView
+              RESULT_VARIABLE result
+            )
+            if (NOT result EQUAL 0)
+              message(FATAL_ERROR "otool -L failed")
+            endif()
+            execute_process(
+              COMMAND         otool -l ./test3/_ninja/Release/SimpleView
+              RESULT_VARIABLE result
+            )
+            if (NOT result EQUAL 0)
+              message(FATAL_ERROR "otool -l failed")
+            endif()
+          endif()
+          if ("${CMAKE_HOST_SYSTEM_NAME}" STREQUAL "Windows")
+            execute_process(
+              COMMAND         dumpbin /imports ./test2/_ninja/Release/SimpleView.exe
+              RESULT_VARIABLE result
+            )
+            if (NOT result EQUAL 0)
+              message(FATAL_ERROR "dumpbin failed")
+            endif()
+          endif()
+
+      - name: install
+        if: runner.os == 'Windows'
+        run: |
+          windeployqt test3/_ninja/INSTALL/bin/SimpleView.exe
+
+      - name: install
+        if: runner.os == 'macOS'
+        run: |
+          macdeployqt test3/_ninja/INSTALL/bin/SimpleView.app
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: ${{ matrix.config.aqt_host }}-artifact
+          path: ${{ github.workspace }}/test3/_ninja/INSTALL
+
+      - name: Check test3 dependencies after deploy
+        shell: cmake -P {0}
+        run: |
+          if ("${CMAKE_HOST_SYSTEM_NAME}" STREQUAL "Linux")
+            execute_process(
+              COMMAND         ldd ./test3/_ninja/Release/SimpleView
+              RESULT_VARIABLE result
+            )
+            if (NOT result EQUAL 0)
+              message(FATAL_ERROR "ldd failed")
+            endif()
+          endif()
+          if ("${CMAKE_HOST_SYSTEM_NAME}" STREQUAL "Darwin")
+            execute_process(
+              COMMAND         otool -L ./test3/_ninja/Release/SimpleView
+              RESULT_VARIABLE result
+            )
+            if (NOT result EQUAL 0)
+              message(FATAL_ERROR "otool -L failed")
+            endif()
+            execute_process(
+              COMMAND         otool -l ./test3/_ninja/Release/SimpleView
+              RESULT_VARIABLE result
+            )
+            if (NOT result EQUAL 0)
+              message(FATAL_ERROR "otool -l failed")
+            endif()
+          endif()
+          if ("${CMAKE_HOST_SYSTEM_NAME}" STREQUAL "Windows")
+            execute_process(
+              COMMAND         dumpbin /imports ./test3/_ninja/Release/SimpleView.exe
+              RESULT_VARIABLE result
+            )
+            if (NOT result EQUAL 0)
+              message(FATAL_ERROR "dumpbin failed")
+            endif()
+          endif()
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: ${{ matrix.config.aqt_host }}-artifact
+          path: ${{ github.workspace }}/test3/_ninja/INSTALL
