@@ -33,6 +33,8 @@ env:
 jobs:
 
   build-6_3:
+    if: ${{ false }}    # skip
+
     runs-on: windows-2019
 
     steps:
@@ -371,6 +373,8 @@ jobs:
 ###################################################################################################
 
   build-9_1:
+    if: ${{ false }}    # skip
+
     runs-on: windows-2019
 
     steps:
