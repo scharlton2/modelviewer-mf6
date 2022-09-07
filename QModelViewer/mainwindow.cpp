@@ -50,8 +50,6 @@
 #include "mvGUISettings.h"
 #include "mvSaveCurrentDirectory.h"
 
-#include <malloc.h>
-
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , doc{nullptr}
