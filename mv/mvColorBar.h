@@ -38,11 +38,11 @@ public:
     void               SetColorScheme(int value);
     int                GetColorScheme() const { return m_ColorScheme; }
 
-    int                RenderOpaqueGeometry(vtkViewport *viewport);
-    virtual int        RenderTranslucentPolygonalGeometry(vtkViewport *) { return 0; };
-    int                RenderOverlay(vtkViewport *viewport);
-    virtual int        HasTranslucentPolygonalGeometry();
-    virtual void       ReleaseGraphicsResources(vtkWindow *);
+    int                RenderOpaqueGeometry(vtkViewport *viewport) override;
+    int                RenderTranslucentPolygonalGeometry(vtkViewport *) override { return 0; };
+    int                RenderOverlay(vtkViewport *viewport) override;
+    int                HasTranslucentPolygonalGeometry() override;
+    void               ReleaseGraphicsResources(vtkWindow *) override;
     int                GetColorBarColorScheme() const;
 
     void               SetScalarRange(double min, double max);

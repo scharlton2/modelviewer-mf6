@@ -124,7 +124,7 @@ int mvDxfReader::GetCoordinates(int entity, int vertex, double &x, double &y)
     return 1;
 }
 
-int mvDxfReader::Read(char *errMsg)
+int mvDxfReader::Read(const char *errMsg)
 {
     double Xoff = 0.0;
     double Yoff = 0.0;
@@ -132,7 +132,7 @@ int mvDxfReader::Read(char *errMsg)
     int    test, code;
     char   buffer[1024];
     num_layers = 0;
-    errMsg     = 0;
+    errMsg     = nullptr;
     ClearData();
 
     // Open DXF file

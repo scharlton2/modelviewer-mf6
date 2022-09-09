@@ -212,7 +212,7 @@ public:
     int                                GetOverlayTrim();
     int                                GetOverlayCrop();
     void                               GetOverlayBounds(double &xmin, double &xmax, double &ymin, double &ymax);
-    int                                UpdateOverlay(char *errMsg);
+    int                                UpdateOverlay(const char *errMsg);
     void                               RemoveOverlay();
 
     // Grid shell

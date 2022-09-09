@@ -6013,7 +6013,7 @@ void mvManager::Deserialize(const char *fileName, mvGUISettings *gui, std::strin
         SetOverlayDrapeGap(dvalue);
     }
     char  filename[1024];
-    char *errMsg = 0;
+    const char *errMsg = nullptr;
     if (hashTable->GetHashTableValue("Overlay file", filename))
     {
         SetOverlayFileName(mvSaveCurrentDirectory::GetFullPath(filename, dirname.c_str()).c_str());
@@ -6139,7 +6139,7 @@ void mvManager::SetOverlayDrapeGap(double d)
     m_Overlay->SetDrapeGap(d);
 }
 
-int mvManager::UpdateOverlay(char *errMsg)
+int mvManager::UpdateOverlay(const char *errMsg)
 {
     return m_Overlay->Update(errMsg);
 }

@@ -243,6 +243,9 @@ std::string Modflow6DataSource::LoadData(char *dataFileList)
     case GridType::MV_UNSTRUCTURED_GRID:
         errMsg = CreateDisuGrid(gridFile);
         break;
+    case GridType::MV_GRID_NOT_DEFINED:
+        errMsg = "Grid has not been defined";
+        break;
     }
     if (!errMsg.empty()) return errMsg;
 

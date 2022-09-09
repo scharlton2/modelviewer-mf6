@@ -24,7 +24,7 @@ protected:
 public:
     vtkTypeMacro(mvLogColorTable, vtkLogLookupTable);
 
-    virtual void            Build();
+    void                    Build() override;
     static mvLogColorTable *New();
     bool                    GetTransformValues() { return m_TransformValues; };
     void                    SetTransformValues(bool Value);
