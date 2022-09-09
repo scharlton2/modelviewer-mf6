@@ -30,7 +30,7 @@ mvColorBar::mvColorBar()
     m_Precision           = 3;
     m_NumberOfColors      = 64;
     m_NumberOfLabelsBuilt = 0;
-    m_LabelFormat         = new char[16];
+    m_LabelFormat         = new char[30];
     sprintf(m_LabelFormat, "%s%d.%d%c", "%-#", m_Precision + 8, m_Precision, 'g');
     m_LookupTable    = 0;
     m_ColorBar       = vtkPolyData::New();
