@@ -510,6 +510,39 @@ void MvDoc::onModelFeatures()
 {
 }
 
+void MvDoc::setCurrentFile(const QString& fileName)
+{
+    _currentFile = QDir::toNativeSeparators(fileName);
+
+    QMainWindow* mainWindow = dynamic_cast<QMainWindow*>(parent());
+    assert(mainWindow);
+    if (mainWindow)
+    {
+        mainWindow->setWindowModified(false);
+
+        QString shownName = _currentFile;
+        if (shownName.isEmpty())
+            shownName = tr("Untitled");
+        mainWindow->setWindowFilePath(shownName);
+
+    }
+}
+
+QString MvDoc::currentFile()
+{
+    return _currentFile;
+}
+
+QDir MvDoc::defaultDir() const
+{
+    if (!_currentFile.isEmpty())
+    {
+        QFileInfo fileInfo(_currentFile);
+        return fileInfo.absoluteDir();
+    }
+    return QDir();
+}
+
 void MvDoc::onShowAxes()
 {
     /*

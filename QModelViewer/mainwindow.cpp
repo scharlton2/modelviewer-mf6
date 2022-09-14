@@ -67,13 +67,10 @@ MainWindow::MainWindow(QWidget *parent)
 
     vtkNew<vtkNamedColors> colors;
 
-    doc     = new MvDoc();
-    //manager = new mvManager();
-    //gui     = new mvGUISettings();
+    doc     = new MvDoc(this);
     view    = new MvView(doc);
-    //{{NEW
     doc->addView(view);
-    //}}NEW
+
     setCentralWidget(view->mainWidget());
 
     createActions();
@@ -89,11 +86,6 @@ MainWindow::MainWindow(QWidget *parent)
 
 MainWindow::~MainWindow()
 {
-    //delete view;  // view is deleted by its parent -- doc
-    delete doc;
-
-    //delete gui;
-    //delete manager;
 }
 
 void MainWindow::createActions()
@@ -874,13 +866,7 @@ void MainWindow::onExportAnimation()
 
 void MainWindow::setCurrentFile(const QString &fileName)
 {
-    curFile = QDir::toNativeSeparators(fileName);
-    setWindowModified(false);
-
-    QString shownName = curFile;
-    if (curFile.isEmpty())
-        shownName = "Untitled";
-    setWindowFilePath(shownName);
+    doc->setCurrentFile(fileName);
 }
 
 QString MainWindow::strippedName(const QString &fullFileName)
