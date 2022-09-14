@@ -2,6 +2,9 @@
 
 
 #include <QMessageBox>
+#include <QApplication>
+#include <QDir>
+#include <QMainWindow>
 
 //#include "qabstractview.h"
 #include "mvview.h"
@@ -11,7 +14,7 @@
 #include <algorithm>
 
 
-MvDoc::MvDoc(QObject *parent)
+MvDoc::MvDoc(QMainWindow* parent)
     : QObject{parent}
     , _gui{nullptr}
     , _isAnimating{false}
@@ -71,6 +74,7 @@ MvDoc::~MvDoc()
 
     // Free memory
     delete _manager;
+    delete _gui;
 
     /***
     for (int i = 0; i < m_NumberOfModels; i++)
@@ -115,10 +119,10 @@ void MvDoc::saveCurrentAppSettings()
 #endif
 }
 
-const QString& MvDoc::pathName() const
-{
-    return _pathName;
-}
+//const QString& MvDoc::pathName() const
+//{
+//    return _pathName;
+//}
 
 QString MvDoc::modelName() const
 {
@@ -140,10 +144,22 @@ bool MvDoc::isAnimating() const
     return _isAnimating;
 }
 
+std::vector<QString> MvDoc::timePointLabels()
+{
+    std::vector<QString> timePointLabels;
+    int                  n      = _manager->GetNumberOfTimePoints();
+    char**               labels = _manager->GetTimePointLabels();
+    for (int i = 0; i < n; ++i)
+    {
+        timePointLabels.push_back(labels[i]);
+    }
+    return timePointLabels;
+}
+
 /////////////////////////////////////////////////////////////////////////////
 // Time Label
 
-void MvDoc::SetTimeLabelFontSize(int size, bool update /* = TRUE */)
+void MvDoc::SetTimeLabelFontSize(int size, bool update /* = true */)
 {
     _manager->SetTimeLabelFontSize(size);
     if (update)
@@ -792,5 +808,111 @@ void MvDoc::onShowColorBar()
     setModified(true);
 }
 
+void MvDoc::setTimePointTo(int timePointIndex)
+{
+    //QApplication::setOverrideCursor(Qt::WaitCursor);
+    _manager->SetTimePointTo(timePointIndex);
+    updateAnimation();
+}
 
+void MvDoc::updateAnimation()
+{
+    ///POSITION pos = GetFirstViewPosition();
+    ///GetNextView(pos)->SendMessage(WM_PAINT);
+    
+    for (auto view : _views)
+    {
+        view->onUpdate(nullptr, nullptr);
 
+        //{{
+        // added so that File->Export Animation->Preview would update the view
+        // this seems to do what 'GetNextView(pos)->SendMessage(WM_PAINT)' did in the MFC version
+        qApp->processEvents();
+        //}}
+    }
+
+    double range[2];
+    _manager->GetScalarDataRange(range);
+    //m_DataDlg->m_ScalarPage->SetRange(range);
+    _manager->GetVectorMagnitudeRange(range);
+    //m_DataDlg->m_VectorPage->SetRange(range);
+    //m_AnimationDlg->m_ControlsPage->SetAndDisplayCurrentTime(_manager->GetCurrentTimePointIndex());
+
+    if (!_isAnimating)
+    {
+        bool          b;
+        switch (animationType)
+        {
+        case AnimationType::atTime:
+            b = _manager->GetCurrentTimePointIndex() < _manager->GetNumberOfTimePoints() - 1;
+            break;
+        case AnimationType::atSpace:
+            b = true;
+            break;
+        }
+
+        //m_AnimationDlg->m_ControlsPage->GetDlgItem(IDC_RUN_ANIMATION)->EnableWindow(b);
+        //m_AnimationDlg->m_ControlsPage->GetDlgItem(IDC_ADVANCE_ANIMATION)->EnableWindow(b);
+        ///EndWaitCursor();
+    }
+}
+
+void MvDoc::advanceOneTimePoint()
+{
+    if (!_isAnimating)
+    {
+        ///BeginWaitCursor();
+    }
+    _manager->AdvanceOneTimePoint();
+    updateAnimationPosition();
+}
+
+void MvDoc::updateAnimationPosition()
+{
+    //POSITION pos   = GetFirstViewPosition();
+    //CMvView* pView = (CMvView*)GetNextView(pos);
+    //pView->RotateCamera(m_AnimationDlg->m_OptionsPage->m_Rotate);
+    //pView->ElevateCamera(m_AnimationDlg->m_OptionsPage->m_Elevate);
+
+    for(auto view : this->_views)
+    {
+        //pView->RotateCamera(m_AnimationDlg->m_OptionsPage->m_Rotate);
+        //pView->ElevateCamera(m_AnimationDlg->m_OptionsPage->m_Elevate);
+
+        //view->rotateCamera();
+        //view->elevateCamera();
+    }
+    updateAnimation();
+}
+
+//void MvDoc::updateAnimation()
+//{
+//    //POSITION pos = GetFirstViewPosition();
+//    //GetNextView(pos)->SendMessage(WM_PAINT);
+//
+//    double range[2];
+//    _manager->GetScalarDataRange(range);
+//    //m_DataDlg->m_ScalarPage->SetRange(range);
+//    _manager->GetVectorMagnitudeRange(range);
+//    //m_DataDlg->m_VectorPage->SetRange(range);
+//    //m_AnimationDlg->m_ControlsPage->SetAndDisplayCurrentTime(_manager->GetCurrentTimePointIndex());
+//
+//    if (!_isAnimating)
+//    {
+//        bool          b;
+//        AnimationType at = animationType;
+//        switch (at)
+//        {
+//        case AnimationType::atTime:
+//            b = _manager->GetCurrentTimePointIndex() < _manager->GetNumberOfTimePoints() - 1;
+//            break;
+//        case AnimationType::atSpace:
+//            b = true;
+//            break;
+//        }
+//
+//        //m_AnimationDlg->m_ControlsPage->GetDlgItem(IDC_RUN_ANIMATION)->EnableWindow(b);
+//        //m_AnimationDlg->m_ControlsPage->GetDlgItem(IDC_ADVANCE_ANIMATION)->EnableWindow(b);
+//        //EndWaitCursor();
+//    }
+//}

@@ -76,12 +76,12 @@ protected:
     double         bitmapHeightInInches;          // m_BitmapHeightInInches
 
     // parameters for exporting image sequence
-    int            m_StartIndex;
-    int            m_EndIndex;
-    int            m_NumberOfSteps;
+    int            startIndex;
+    int            endIndex;
+    int            numberOfSteps;
     double         rotate;
     double         elevate;
-    AnimationType  m_AnimationType;
+    AnimationType  animationType;
     QString        outputFolder;
     QString        filePrefix;
     QString        fileStartNumber;

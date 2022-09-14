@@ -5,6 +5,7 @@
 #include <vector>
 #include <string>
 
+#include <QDir>
 #include <QObject>
 #include <QString>
 
@@ -16,6 +17,7 @@ class mvManager;
 class QAbstractView;
 class QObject;
 class QWidget;
+class QMainWindow;
 
 class vtkPropCollection;
 
@@ -38,7 +40,7 @@ class MvDoc : public QObject
 {
     Q_OBJECT
 public:
-    explicit MvDoc(QObject *parent = nullptr);
+    explicit MvDoc(QMainWindow* parent);
     ~MvDoc() override;
 
 
@@ -48,6 +50,17 @@ public:
 
     QString        activeScalarName() const;
     QString        modelName() const;
+
+    //char**                             GetTimePointLabels();
+    //int                                GetNumberOfTimePoints();
+    std::vector<QString>               timePointLabels();
+
+    void                               setTimePointTo(int timePointIndex);
+    void                               updateAnimation();
+    void                               advanceOneTimePoint();
+    void                               updateAnimationPosition();
+
+
 
     // Time Label
     void           SetTimeLabelFontSize(int size, bool update = true);
@@ -91,6 +104,11 @@ public:
 
     vtkSmartPointer<vtkPropCollection> propCollection();
 
+    // 
+    QString                            currentFile();
+
+    QDir                               defaultDir() const;
+
 
 public slots:
 
@@ -117,12 +135,16 @@ private:
 
     friend class MainWindow;
 
-    void                     loadPreviousAppSettings();
-    void                     saveCurrentAppSettings();
+    void                      setCurrentFile(const QString& fileName);
 
-    QString                  _pathName;              // CDocument::m_strPathName
 
-    bool                     _modified;              // CDocument::m_bModified
+    void                      loadPreviousAppSettings();
+    void                      saveCurrentAppSettings();
+
+    //QString                  _pathName;              // CDocument::m_strPathName
+    QString                   _currentFile;
+
+    bool                      _modified;            // CDocument::m_bModified
 
 
     AnimationType            animationType;         // m_AnimationType

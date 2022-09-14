@@ -17,6 +17,8 @@
 #include <vtkBMPWriter.h>
 
 #include "bitmapresolutiondialog.h"
+#include "exportanimationdialog.h"
+
 
 
 MvView::MvView(QObject *parent)
@@ -205,17 +207,23 @@ void MvView::onUpdate(QAbstractView* sender, QObject* hint)
 
     widget->renderWindow()->Render();
 
+    // The following was moved to -- void MvDoc::updateAnimation()
+    ////{{
+    //// added so that File->Export Animation->Preview would update the view
+    //qApp->processEvents();
+    ////}}
+
     QAbstractView::onUpdate(sender, hint);
 }
 
 void MvView::resetExportImageParameters()
 {
-    m_StartIndex      = 0;
-    m_EndIndex        = 0;
+    startIndex        = 0;
+    endIndex          = 0;
     rotate            = 0;
     elevate           = 0;
-    m_NumberOfSteps   = 10;
-    m_AnimationType   = AnimationType::atTime;
+    numberOfSteps     = 10;
+    animationType     = AnimationType::atTime;
     outputFolder      = "";
     filePrefix        = "";
     fileStartNumber   = "001";
@@ -427,5 +435,152 @@ void MvView::onFileExportAsBmp(QWidget* parent)
 
 void MvView::onFileExportAnimation(QWidget* parent)
 {
-    QMessageBox::information(parent, "TODO", "Not implemented");
+    const double          MB_PER_PIXEL = 2.88e-6;
+    int                   width        = this->widget->renderWindow()->GetSize()[0];
+    int                   height       = this->widget->renderWindow()->GetSize()[1];
+    double                MBPerFile    = (width * height) * MB_PER_PIXEL;
+
+    ExportAnimationDialog dlg(parent);
+
+    dlg.startIndex          = startIndex;
+    dlg.endIndex            = endIndex;
+    dlg.outputFolder        = outputFolder;
+    dlg.defaultOutputFolder = GetDocument()->defaultDir().absolutePath();
+    dlg.filePrefix          = filePrefix;
+    dlg.fileStartNumber     = fileStartNumber;
+    dlg.rotate              = rotate;
+    dlg.elevate             = elevate;
+    dlg.MBPerFile           = MBPerFile;
+    dlg.timePointLabels     = GetDocument()->timePointLabels();
+    dlg.numberOfSteps       = numberOfSteps;
+    dlg.animationType       = animationType;
+
+    if (dlg.exec() != QDialog::Accepted)
+    {
+        return;
+    }
+
+    startIndex      = dlg.startIndex;
+    endIndex        = dlg.endIndex;
+    outputFolder    = dlg.outputFolder;
+    filePrefix      = dlg.filePrefix.trimmed();
+    fileStartNumber = dlg.fileStartNumber.trimmed();
+    rotate          = dlg.rotate;
+    elevate         = dlg.elevate;
+    animationType   = dlg.animationType;
+    numberOfSteps   = dlg.numberOfSteps;
+
+    int StartIndex;
+    int EndIndex;
+    switch (animationType)
+    {
+    case AnimationType::atTime:
+        StartIndex = startIndex;
+        EndIndex   = endIndex;
+        break;
+    case AnimationType::atSpace:
+        StartIndex = 0;
+        EndIndex   = numberOfSteps - 1;
+        break;
+    }
+
+    QString path;
+    if (!dlg.outputFolder.isEmpty())
+    {
+        path = dlg.outputFolder;
+    }
+    else
+    {
+        path = GetDocument()->defaultDir().absolutePath() + filePrefix;
+    }
+    if (!filePrefix.isEmpty()) path += QDir::separator() + filePrefix;
+    path += QDir::separator();
+
+    if (!dlg.preview)
+    {
+        // Issue warning for large output (greater than 100 megabytes)
+        double diskUsage = (EndIndex - StartIndex + 1) * MBPerFile;
+        if (diskUsage > 100)
+        {
+            QMessageBox::StandardButton reply = 
+                QMessageBox::question(parent, "", QString(tr("You are about to write a total of %1 MB to disk. Do you want to continue?")).arg(diskUsage, 0, 'g', 3), QMessageBox::Yes | QMessageBox::No);
+
+            if (reply == QMessageBox::No)
+            {
+                return;
+            }
+        }
+    }
+
+    PlaceHeadlightWithCamera();
+
+    vtkLightCollection* lights = renderer->GetLights();
+    lights->InitTraversal();
+    vtkLight*  light    = lights->GetNextItem();
+    vtkLight*  auxlight = lights->GetNextItem();
+    vtkCamera* camera   = renderer->GetActiveCamera();
+    assert(light == this->headlight);
+    assert(auxlight == this->auxiliaryLight);
+
+    light->SetPosition(camera->GetPosition());
+    light->SetFocalPoint(camera->GetFocalPoint());
+    auxlight->SetFocalPoint(camera->GetFocalPoint());
+
+    assert(GetDocument());
+    QApplication::setOverrideCursor(Qt::WaitCursor);
+    if (animationType == AnimationType::atTime)
+    {
+        GetDocument()->setTimePointTo(startIndex);
+    }
+
+    //int fileNumber = atoi((char*)((LPCTSTR)m_FileStartNumber));
+    int fileNumber = atoi(fileStartNumber.toStdString().c_str());
+    int len        = fileStartNumber.length();
+    int i          = StartIndex;
+    int fill;
+
+    char b1[10];
+    char b2[10];
+
+    while (1)
+    {
+        if (!dlg.preview)
+        {
+            b1[0] = '\0';
+            sprintf(b2, "%d", fileNumber);
+            fill = len - strlen(b2);
+            for (int j = 0; j < fill; j++)
+            {
+                strcat(b1, "0");
+            }
+            WriteBmp((path + b1 + b2 + ".bmp").toStdString().c_str(), true);
+            fileNumber++;
+        }
+        i++;
+        if (i > EndIndex)
+        {
+            break;
+        }
+        camera->Azimuth(rotate);
+        camera->Elevation(elevate);
+
+        if (elevate != 0)
+        {
+            camera->OrthogonalizeViewUp();
+        }
+
+        light->SetPosition(camera->GetPosition());
+        light->SetFocalPoint(camera->GetFocalPoint());
+        auxlight->SetFocalPoint(camera->GetFocalPoint());
+
+        if (animationType == AnimationType::atTime)
+        {
+            GetDocument()->advanceOneTimePoint();
+        }
+        else if (animationType == AnimationType::atSpace)
+        {
+            GetDocument()->updateAnimation();
+        }
+    }
+    QApplication::restoreOverrideCursor();
 }
