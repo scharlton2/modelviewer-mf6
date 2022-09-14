@@ -398,10 +398,12 @@ void MvView::onFileExportAsBmp(QWidget* parent)
     lights->InitTraversal();
     
     // get headlight
+    assert(lights->IsItemPresent(this->headlight));
     vtkLight* light = lights->GetNextItem();
-    assert(light == this->auxiliaryLight);
+    assert(light == this->headlight);
 
     // get auxilliary light
+    assert(lights->IsItemPresent(this->auxiliaryLight));
     light = lights->GetNextItem();
     assert(light == this->auxiliaryLight);
 
