@@ -2,7 +2,7 @@
 #include "ui_bitmapresolutiondialog.h"
 
 BitmapResolutionDialog::BitmapResolutionDialog(QWidget *parent) :
-    QDialog(parent),
+    QDialog(parent, Qt::WindowCloseButtonHint),
     ui(new Ui::BitmapResolutionDialog)
 {
     ui->setupUi(this);
