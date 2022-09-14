@@ -38,7 +38,7 @@ MvView::MvView(QObject *parent)
     auxiliaryLight->SetIntensity(0);
 
     renderer->AddLight(headlight);
-    renderer->AddLight(headlight);
+    renderer->AddLight(auxiliaryLight);
 
     widget->renderWindow()->AddRenderer(renderer);
 
