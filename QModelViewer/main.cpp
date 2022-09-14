@@ -1,5 +1,6 @@
 #include <QApplication>
 #include <QGuiApplication>
+#include <QIcon>
 #include <QSurfaceFormat>
 
 #include <QVTKOpenGLNativeWidget.h>
@@ -17,7 +18,10 @@ int main(int argc, char** argv)
 
   QApplication app(argc, argv);
   QGuiApplication::setApplicationDisplayName(QObject::tr("Model Viewer for Modflow 6"));
-  QGuiApplication::setWindowIcon(QIcon(":/images/ModelViewer-16x16.png"));
+
+  QIcon icon(":/images/ModelViewer-32x32.png");
+  icon.addFile(":/images/ModelViewer-16x16.png");
+  QGuiApplication::setWindowIcon(icon);
 
   MainWindow window;
   window.show();
