@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.12 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.20 FATAL_ERROR)
 
 if(POLICY CMP0020)
   cmake_policy(SET CMP0020 NEW)
@@ -61,12 +61,41 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTORCC ON)
 
-include_directories(${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR})
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
-set(UI_FILES mainwindow.ui bitmapresolutiondialog.ui displaysizedialog.ui)
-set(HXX_FILES mainwindow.h resource.h mvdoc.h mvview.h displaysizedialog.h bitmapresolutiondialog.h)
-set(CXX_FILES mainwindow.cpp main.cpp mvdoc.cpp mvview.cpp displaysizedialog.cpp bitmapresolutiondialog.cpp qabstractview.h qabstractview.cpp)
-set(QRC_FILES modelviewer.qrc)
+
+set(UI_FILES
+  bitmapresolutiondialog.ui
+  displaysizedialog.ui
+  exportanimationdialog.ui
+  mainwindow.ui
+)
+
+set(HXX_FILES
+  bitmapresolutiondialog.h
+  displaysizedialog.h
+  exportanimationdialog.h
+  mainwindow.h
+  mvdoc.h
+  mvview.h
+  qabstractview.h
+  resource.h
+)
+
+set(CXX_FILES
+  bitmapresolutiondialog.cpp
+  displaysizedialog.cpp
+  exportanimationdialog.cpp
+  main.cpp
+  mainwindow.cpp
+  mvdoc.cpp
+  mvview.cpp
+  qabstractview.cpp
+)
+
+set(QRC_FILES
+  modelviewer.qrc
+)
 
 source_group("Resources"
   FILES
@@ -99,7 +128,6 @@ target_include_directories(QModelViewer PRIVATE ${CMAKE_SOURCE_DIR}/mv)
 
 target_link_libraries(QModelViewer ${VTK_LIBRARIES})
 target_link_libraries(QModelViewer mv)
-# target_link_libraries(QModelViewer Shlwapi)
 
 set_target_properties(QModelViewer PROPERTIES VS_DEBUGGER_ENVIRONMENT "PATH=$(SolutionDir)\\mv\\$(Configuration);C:\\QT-VTK-9.1.0-leaks-vs2019-x64\\bin;C:\\Qt\\5.15.2\\msvc2019_64\\bin;%PATH%")
 
