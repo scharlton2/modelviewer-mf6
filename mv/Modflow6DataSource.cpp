@@ -144,16 +144,16 @@ void Modflow6DataSource::GetDefaultModelFeatureColor(int i, double *rgba)
     }
 }
 
-std::string Modflow6DataSource::LoadData(char *dataFileList)
+const char *Modflow6DataSource::LoadData(char *dataFileList)
 {
     char nameFile[256];
     char gridFile[256];
     char headFile[256];
     char budgetFile[256];
-    gridFile[0]   = '\0';
-    headFile[0]   = '\0';
-    budgetFile[0] = '\0';
-    std::string errMsg;
+    gridFile[0]        = '\0';
+    headFile[0]        = '\0';
+    budgetFile[0]      = '\0';
+    const char *errMsg = nullptr;
     int         i;
 
     // Save the dataFileList. This is needed for serialization.
@@ -171,7 +171,7 @@ std::string Modflow6DataSource::LoadData(char *dataFileList)
         // if nameFile is specified, then get the gridFile, headFile, and budgetFile from
         // the nameFile
         errMsg = ExtractModflowOutputFileNames(nameFile, gridFile, headFile, budgetFile);
-        if (!errMsg.empty())
+        if (errMsg)
         {
             delete[] m_DataFileList;
             m_DataFileList = 0;
@@ -181,7 +181,7 @@ std::string Modflow6DataSource::LoadData(char *dataFileList)
         {
             delete[] m_DataFileList;
             m_DataFileList = 0;
-            return std::string("Error: Unable to determine type of Modflow grid.");
+            return "Error: Unable to determine type of Modflow grid.";
         }
     }
     else
@@ -211,7 +211,7 @@ std::string Modflow6DataSource::LoadData(char *dataFileList)
         }
         else
         {
-            return std::string("Error encountered while reading the binary grid file to determine the grid type.");
+            return "Error encountered while reading the binary grid file to determine the grid type.";
         }
     }
 
@@ -219,7 +219,7 @@ std::string Modflow6DataSource::LoadData(char *dataFileList)
     m_IfHead.open(headFile, ios::in | ios::binary);
     if (!m_IfHead.is_open())
     {
-        return std::string("Error: Unable to open the head file.");
+        return "Error: Unable to open the head file.";
     }
 
     // open budget file, if it is specified.
@@ -231,7 +231,7 @@ std::string Modflow6DataSource::LoadData(char *dataFileList)
     }
 
     // construct the grid
-    errMsg = std::string();
+    errMsg = nullptr;
     switch (m_GridType)
     {
     case GridType::MV_STRUCTURED_GRID:
@@ -247,7 +247,7 @@ std::string Modflow6DataSource::LoadData(char *dataFileList)
         errMsg = "Grid has not been defined";
         break;
     }
-    if (!errMsg.empty()) return errMsg;
+    if (errMsg) return errMsg;
 
     const int dataTypeLabelLength  = 17;
     const int maxNumberOfDataTypes = 4; // temporary
@@ -267,7 +267,7 @@ std::string Modflow6DataSource::LoadData(char *dataFileList)
             delete[] dataTypeLabel[i];
         }
         delete[] dataTypeLabel;
-        return std::string("Error: No head data.");
+        return "Error: No head data.";
     }
     mvUtil::ToLowerCase(dataTypeLabel[0]);
     m_NumberOfScalarDataTypes = 1;
@@ -330,7 +330,7 @@ std::string Modflow6DataSource::LoadData(char *dataFileList)
     // Count budget file and model features
     m_HasSpecificDischargeData = 0;
     m_ModelFeatureArraySize    = 0;
-    errMsg                     = std::string();
+    errMsg                     = nullptr;
     if (m_IfBudget.is_open())
     {
         errMsg = CountBudgetAndFeatures();
@@ -347,7 +347,7 @@ std::string Modflow6DataSource::LoadData(char *dataFileList)
             m_VectorArray = new double[3 * m_NumberOfModflowCells];
         }
     }
-    return std::string();
+    return nullptr;
 }
 
 int Modflow6DataSource::GetNumVTKPoints()
@@ -382,7 +382,7 @@ double Modflow6DataSource::GetAngRot()const
 }
 
 
-std::string Modflow6DataSource::ExtractModflowOutputFileNames(char *nameFile,
+const char *Modflow6DataSource::ExtractModflowOutputFileNames(char *nameFile,
                                                               char *gridFile, char *headFile, char *budgetFile)
 {
     char  aline[300];
@@ -396,7 +396,7 @@ std::string Modflow6DataSource::ExtractModflowOutputFileNames(char *nameFile,
     ifstream in(nameFile, ios::in);
     if (!in.is_open())
     {
-        return std::string("Error: Unable to open the name file.");
+        return "Error: Unable to open the name file.";
     }
 
     // determine the grid type (DIS, DISV, or DISU), name of the grid file,
@@ -446,12 +446,12 @@ std::string Modflow6DataSource::ExtractModflowOutputFileNames(char *nameFile,
     // open the oc file
     if (strlen(ocFile) == 0)
     {
-        return std::string("Error: Unable to determine the oc file.");
+        return "Error: Unable to determine the oc file.";
     }
     in.open(ocFile, ios::in);
     if (!in.is_open())
     {
-        return std::string("Error: Unable to open the oc file.");
+        return "Error: Unable to open the oc file.";
     }
 
     // determine the name of the head file and budget file
@@ -496,10 +496,10 @@ std::string Modflow6DataSource::ExtractModflowOutputFileNames(char *nameFile,
         }
     }
     in.close();
-    return std::string();
+    return nullptr;
 }
 
-std::string Modflow6DataSource::CreateDisGrid(char *gridFile)
+const char *Modflow6DataSource::CreateDisGrid(char *gridFile)
 {
     int      i, j, k;
     int      nx, ny, nz, nxy;
@@ -507,7 +507,7 @@ std::string Modflow6DataSource::CreateDisGrid(char *gridFile)
     ifstream in(gridFile, ios::in | ios::binary);
     if (!in.is_open())
     {
-        return std::string("Error: Unable to open the binary grid file.");
+        return "Error: Unable to open the binary grid file.";
     }
 
     char   *aRecord = new char[50];
@@ -555,7 +555,7 @@ std::string Modflow6DataSource::CreateDisGrid(char *gridFile)
     catch (...)
     {
         delete[] aRecord;
-        return std::string("Error encountered while reading the binary grid file.");
+        return "Error encountered while reading the binary grid file.";
     }
 
     m_Ncpl             = m_NumberOfCellRows * m_NumberOfCellColumns;
@@ -604,7 +604,7 @@ std::string Modflow6DataSource::CreateDisGrid(char *gridFile)
         m_Idomain     = 0;
         m_Icelltype   = 0;
         m_NumFlowConn = 0;
-        return std::string("Error encountered while reading the binary grid file.");
+        return "Error encountered while reading the binary grid file.";
     }
 
     // change flow indices to start counting from zero
@@ -908,17 +908,17 @@ std::string Modflow6DataSource::CreateDisGrid(char *gridFile)
     delete[] elev;
     delete[] delr;
     delete[] delc;
-    return std::string();
+    return nullptr;
 }
 
-std::string Modflow6DataSource::CreateDisvGrid(char *gridFile)
+const char *Modflow6DataSource::CreateDisvGrid(char *gridFile)
 {
     int      i, j, k, m, index;
 
     ifstream in(gridFile, ios::in | ios::binary);
     if (!in.is_open())
     {
-        return std::string("Error: Unable to open the binary grid file.");
+        return "Error: Unable to open the binary grid file.";
     }
 
     char   *aRecord = new char[50];
@@ -966,7 +966,7 @@ std::string Modflow6DataSource::CreateDisvGrid(char *gridFile)
     catch (...)
     {
         delete[] aRecord;
-        return std::string("Error encountered while reading the binary grid file.");
+        return "Error encountered while reading the binary grid file.";
     }
 
     m_xorigin   = xorigin;
@@ -1018,7 +1018,7 @@ std::string Modflow6DataSource::CreateDisvGrid(char *gridFile)
         delete[] m_Ja;
         delete[] m_Idomain;
         delete[] m_Icelltype;
-        return std::string("Error encountered while reading the binary grid file.");
+        return "Error encountered while reading the binary grid file.";
     }
 
     // allocate arrays
@@ -1424,16 +1424,16 @@ std::string Modflow6DataSource::CreateDisvGrid(char *gridFile)
         }
     }
 
-    return std::string();
+    return nullptr;
 }
 
-std::string Modflow6DataSource::CreateDisuGrid(char *gridFile)
+const char *Modflow6DataSource::CreateDisuGrid(char *gridFile)
 {
     int      i, j;
     ifstream in(gridFile, ios::in | ios::binary);
     if (!in.is_open())
     {
-        return std::string("Error: Unable to open the binary grid file.");
+        return "Error: Unable to open the binary grid file.";
     }
     char   *aRecord = new char[50];
     char   *q;
@@ -1455,7 +1455,7 @@ std::string Modflow6DataSource::CreateDisuGrid(char *gridFile)
         {
             in.close();
             delete[] aRecord;
-            return std::string("Unable to display DISU grid because the binary grid file does not contain data on vertices.");
+            return "Unable to display DISU grid because the binary grid file does not contain data on vertices.";
         }
         // determine lentxt
         if (!in.read(aRecord, sizeof(char) * 50)) throw 1;
@@ -1494,7 +1494,7 @@ std::string Modflow6DataSource::CreateDisuGrid(char *gridFile)
     catch (...)
     {
         delete[] aRecord;
-        return std::string("Error encountered while reading the binary grid file.");
+        return "Error encountered while reading the binary grid file.";
     }
 
     m_xorigin       = xorigin;
@@ -1545,7 +1545,7 @@ std::string Modflow6DataSource::CreateDisuGrid(char *gridFile)
         delete[] m_NumCell2dVert;
         delete[] m_NumFlowConn;
         in.close();
-        return std::string("Error encountered while reading the binary grid file.");
+        return "Error encountered while reading the binary grid file.";
     }
 
     // change indices to start counting from zero
@@ -1706,10 +1706,10 @@ std::string Modflow6DataSource::CreateDisuGrid(char *gridFile)
         m++;
     }
 
-    return std::string();
+    return nullptr;
 }
 
-std::string Modflow6DataSource::CountHead(char *dataTypeLabel)
+const char *Modflow6DataSource::CountHead(char *dataTypeLabel)
 {
     int    kstp, kper, n1, n2, n3, j, jmax, k, kmax;
     double pertim, totim, value;
@@ -1759,10 +1759,10 @@ std::string Modflow6DataSource::CountHead(char *dataTypeLabel)
     strncpy(dataTypeLabel, text, 16);
     dataTypeLabel[16] = '\0';
     mvUtil::TrimRight(dataTypeLabel);
-    return std::string();
+    return nullptr;
 }
 
-std::string Modflow6DataSource::CountBudgetAndFeatures()
+const char *Modflow6DataSource::CountBudgetAndFeatures()
 {
     int    kstp, kper, ndim1, ndim2, ndim3, imeth, i, j, nlist, nval, match;
     double delt, pertim, totim, value, t1;
@@ -1794,7 +1794,7 @@ std::string Modflow6DataSource::CountBudgetAndFeatures()
                 delete vtk_cell_count;
                 m_HasSpecificDischargeData = 0;
                 m_ModelFeatureArraySize    = 0;
-                return std::string();
+                return nullptr;
             }
             if (kper != perstp[0] || kstp != perstp[1])
             {
@@ -1803,7 +1803,7 @@ std::string Modflow6DataSource::CountBudgetAndFeatures()
                 delete vtk_cell_count;
                 m_HasSpecificDischargeData = 0;
                 m_ModelFeatureArraySize    = 0;
-                return std::string();
+                return nullptr;
             }
             else
             {
@@ -1950,7 +1950,7 @@ std::string Modflow6DataSource::CountBudgetAndFeatures()
         m_HasSpecificDischargeData = 0;
     }
 
-    return std::string();
+    return nullptr;
 }
 
 void Modflow6DataSource::GetTimePoints(double *timePoints, int *periods, int *steps)

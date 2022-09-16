@@ -65,7 +65,7 @@ public:
 
     // Data set and animation control
     // void ClearData();
-    std::string                        LoadData(char *modelType, char *dataFileList);
+    const char *                       LoadData(char *modelType, char *dataFileList);
     char                              *GetDataFileList() const;
     int                                HasVectorData() const;
     int                                HasPathlineData() const;
@@ -90,7 +90,7 @@ public:
     int                                GetActiveScalarDataType() const { return m_ActiveDataType; }
     const char *                       GetActiveScalarDataName() const;
     int                                GetPrimaryScalarMode() const;
-    std::string                        GetModelName() const;
+    const char *                       GetModelName() const;
     int                                GetTimeLabelOption() const;
     void                               SetTimePointTo(int timePointIndex);
     void                               AdvanceOneTimePoint();

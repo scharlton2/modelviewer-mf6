@@ -126,7 +126,7 @@ void MvDoc::saveCurrentAppSettings()
 
 QString MvDoc::modelName() const
 {
-    return _manager->GetModelName().c_str();
+    return _manager->GetModelName();
 }
 
 QString MvDoc::activeScalarName() const

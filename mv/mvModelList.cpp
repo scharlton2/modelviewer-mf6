@@ -37,7 +37,7 @@ void mvModelList::GetModelNames(char **buffer)
     int n = 0;
 
 #ifdef MV_MODFLOW6
-    strcpy(buffer[n], Modflow6DataSource::GetNameStatic().c_str());
+    strcpy(buffer[n], Modflow6DataSource::GetNameStatic());
     n++;
 #endif
 }
@@ -45,7 +45,7 @@ void mvModelList::GetModelNames(char **buffer)
 mvDataSource *mvModelList::CreateDataSource(char *model)
 {
 #ifdef MV_MODFLOW6
-    if (mvUtil::stricmp(model, Modflow6DataSource::GetNameStatic().c_str()) == 0)
+    if (mvUtil::stricmp(model, Modflow6DataSource::GetNameStatic()) == 0)
     {
         return new Modflow6DataSource;
     }

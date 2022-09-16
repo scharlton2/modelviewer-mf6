@@ -19,7 +19,7 @@ public:
     /**
      * Returns the name of the dataset.
      */
-    virtual std::string GetName()                              = 0;
+    virtual const char *GetName()                              = 0;
 
     /**
      * Returns the "primary mode" of the scalars. This is either
@@ -54,7 +54,7 @@ public:
      * Reads data from data files. Reads the grid information such as dimensions,
      * point coordinates, and number of time points.
      */
-    virtual std::string LoadData(char *dataFileList)           = 0;
+    virtual const char *LoadData(char *dataFileList)           = 0;
 
     /**
      * Reads data for the next time point. Reads scalar, vector, and pathline
