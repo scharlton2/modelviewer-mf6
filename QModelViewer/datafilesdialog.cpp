@@ -16,7 +16,7 @@
 //using std::ofstream;
 
 #include <QDir>
-#include <QWidget.h>
+//#include <QWidget.h>
 
 
 char *DataFilesDialog::GetDataFileList(char *model, QWidget *parent /* = nullptr */)
