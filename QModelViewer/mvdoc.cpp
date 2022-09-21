@@ -287,6 +287,7 @@ void MvDoc::onFileNew()
     // Check for error in reading data files
     if (errorMsg != 0)
     {
+        QApplication::restoreOverrideCursor();
         QMessageBox::critical(mainWindow, "", errorMsg);
         return;
     }
