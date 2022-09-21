@@ -24,6 +24,14 @@
 // connect(fileMenu, &QMenu::aboutToShow, this, &MainWindow::updateFileActions);                    // New-style
 // connect(fileMenu, qOverload<int>(&QMenu::aboutToShow), this, &MainWindow::updateFileActions);    // New-style with overload
 
+// 
+// MainWindow::setCurrentFile   ->  mvDoc::setCurrentFile
+// MainWindow::onFileOpen       ->  mvDoc::onFileOpen
+// MainWindow::onFileNew        ->  mvDoc::onFileNew
+//
+
+// call QWidget::update() to schedule a paint event
+// call QWidget::repaint() to force a paint event
 
 #include <QtWidgets>
 
@@ -58,12 +66,13 @@ MainWindow::MainWindow(QWidget *parent)
     , _modifiedFlag{false}
 
 {
-
+#if defined(Q_OS_WINDOWS)
     //{{ unit testing
     // std::string mvSaveCurrentDirectory::GetFullPath(const char *szMore, const char *szDirectory)
     std::string            s = mvSaveCurrentDirectory::GetFullPath(".\\New folder\\Greenport_Domain.shp", "D:\\Issues\\modflow\\model viewer for mf6\\issue-51");
     assert(s.compare("D:\\Issues\\modflow\\model viewer for mf6\\issue-51\\New folder\\Greenport_Domain.shp") == 0);
     //}}
+#endif
 
     vtkNew<vtkNamedColors> colors;
 
@@ -95,8 +104,7 @@ void MainWindow::createActions()
     newAct      = new QAction(/* newIcon, */ tr("&New..."), this);
     newAct->setShortcuts(QKeySequence::New);
     newAct->setStatusTip(tr("Create a new mvmv6 file"));
-    connect(newAct, &QAction::triggered, this, &MainWindow::newFile);
-    newAct->setEnabled(false);  // @todo
+    connect(newAct, &QAction::triggered, this, &MainWindow::onFileNew);
 
     // File->Open...
     openAct = new QAction(tr("&Open..."), this);
@@ -247,6 +255,78 @@ void MainWindow::createActions()
     setSizeAction    = new QAction(tr("Set Si&ze of Display Area..."), this);
     setSizeAction->setStatusTip(tr("Set the size of the display area"));
     connect(setSizeAction, &QAction::triggered, this, &MainWindow::setSize);
+
+
+    // Action->View From Direction->+x
+    viewFromPx = new QAction(tr("+x"), this);
+    viewFromPx->setStatusTip(tr("View from the positive x axis towards the negative x direction"));
+    connect(viewFromPx, &QAction::triggered, this, &MainWindow::onViewFromPx);
+    
+    // Action->View From Direction->-x
+    viewFromNx = new QAction(tr("-x"), this);
+    viewFromNx->setStatusTip(tr("View from the negative x axis towards the positive x direction"));
+    connect(viewFromNx, &QAction::triggered, this, &MainWindow::onViewFromNx);
+
+    // Action->View From Direction->+y
+    viewFromPy = new QAction(tr("+y"), this);
+    viewFromPy->setStatusTip(tr("View from the positive y axis towards the negative y direction"));
+    connect(viewFromPy, &QAction::triggered, this, &MainWindow::onViewFromPy);
+
+    // Action->View From Direction->-y
+    viewFromNy = new QAction(tr("-y"), this);
+    viewFromNy->setStatusTip(tr("View from the negative y axis towards the positive y direction"));
+    connect(viewFromNy, &QAction::triggered, this, &MainWindow::onViewFromNy);
+
+    // Action->View From Direction->+z
+    viewFromPz = new QAction(tr("+z"), this);
+    viewFromPz->setStatusTip(tr("View from the positive z axis towards the negative z direction"));
+    connect(viewFromPz, &QAction::triggered, this, &MainWindow::onViewFromPz);
+
+    // Action->View From Direction->-z
+    viewFromNz = new QAction(tr("-z"), this);
+    viewFromNz->setStatusTip(tr("View from the negative z axis towards the positive z direction"));
+    connect(viewFromNz, &QAction::triggered, this, &MainWindow::onViewFromNz);
+
+    // Action->View From Next Direction
+    viewFromNextDirection = new QAction(tr("View From &Next Direction"), this);
+    viewFromNextDirection->setStatusTip(tr("Change to the next preset viewpoint"));
+    viewFromNextDirection->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_D));
+    connect(viewFromNextDirection, &QAction::triggered, this, &MainWindow::onViewFromNextDirection);
+
+    // -----------------------------
+
+    // Action->Set Projection To->Perspective
+    setProjectionToPerspective = new QAction(tr("&Perspective"), this);
+    setProjectionToPerspective->setCheckable(true);
+    setProjectionToPerspective->setStatusTip(tr("Parallel lines appear parallel to each other as they extend to infinity"));
+    connect(setProjectionToPerspective, &QAction::triggered, doc, &MvDoc::onPerspectiveProjection);
+
+    // Action->Set Projection To->Parallel
+    setProjectionToParallel = new QAction(tr("Pa&rallel"), this);
+    setProjectionToParallel->setCheckable(true);
+    setProjectionToParallel->setStatusTip(tr("Parallel lines appear to converge at infinity"));
+    connect(setProjectionToParallel, &QAction::triggered, doc, &MvDoc::onParallelProjection);
+
+
+    // Action->Save Viewpoint
+    saveViewpoint = new QAction(tr("&Save Viewpoint"), this);
+    saveViewpoint->setStatusTip(tr("Save the current viewpoint"));
+    saveViewpoint->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_W));
+    connect(saveViewpoint, &QAction::triggered, view, &MvView::onSaveViewpoint);
+
+
+    // Action->Recall Viewpoint
+    recallViewpoint = new QAction(tr("&Recall Viewpoint"), this);
+    recallViewpoint->setStatusTip(tr("Restore the saved viewpoint"));
+    recallViewpoint->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_Z));
+    connect(recallViewpoint, &QAction::triggered, view, &MvView::onRecallViewpoint);
+
+
+    // Toolbox
+    geometryAction = new QAction(tr("Geo&metry"), this);
+    geometryAction->setCheckable(true);
+    geometryAction->setStatusTip(tr("Show or hide the Geometry Toolbox"));
+    connect(geometryAction, &QAction::triggered, this, &MainWindow::onToolboxGeometry);
 }
 
 void MainWindow::updateFileActions()
@@ -351,18 +431,53 @@ void MainWindow::updateShowActions()
     showColorBarAction->setEnabled(this->doc->_manager->GetDataFileList() && !this->isAnimating());
 }
 
-void MainWindow::updateActions()
+void MainWindow::updateActionActions()
 {
     ///////////////////////////////////////////////////////////////////////////
-    // File
+    // Action
     ///////////////////////////////////////////////////////////////////////////
-    //updateFileActions();
-    
+    qDebug() << "updateActionActions\n";
 
+    // Action->View From Direction->+x
+    view->onUpdateViewFrom(viewFromPx);
+
+    // Action->View From Direction->-x
+    view->onUpdateViewFrom(viewFromNx);
+
+    // Action->View From Direction->+y
+    view->onUpdateViewFrom(viewFromPy);
+
+    // Action->View From Direction->-y
+    view->onUpdateViewFrom(viewFromNy);
+
+    // Action->View From Direction->+z
+    view->onUpdateViewFrom(viewFromPz);
+
+    // Action->View From Direction->-z
+    view->onUpdateViewFrom(viewFromNz);
+
+    // Action->View From &Next Direction
+    view->onUpdateViewFrom(viewFromNextDirection);
+
+    // Action->Set Projection To->Perspective
+    doc->onUpdatePerspectiveProjection(setProjectionToPerspective);
+
+    // Action->Set Projection To->Parallel
+    doc->onUpdateParallelProjection(setProjectionToParallel);
+
+
+
+}
+
+void MainWindow::updateToolboxActions()
+{
     ///////////////////////////////////////////////////////////////////////////
-    // Show
+    // Toolbox
     ///////////////////////////////////////////////////////////////////////////
-    //updateShowActions();   
+    qDebug() << "updateToolboxActions\n";
+
+    // Toolbox->Geometry
+    doc->onUpdateToolboxGeometry(this->geometryAction);
 }
 
 bool MainWindow::isAnimating() const
@@ -481,9 +596,54 @@ void MainWindow::createMenus()
     ///////////////////////////////////////////////////////////////////////////
     // Action
     QMenu *actionMenu = menuBar()->addMenu(tr("&Action"));
+    connect(actionMenu, &QMenu::aboutToShow, this, &MainWindow::updateActionActions);
 
     // Action->Set Size of Display Area...
     actionMenu->addAction(setSizeAction);
+
+    // -----------------------------
+    actionMenu->addSeparator();
+
+    QMenu *viewFromDirection = actionMenu->addMenu(tr("View From &Direction"));
+
+    viewFromDirection->addAction(viewFromPx);
+    viewFromDirection->addAction(viewFromNx);
+    viewFromDirection->addAction(viewFromPy);
+    viewFromDirection->addAction(viewFromNy);
+    viewFromDirection->addAction(viewFromPz);
+    viewFromDirection->addAction(viewFromNz);
+
+    // Action->View From Next Direction
+    actionMenu->addAction(viewFromNextDirection);
+
+    // -----------------------------
+    actionMenu->addSeparator();
+
+    // Set &Projection To
+    QMenu *setProjectionTo = actionMenu->addMenu(tr("Set &Projection To"));
+
+    // Action->Set Projection To->Perspective
+    setProjectionTo->addAction(setProjectionToPerspective);
+
+    // Action->Set Projection To->Parallel
+    setProjectionTo->addAction(setProjectionToParallel);
+
+    // -----------------------------
+    actionMenu->addSeparator();
+
+    // Action->Save Viewpoint
+    actionMenu->addAction(saveViewpoint);
+
+    // Action->Recall Viewpoint
+    actionMenu->addAction(recallViewpoint);
+
+    ///////////////////////////////////////////////////////////////////////////
+    // Toolbox
+    QMenu *toolboxMenu = menuBar()->addMenu(tr("&Toolbox"));
+    connect(toolboxMenu, &QMenu::aboutToShow, this, &MainWindow::updateToolboxActions);
+
+    // Toolbox->Geometry
+    toolboxMenu->addAction(geometryAction);
 }
 
 void MainWindow::createStatusBar()
@@ -538,13 +698,22 @@ void MainWindow::closeEvent(QCloseEvent *event)
     }
 }
 
-void MainWindow::newFile()
+//void MainWindow::newFile()
+//{
+//    if (maybeSave())
+//    {
+//        setCurrentFile(QString());
+//    }
+//}
+
+void MainWindow::onFileNew()
 {
     if (maybeSave())
     {
-        setCurrentFile(QString());
+        doc->onFileNew();
     }
 }
+
 
 //  void CDocManager::OnFileOpen()
 //    BOOL CDocManager::DoPromptFileName(CString& fileName, UINT nIDSTitle, DWORD lFlags, BOOL bOpenFileDialog, CDocTemplate* pTemplate)
@@ -568,45 +737,49 @@ void MainWindow::newFile()
 
 void MainWindow::onFileOpen()
 {
-    if (!maybeSave()) return;
+    //if (!maybeSave()) return;
 
-    QString fileName = QFileDialog::getOpenFileName(this, tr("Open"), QString(), tr("MvMf6 Files (*.mvmf6)"));
+    //QString fileName = QFileDialog::getOpenFileName(this, tr("Open"), QString(), tr("MvMf6 Files (*.mvmf6)"));
 
-    if (fileName.isEmpty())
-    {
-        return;
-    }
+    //if (fileName.isEmpty())
+    //{
+    //    return;
+    //}
 
-    //{{ application MainWindow::loadFile(QString fileName) -> MvDoc::openDocument(QString fileName, QWidget* parent = nullptr)
-    delete doc->_manager;
-    delete doc->_gui;
+    ////{{ application MainWindow::loadFile(QString fileName) -> MvDoc::openDocument(QString fileName, QWidget* parent = nullptr)
+    //delete doc->_manager;
+    //delete doc->_gui;
 
-    QApplication::setOverrideCursor(Qt::WaitCursor);
+    //QApplication::setOverrideCursor(Qt::WaitCursor);
 
-    std::string errorMsg;
-    doc->_gui     = new mvGUISettings();
-    doc->_manager = new mvManager();
-    doc->_manager->Deserialize(QDir::toNativeSeparators(fileName).toStdString().c_str(), doc->_gui, errorMsg);
-    if (errorMsg.size())
-    {
-        QMessageBox::information(this, "Error", errorMsg.c_str());
-    }
+    //std::string errorMsg;
+    //doc->_gui     = new mvGUISettings();
+    //doc->_manager = new mvManager();
+    //doc->_manager->Deserialize(QDir::toNativeSeparators(fileName).toStdString().c_str(), doc->_gui, errorMsg);
+    //if (errorMsg.size())
+    //{
+    //    QMessageBox::information(this, "Error", errorMsg.c_str());
+    //}
 
-    view->renderer->GetViewProps()->RemoveAllItems();
-    vtkSmartPointer<vtkPropCollection> props = doc->_manager->GetPropCollection();
-    props->InitTraversal();
-    for (int i = 0; i < props->GetNumberOfItems(); i++)
-    {
-        view->addViewProp(props->GetNextProp());
-    }
-    view->applyViewSettings(doc->_gui);
+    //// view->renderer->GetViewProps()->RemoveAllItems();
+    //view->renderer->RemoveAllViewProps();
+    //vtkSmartPointer<vtkPropCollection> props = doc->_manager->GetPropCollection();
+    //props->InitTraversal();
+    //for (int i = 0; i < props->GetNumberOfItems(); i++)
+    //{
+    //    view->addViewProp(props->GetNextProp());
+    //}
+    //view->applyViewSettings(doc->_gui);
 
-    this->updateActions();
-    this->updateStatusBar();
-    this->setCurrentFile(fileName);
+    //this->updateActions();
+    //this->updateStatusBar();
+    //this->setCurrentFile(fileName);
 
-    QApplication::restoreOverrideCursor();
-    //}} application MainWindow::loadFile(QString fileName)
+    //QApplication::restoreOverrideCursor();
+    ////}} application MainWindow::loadFile(QString fileName)
+
+    //////
+    doc->onFileOpen();
 }
 
 void MainWindow::closeFile()
@@ -633,26 +806,34 @@ void MainWindow::closeFile()
     }
     view->applyViewSettings(doc->_gui);
 
-    this->updateActions();
+    //this->updateActions();
     this->updateStatusBar();
+    doc->setCurrentFile("");
 
     QApplication::restoreOverrideCursor();
 }
 
-bool MainWindow::isModified() const
-{
-    return _modifiedFlag;
-}
- 
+//bool MainWindow::isModified() const
+//{
+//    return _modifiedFlag;
+//}
+
+// similar to doc::SaveModified()
 bool MainWindow::maybeSave()
 {
-    if (!isModified())
+    if (!doc->isModified())
         return true;
 
-    QString shownName = curFile;
-    if (curFile.isEmpty())
+    QString shownName = doc->_currentFile;
+    if (shownName.isEmpty())
+    {
         shownName = "Untitled";
-
+    }
+    else
+    {
+        QFileInfo info(shownName);
+        shownName = info.fileName();
+    }
 
     const QMessageBox::StandardButton ret = QMessageBox::question(this,
                                                                   tr("Model Viewer for Modflow 6"),
@@ -684,15 +865,27 @@ bool MainWindow::maybeSave()
 
 bool MainWindow::onFileSave()
 {
-    if (curFile.isEmpty())
+    //if (curFile.isEmpty())
+    //{
+    //    return onFileSaveAs();
+    //}
+    //else
+    //{
+    //    // return return saveFile(curFile);
+    //    return saveFile(curFile.toLocal8Bit().data());
+    //}
+
+    //{{
+    if (doc->_currentFile.isEmpty())
     {
         return onFileSaveAs();
     }
     else
     {
         // return return saveFile(curFile);
-        return onSaveDocument(curFile.toLocal8Bit().data());
+        return saveFile(doc->_currentFile);
     }
+    //}}
 }
 
 
@@ -729,7 +922,7 @@ bool MainWindow::onFileSaveAs()
     if (!fileName.isEmpty())
     {
         fileName = QDir::toNativeSeparators(fileName);
-        return onSaveDocument(fileName.toLocal8Bit().data());
+        return saveFile(fileName);
     }
     return false;
 }
@@ -915,6 +1108,41 @@ void MainWindow::setSize()
     }
 }
 
+void MainWindow::onViewFromPx()
+{
+    view->onViewFromPx();
+}
+
+void MainWindow::onViewFromNx()
+{
+    view->onViewFromNx();
+}
+
+void MainWindow::onViewFromPy()
+{
+    view->onViewFromPy();
+}
+
+void MainWindow::onViewFromNy()
+{
+    view->onViewFromNy();
+}
+
+void MainWindow::onViewFromPz()
+{
+    view->onViewFromPz();
+}
+
+void MainWindow::onViewFromNz()
+{
+    view->onViewFromNz();
+}
+
+void MainWindow::onViewFromNextDirection()
+{
+    view->onViewFromNextDirection();
+}
+
 void MainWindow::onShowNone()
 {
     doc->onShowNone();
@@ -957,6 +1185,7 @@ void MainWindow::onShowPathlines()
 
 void MainWindow::onModelFeatures()
 {
+    doc->onModelFeatures();
 }
 
 void MainWindow::onShowAxes()
@@ -994,6 +1223,11 @@ void MainWindow::onShowColorBar()
     doc->onShowColorBar();
 }
 
+void MainWindow::onToolboxGeometry()
+{
+    doc->onToolboxGeometry();
+}
+
 void MainWindow::setModifiedFlag(bool modified)
 {
     this->_modifiedFlag = modified;
@@ -1004,7 +1238,8 @@ void MainWindow::updateAllViews()
     this->view->mainWidget()->renderWindow()->Render();
 }
 
-bool MainWindow::onSaveDocument(const char *lpszPathName)
+// bool MainWindow::saveFile(const char *lpszPathName)
+bool MainWindow::saveFile(const QString &fileName)
 {
     /*
     * BOOL CMvDoc::OnSaveDocument(LPCTSTR lpszPathName)
@@ -1051,6 +1286,7 @@ bool MainWindow::onSaveDocument(const char *lpszPathName)
     return TRUE;
     */
 
+    assert(doc->_gui);
     mvGUISettings settings(*doc->_gui);
 
     // @todo replace this with m_CropDlg
@@ -1062,13 +1298,14 @@ bool MainWindow::onSaveDocument(const char *lpszPathName)
 
     // The visualization pipeline doc->_manager will serialize everything along
     // with the gui settings
-    char *errorMsg = this->doc->_manager->Serialize(lpszPathName, &settings);
+    ///char *errorMsg = this->doc->_manager->Serialize(lpszPathName, &settings);
+    char *errorMsg = this->doc->_manager->Serialize(fileName.toLocal8Bit().data(), &settings);
     if (errorMsg != 0)
     {
         QMessageBox::information(this, tr(""), tr(errorMsg));
         return false;
     }
-    setCurrentFile(QString(lpszPathName));
+    setCurrentFile(fileName);
     setModifiedFlag(false);
     return true;
 }

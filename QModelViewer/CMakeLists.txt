@@ -68,26 +68,34 @@ set(UI_FILES
   bitmapresolutiondialog.ui
   displaysizedialog.ui
   exportanimationdialog.ui
+  geometrydialog.ui
   mainwindow.ui
+  modflow6datafilesdialog.ui
 )
 
 set(HXX_FILES
   bitmapresolutiondialog.h
+  datafilesdialog.h
   displaysizedialog.h
   exportanimationdialog.h
+  geometrydialog.h
   mainwindow.h
   mvdoc.h
   mvview.h
+  modflow6datafilesdialog.h
   qabstractview.h
   resource.h
 )
 
 set(CXX_FILES
   bitmapresolutiondialog.cpp
+  datafilesdialog.cpp
   displaysizedialog.cpp
   exportanimationdialog.cpp
+  geometrydialog.cpp
   main.cpp
   mainwindow.cpp
+  modflow6datafilesdialog.cpp
   mvdoc.cpp
   mvview.cpp
   qabstractview.cpp

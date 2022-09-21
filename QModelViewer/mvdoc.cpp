@@ -5,11 +5,25 @@
 #include <QApplication>
 #include <QDir>
 #include <QMainWindow>
+#include <QAction>
+
+
+
 
 //#include "qabstractview.h"
+
+#include "mainwindow.h"
+#include "datafilesdialog.h"
+
+#include "Modflow6DataSource.h"
+
 #include "mvview.h"
 
+#include "mvGUISettings.h"
 #include "mvManager.h"
+
+#include "geometrydialog.h"
+
 
 #include <algorithm>
 
@@ -18,6 +32,7 @@ MvDoc::MvDoc(QMainWindow* parent)
     : QObject{parent}
     , _gui{nullptr}
     , _isAnimating{false}
+    , _modified{false}
 {
     // Initialize variables
     startup           = true;
@@ -65,6 +80,8 @@ MvDoc::MvDoc(QMainWindow* parent)
     m_AnimationDlg     = NULL;
     m_OverlayDlg       = NULL;
 #endif
+    geometryDialog = new GeometryDialog(parent, this);
+    geometryDialog->reinitialize();
 }
 
 MvDoc::~MvDoc()
@@ -154,6 +171,226 @@ std::vector<QString> MvDoc::timePointLabels()
         timePointLabels.push_back(labels[i]);
     }
     return timePointLabels;
+}
+
+/////////////////////////////////////////////////////////////////////////////
+// File->
+
+#include <QFileDialog>
+#include <QMessageBox>
+#include <vtkPropCollection.h>
+
+void MvDoc::onFileNew()
+{
+    //{{ OLD
+    //char selectedModel[20];
+    //// This version of Model View is customized to display only Modflow 6 results.
+    //// In other words, the variable "selectedModel" is set to "Modflow 6"
+    //strcpy(selectedModel, Modflow6DataSource::GetNameStatic());
+
+    //// Display dialog box for user to specify data files for the
+    //// selected model. Note that memory for dataFileList is allocated
+    //// by the dataFileList method
+    //char* dataFileList = DataFilesDialog::GetDataFileList(selectedModel);
+    //if (dataFileList == NULL)
+    //{
+    //    return; // User clicked the Cancel button
+    //}
+
+    //// Load data
+    //char* errorMsg = m_Manager->LoadData(selectedModel, dataFileList);
+    //delete[] dataFileList;
+
+    //// Check for error in reading data files
+    //if (errorMsg != 0)
+    //{
+    //    AfxMessageBox(errorMsg);
+    //    return;
+    //}
+
+    //// Display dialog box for user to select time and type of data to view
+    //CDataSelectionDlg dlg2;
+    //dlg2.m_NumberOfTimePoints      = m_Manager->GetNumberOfTimePoints();
+    //dlg2.m_TimePointLabels         = m_Manager->GetTimePointLabels();
+    //dlg2.m_NumberOfScalarDataTypes = m_Manager->GetNumberOfScalarDataTypes();
+    //dlg2.m_DataTypeLabels          = m_Manager->GetDataTypeLabels();
+    //dlg2.m_TimeLabelOption         = m_Manager->GetTimeLabelOption();
+    //dlg2.m_InitialDisplayTimePoint = m_Manager->GetInitialDisplayTimePoint();
+    //dlg2.DoModal(); // Cancel not allowed.
+    //m_Manager->SetTimePointTo(dlg2.m_SelectedTimePoint);
+    //m_Manager->SetScalarDataTypeTo(dlg2.m_SelectedDataType);
+
+    //// Apply default settings and then turn on bounding box
+    //m_Manager->ApplyDefaultSettings();
+
+    //// If there are more than one time points, turn on the
+    //// time label
+    //if (m_Manager->GetNumberOfTimePoints() > 1)
+    //{
+    //    m_Manager->ShowTimeLabel();
+    //}
+
+    //// Create a gui settings object with initial settings. These
+    //// are used to update the tool dialog boxes and view.
+    //mvGUISettings* gui = new mvGUISettings;
+
+    //// Update the tool (modeless) dialog boxes
+    //UpdateToolDialogs(gui);
+
+    //// Set the view parameters
+    //m_ProjectionMode = MV_PERSPECTIVE_PROJECTION;
+    //POSITION pos     = GetFirstViewPosition();
+    //CMvView* pView   = (CMvView*)GetNextView(pos);
+    //pView->SetProjectionToPerspective();
+    //pView->ApplyViewSettings(gui);
+    //pView->ResetViewpoint();
+    //delete gui;
+
+    //// Mark this document as modified
+    //SetModifiedFlag(TRUE);
+
+    //// Redraw the view;
+    //UpdateAllViews(NULL);
+    //}} OLD
+
+    MainWindow* mainWindow = dynamic_cast<MainWindow*>(parent());
+    assert(mainWindow);
+
+    //{{NEW
+    delete _manager;
+    _manager = new mvManager;
+
+    geometryDialog->reinitialize();
+    //}}NEW
+
+
+    char selectedModel[20];
+    // This version of Model View is customized to display only Modflow 6 results.
+    // In other words, the variable "selectedModel" is set to "Modflow 6"
+    strcpy(selectedModel, Modflow6DataSource::GetNameStatic());
+
+    // Display dialog box for user to specify data files for the
+    // selected model. Note that memory for dataFileList is allocated
+    // by the dataFileList method
+    char* dataFileList = DataFilesDialog::GetDataFileList(selectedModel, mainWindow);
+    if (dataFileList == nullptr)
+    {
+        return; // User clicked the Cancel button
+    }
+
+    QApplication::setOverrideCursor(Qt::WaitCursor);
+
+    // Load data
+    const char* errorMsg = _manager->LoadData(selectedModel, dataFileList);
+    delete[] dataFileList;
+
+    // Check for error in reading data files
+    if (errorMsg != 0)
+    {
+        QMessageBox::critical(mainWindow, "", errorMsg);
+        return;
+    }
+
+    // Display dialog box for user to select time and type of data to view
+    // @todo
+    this->_manager->SetTimePointTo(0);
+    this->_manager->SetScalarDataTypeTo(0);
+
+    // Apply default settings and then turn on bounding box
+    this->_manager->ApplyDefaultSettings();
+
+    // If there are more than one time points, turn on the
+    // time label
+    if (this->_manager->GetNumberOfTimePoints() > 1)
+    {
+        this->_manager->ShowTimeLabel();
+    }
+
+    // Create a gui settings object with initial settings. These
+    // are used to update the tool dialog boxes and view.
+    mvGUISettings* gui = new mvGUISettings;
+
+    // Update the tool (modeless) dialog boxes
+    updateToolDialogs(gui);
+
+    for (auto view : _views)
+    {
+        view->removeAllViewProps();
+        vtkSmartPointer<vtkPropCollection> props = _manager->GetPropCollection();
+        props->InitTraversal();
+        for (int i = 0; i < props->GetNumberOfItems(); i++)
+        {
+            view->addViewProp(props->GetNextProp());
+        }
+        view->setProjectionToPerspective();
+        view->applyViewSettings(gui);
+        view->resetViewPoint();
+        view->onUpdate(nullptr, nullptr);
+    }
+    //delete gui;
+    _gui = gui;
+
+    // Mark this document as modified
+    setModified(true);
+
+    // Redraw the view;
+    //updateAllViews(nullptr);
+
+    QApplication::restoreOverrideCursor();
+}
+
+
+void MvDoc::onFileOpen()
+{
+    MainWindow* mainWindow = dynamic_cast<MainWindow*>(parent());
+    assert(mainWindow);
+
+    if (!mainWindow->maybeSave()) return;
+
+    QString fileName = QFileDialog::getOpenFileName(mainWindow, tr("Open"), QString(), tr("MvMf6 Files (*.mvmf6)"));
+
+    if (fileName.isEmpty())
+    {
+        return;
+    }
+
+    //{{ application MainWindow::loadFile(QString fileName) -> MvDoc::openDocument(QString fileName, QWidget* parent = nullptr)
+    delete _manager;
+    delete _gui;
+
+    QApplication::setOverrideCursor(Qt::WaitCursor);
+
+    std::string errorMsg;
+    _gui     = new mvGUISettings();
+    _manager = new mvManager();
+    _manager->Deserialize(QDir::toNativeSeparators(fileName).toStdString().c_str(), _gui, errorMsg);
+    if (errorMsg.size())
+    {
+        QMessageBox::information(mainWindow, "Error", errorMsg.c_str());
+        return;
+    }
+
+    for (auto view : _views)
+    {
+        view->removeAllViewProps();
+        vtkSmartPointer<vtkPropCollection> props = _manager->GetPropCollection();
+        props->InitTraversal();
+        for (int i = 0; i < props->GetNumberOfItems(); i++)
+        {
+            view->addViewProp(props->GetNextProp());
+        }
+        view->applyViewSettings(_gui);
+        view->onUpdate(nullptr, nullptr);
+    }
+
+    //{{
+    updateToolDialogs(_gui);
+    //}}
+    //mainWindow->updateActions();
+    mainWindow->updateStatusBar();
+    setCurrentFile(fileName);
+
+    QApplication::restoreOverrideCursor();
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -347,6 +584,11 @@ bool MvDoc::modified() const
     return _modified;
 }
 
+bool MvDoc::isModified() const
+{
+    return _modified;
+}
+
 void MvDoc::setModified(bool modified)
 {
     _modified = modified;
@@ -524,11 +766,50 @@ void MvDoc::onShowPathlines()
 
 void MvDoc::onModelFeatures()
 {
+    if (this->_manager->AreModelFeaturesVisible())
+    {
+        this->_manager->HideModelFeatures();
+        ///m_ModelFeaturesDlg->Activate(FALSE);
+    }
+    else
+    {
+        this->_manager->ShowModelFeatures();
+        //m_ModelFeaturesDlg->Activate(TRUE);
+        //if ((!m_ModelFeaturesDlg->IsWindowVisible()) &&
+        //    (m_ModelFeaturesDlg->m_ShowListBox.GetCount() == 0))
+        //{
+        //    m_ModelFeaturesDlg->ShowWindow(SW_SHOW);
+        //}
+    }
+    updateAllViews(nullptr);
+    setModified(true);
+}
+
+void MvDoc::onToolboxGeometry()
+{
+    assert(geometryDialog);
+    if (geometryDialog->isVisible())
+    {
+        geometryDialog->hide();
+        //geometryDialog->setVisible(false);
+    }
+    else
+    {
+        geometryDialog->show();
+        //geometryDialog->setVisible(true);
+    }
+}
+
+void MvDoc::onUpdateToolboxGeometry(QAction *action)
+{
+    assert(geometryDialog);
+    action->setChecked(geometryDialog->isVisible());
 }
 
 void MvDoc::setCurrentFile(const QString& fileName)
 {
     _currentFile = QDir::toNativeSeparators(fileName);
+    setModified(false);
 
     QMainWindow* mainWindow = dynamic_cast<QMainWindow*>(parent());
     assert(mainWindow);
@@ -540,8 +821,8 @@ void MvDoc::setCurrentFile(const QString& fileName)
         if (shownName.isEmpty())
             shownName = tr("Untitled");
         mainWindow->setWindowFilePath(shownName);
-
     }
+    updateAllViews(nullptr);
 }
 
 QString MvDoc::currentFile()
@@ -808,6 +1089,56 @@ void MvDoc::onShowColorBar()
     setModified(true);
 }
 
+/////////////////////////////////////////////////////////////////////////////
+// Command handlers -- Action Menu
+
+void MvDoc::onPerspectiveProjection()
+{
+    projectionMode   = ProjectionType::ptPerspective;
+    
+    //POSITION pos     = GetFirstViewPosition();
+    //CMvView* pView   = (CMvView*)GetNextView(pos);
+    //pView->SetProjectionToPerspective();
+    //UpdateAllViews(NULL);
+
+    for (auto view : _views)
+    {
+        view->setProjectionToPerspective();
+    }
+    updateAllViews(nullptr, nullptr);
+}
+
+void MvDoc::onUpdatePerspectiveProjection(QAction* action)
+{
+    action->setChecked(projectionMode == ProjectionType::ptPerspective);
+    action->setEnabled(_manager->GetDataFileList() && !_isAnimating);
+}
+
+void MvDoc::onParallelProjection()
+{
+    projectionMode   = ProjectionType::ptParallel;
+    //POSITION pos     = GetFirstViewPosition();
+    //CMvView* pView   = (CMvView*)GetNextView(pos);
+    //pView->SetProjectionToParallel();
+    //UpdateAllViews(NULL);
+
+    for (auto view : _views)
+    {
+        view->setProjectionToParallel();
+    }
+    updateAllViews(nullptr, nullptr);
+}
+
+void MvDoc::onUpdateParallelProjection(QAction* action)
+{
+    action->setChecked(projectionMode == ProjectionType::ptParallel);
+    action->setEnabled(_manager->GetDataFileList() && !_isAnimating);
+}
+
+/////////////////////////////////////////////////////////////////////////////
+// Command handlers -- Tools Menu
+
+
 void MvDoc::setTimePointTo(int timePointIndex)
 {
     //QApplication::setOverrideCursor(Qt::WaitCursor);
@@ -916,3 +1247,110 @@ void MvDoc::updateAnimationPosition()
 //        //EndWaitCursor();
 //    }
 //}
+
+void MvDoc::updateToolDialogs(mvGUISettings* gui)
+{
+    //UpdateColorBarDlg();
+    //UpdateSolidDlg();
+    //UpdateIsosurfaceDlg();
+    //UpdateLightingDlg(gui);
+    updateGeometryDialog();
+    //UpdateGridDlg();
+    //UpdateAnimationDlg(gui);
+    //UpdateVectorDlg();
+    //UpdateCropDlg(gui);
+    //UpdateDataDlg();
+    //UpdatePathlinesDlg();
+    //UpdateModelFeaturesDlg();
+    //UpdateOverlayDlg();
+}
+
+
+/////////////////////////////////////////////////////////////////////////////
+// Scale
+
+void MvDoc::setScale(double xScale, double yScale, double zScale)
+{
+    _manager->SetScale(xScale, yScale, zScale);
+    //POSITION pos   = GetFirstViewPosition();
+    //CMvView* pView = (CMvView*)GetNextView(pos);
+    //pView->ResetCameraClippingRange();
+    //UpdateAllViews(NULL);
+    //SetModifiedFlag(TRUE);
+
+    for (auto view : this->_views)
+    {
+        view->resetCameraClippingRange();
+    }
+    updateAllViews(nullptr);
+    setModified(true);
+}
+
+/////////////////////////////////////////////////////////////////////////////
+// Axes
+
+void MvDoc::setAxesRepresentationToLine()
+{
+    _manager->SetAxesRepresentationToLine();
+    updateAllViews(nullptr);
+    setModified(true);
+}
+
+void MvDoc::setAxesRepresentationToTube()
+{
+    _manager->SetAxesRepresentationToTube();
+    updateAllViews(nullptr);
+    setModified(true);
+}
+
+void MvDoc::setAxesProperties(double xPos, double yPos, double zPos,
+                               double axesSize, double tubeDiameter)
+{
+    _manager->SetAxesNormalizedSize(axesSize);
+    _manager->SetAxesNormalizedPosition(xPos, yPos, zPos);
+    _manager->SetAxesNormalizedTubeDiameter(tubeDiameter);
+    updateAllViews(nullptr);
+    setModified(true);
+}
+
+
+/////////////////////////////////////////////////////////////////////////////
+// Bounding Box
+void MvDoc::setBoundingBoxColor(double red, double green, double blue)
+{
+    _manager->SetBoundingBoxColor(red, green, blue);
+    updateAllViews(nullptr);
+    setModified(true);
+}
+
+
+void MvDoc::updateGeometryDialog()
+{
+    // scale
+    const double* sc       = _manager->GetScale();
+    geometryDialog->xScale = sc[0];
+    geometryDialog->yScale = sc[1];
+    geometryDialog->zScale = sc[2];
+    geometryDialog->updateDataScale(false);
+    geometryDialog->activateScale(true);
+
+    // axes
+    const double* p                = _manager->GetAxesNormalizedPosition();
+    geometryDialog->representation = _manager->GetAxesRepresentation();
+    geometryDialog->axesSize       = _manager->GetAxesNormalizedSize();
+    geometryDialog->tubeDiameter   = _manager->GetAxesNormalizedTubeDiameter();
+    geometryDialog->xPos           = p[0];
+    geometryDialog->yPos           = p[1];
+    geometryDialog->zPos           = p[2];
+    geometryDialog->updateDataAxes(false);
+    geometryDialog->activateAxes(_manager->AreAxesVisible());
+
+    // bounding box
+    const double* rgb = _manager->GetBoundingBoxColor();
+    geometryDialog->boundingBoxColor = (int)(rgb[0] * 2 + 0.1);
+    geometryDialog->updateDataBoundingBox(false);
+    geometryDialog->activateBoundingBox(_manager->IsBoundingBoxVisible());
+
+    geometryDialog->enableApplyButton(true);
+    geometryDialog->setCurrentIndex(0);
+}

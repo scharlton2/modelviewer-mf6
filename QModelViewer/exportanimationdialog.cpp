@@ -33,12 +33,6 @@ ExportAnimationDialog::ExportAnimationDialog(QWidget *parent)
     // connections
     connect(ui->pushButtonExport, &QAbstractButton::clicked, this, &QDialog::accept);
     connect(ui->pushButtonCancel, &QAbstractButton::clicked, this, &QDialog::reject);
-
-    //connect(ui->pushButtonPreview, &QAbstractButton::clicked, this, &ExportAnimationDialog::onPreview);
-    //connect(ui->pushButtonBrowse, &QAbstractButton::clicked, this, &ExportAnimationDialog::onBrowse);
-    //connect(ui->comboBoxAnimationType, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &ExportAnimationDialog::onChangeComboBoxAnimationType);
-    //connect(ui->comboBoxStartIndex, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &ExportAnimationDialog::onChangeStartIndex);
-    //connect(ui->comboBoxEndIndex, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &ExportAnimationDialog::onChangeEndIndex);
 }
 
 ExportAnimationDialog::~ExportAnimationDialog()
@@ -90,9 +84,9 @@ void ExportAnimationDialog::onInitDialog()
     //
     connect(ui->pushButtonPreview, &QAbstractButton::clicked, this, &ExportAnimationDialog::onPreview);
     connect(ui->pushButtonBrowse, &QAbstractButton::clicked, this, &ExportAnimationDialog::onBrowse);
-    connect(ui->comboBoxAnimationType, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &ExportAnimationDialog::onChangeComboBoxAnimationType);
-    connect(ui->comboBoxStartIndex, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &ExportAnimationDialog::onChangeStartIndex);
-    connect(ui->comboBoxEndIndex, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &ExportAnimationDialog::onChangeEndIndex);
+    connect(ui->comboBoxAnimationType, QOverload<int>::of(&QComboBox::currentIndexChanged), this, QOverload<int>::of(&ExportAnimationDialog::onChangeComboBoxAnimationType));
+    connect(ui->comboBoxStartIndex, QOverload<int>::of(&QComboBox::currentIndexChanged), this, QOverload<int>::of(&ExportAnimationDialog::onChangeStartIndex));
+    connect(ui->comboBoxEndIndex, QOverload<int>::of(&QComboBox::currentIndexChanged), this, QOverload<int>::of(&ExportAnimationDialog::onChangeEndIndex));
 
     // QSpinBox
     connect(ui->spinBoxNumberOfSteps, QOverload<int>::of(&QSpinBox::valueChanged),

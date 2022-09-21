@@ -16,33 +16,46 @@
 #include <vtkRenderLargeImage.h>
 #include <vtkBMPWriter.h>
 
+//#include <vtkViewport.h> // testing
+
 #include "bitmapresolutiondialog.h"
 #include "exportanimationdialog.h"
 
+#define MV_VIEW_FROM_POSITIVE_X 0
+#define MV_VIEW_FROM_NEGATIVE_X 1
+#define MV_VIEW_FROM_POSITIVE_Y 2
+#define MV_VIEW_FROM_NEGATIVE_Y 3
+#define MV_VIEW_FROM_POSITIVE_Z 4
+#define MV_VIEW_FROM_NEGATIVE_Z 5
 
 
 MvView::MvView(QObject *parent)
     : QAbstractView(parent)
 {
-    renderer = vtkRenderer::New();
-    renderer->SetBackground(1, 1, 1);
+    //renderer = vtkRenderer::New();
+    //renderer->SetBackground(1, 1, 1);
 
 #ifdef NDEBUG
-    renderer->GlobalWarningDisplayOff();
+    //renderer->GlobalWarningDisplayOff();
 #endif
 
-    widget    = new QVTKOpenGLNativeWidget();
+    ////widget    = new QVTKOpenGLNativeWidget();
 
-    headlight = vtkLight::New();
-    headlight->SetLightTypeToHeadlight();
+    //headlight = vtkLight::New();
+    //headlight->SetLightTypeToHeadlight();
 
-    auxiliaryLight = vtkLight::New();
-    auxiliaryLight->SetIntensity(0);
+    //auxiliaryLight = vtkLight::New();
+    //auxiliaryLight->SetIntensity(0);
 
-    renderer->AddLight(headlight);
-    renderer->AddLight(auxiliaryLight);
+    //renderer->AddLight(headlight);
+    //renderer->AddLight(auxiliaryLight);
 
-    widget->renderWindow()->AddRenderer(renderer);
+    //widget->renderWindow()->AddRenderer(renderer);
+
+    // camera position
+    viewpointSaved       = false;
+    viewFromDirection    = MV_VIEW_FROM_POSITIVE_Z;
+    doResetViewpoint     = false;
 
     // bitmap exporting
     bitmapResolutionOption = ResolutionType::rtScreen;
@@ -56,16 +69,25 @@ MvView::MvView(QObject *parent)
 
 MvView::~MvView()
 {
-    renderer->SetRenderWindow(nullptr);
-    renderer->RemoveLight(headlight);
-    renderer->RemoveLight(auxiliaryLight);
+    //renderer->SetRenderWindow(nullptr);
+    //renderer->RemoveLight(headlight);
+    //renderer->RemoveLight(auxiliaryLight);
 
-    renderer->Delete();
-    headlight->Delete();
-    auxiliaryLight->Delete();
+    //renderer->Delete();
+    //headlight->Delete();
+    //auxiliaryLight->Delete();
 
-    delete widget;
+    ///delete widget;
 }
+
+//#if 1 // use vtkViewport
+////
+//vtkWindow* MvView::GetVTKWindow()
+//{
+//    return widget->renderWindow();
+//}
+//
+//#endif
 
 /////////////////////////////////////////////////////////////////////////////
 // MvView diagnostics
@@ -94,75 +116,75 @@ QVTKOpenGLNativeWidget* MvView::mainWidget()
     return widget;
 }
 
-void MvView::addActor(vtkProp* p)
-{
-    this->renderer->AddActor(p);
-}
+//void MvView::addActor(vtkProp* p)
+//{
+//    this->renderer->AddActor(p);
+//}
+//
+//void MvView::addViewProp(vtkProp* p)
+//{
+//    this->renderer->AddViewProp(p);
+//}
 
-void MvView::addViewProp(vtkProp* p)
-{
-    this->renderer->AddViewProp(p);
-}
-
-void MvView::applyViewSettings(mvGUISettings* gui)
-{
-    /*
-    vtkCamera* camera = m_Renderer->GetActiveCamera();
-    camera->SetPosition(gui->cameraPosition);
-    camera->SetFocalPoint(gui->focalPoint);
-    camera->SetViewUp(gui->viewUp);
-    camera->OrthogonalizeViewUp();
-    camera->SetParallelProjection(gui->parallelProjection);
-    camera->SetParallelScale(gui->parallelScale);
-    PlaceHeadlightWithCamera();
-    SetHeadlightIntensity(gui->headlightIntensity);
-    // m_Headlight->SetIntensity(gui->headlightIntensity);
-    // m_AuxiliaryLight->SetIntensity(gui->auxiliaryLightIntensity);
-    SetAuxiliaryLightIntensity(gui->auxiliaryLightIntensity);
-    m_AuxiliaryLight->SetPosition(gui->auxiliaryLightDirection);
-    SwitchOnHeadlight(gui->headlightOn);
-    SwitchOnAuxiliaryLight(gui->auxiliaryLightOn);
-    m_Renderer->ResetCameraClippingRange();
-    if (gui->customBackground)
-    {
-        m_Renderer->SetBackground(gui->background);
-    }
-    else
-    {
-        m_Renderer->SetBackground(1, 1, 1);
-    }
-    */
-
-    //{{
-    vtkCamera* camera = this->renderer->GetActiveCamera();
-    camera->SetPosition(gui->cameraPosition);
-    camera->SetFocalPoint(gui->focalPoint);
-    camera->SetViewUp(gui->viewUp);
-    camera->OrthogonalizeViewUp();
-    camera->SetParallelProjection(gui->parallelProjection);
-    camera->SetParallelScale(gui->parallelScale);
-    PlaceHeadlightWithCamera();
-    //SetHeadlightIntensity(gui->headlightIntensity);
-    //// m_Headlight->SetIntensity(gui->headlightIntensity);
-    //// m_AuxiliaryLight->SetIntensity(gui->auxiliaryLightIntensity);
-    //SetAuxiliaryLightIntensity(gui->auxiliaryLightIntensity);
-    //m_AuxiliaryLight->SetPosition(gui->auxiliaryLightDirection);
-    //SwitchOnHeadlight(gui->headlightOn);
-    //SwitchOnAuxiliaryLight(gui->auxiliaryLightOn);
-    this->renderer->ResetCameraClippingRange();
-    if (gui->customBackground)
-    {
-        this->renderer->SetBackground(gui->background);
-    }
-    else
-    {
-        this->renderer->SetBackground(1, 1, 1);
-    }
-    //}}
-
-    ////this->renderer->ResetCamera();
-    this->mainWidget()->renderWindow()->Render();
-}
+//void MvView::applyViewSettings(mvGUISettings* gui)
+//{
+//    /*
+//    vtkCamera* camera = m_Renderer->GetActiveCamera();
+//    camera->SetPosition(gui->cameraPosition);
+//    camera->SetFocalPoint(gui->focalPoint);
+//    camera->SetViewUp(gui->viewUp);
+//    camera->OrthogonalizeViewUp();
+//    camera->SetParallelProjection(gui->parallelProjection);
+//    camera->SetParallelScale(gui->parallelScale);
+//    PlaceHeadlightWithCamera();
+//    SetHeadlightIntensity(gui->headlightIntensity);
+//    // m_Headlight->SetIntensity(gui->headlightIntensity);
+//    // m_AuxiliaryLight->SetIntensity(gui->auxiliaryLightIntensity);
+//    SetAuxiliaryLightIntensity(gui->auxiliaryLightIntensity);
+//    m_AuxiliaryLight->SetPosition(gui->auxiliaryLightDirection);
+//    SwitchOnHeadlight(gui->headlightOn);
+//    SwitchOnAuxiliaryLight(gui->auxiliaryLightOn);
+//    m_Renderer->ResetCameraClippingRange();
+//    if (gui->customBackground)
+//    {
+//        m_Renderer->SetBackground(gui->background);
+//    }
+//    else
+//    {
+//        m_Renderer->SetBackground(1, 1, 1);
+//    }
+//    */
+//
+//    //{{
+//    vtkCamera* camera = this->renderer->GetActiveCamera();
+//    camera->SetPosition(gui->cameraPosition);
+//    camera->SetFocalPoint(gui->focalPoint);
+//    camera->SetViewUp(gui->viewUp);
+//    camera->OrthogonalizeViewUp();
+//    camera->SetParallelProjection(gui->parallelProjection);
+//    camera->SetParallelScale(gui->parallelScale);
+//    PlaceHeadlightWithCamera();
+//    //SetHeadlightIntensity(gui->headlightIntensity);
+//    //// m_Headlight->SetIntensity(gui->headlightIntensity);
+//    //// m_AuxiliaryLight->SetIntensity(gui->auxiliaryLightIntensity);
+//    //SetAuxiliaryLightIntensity(gui->auxiliaryLightIntensity);
+//    //m_AuxiliaryLight->SetPosition(gui->auxiliaryLightDirection);
+//    //SwitchOnHeadlight(gui->headlightOn);
+//    //SwitchOnAuxiliaryLight(gui->auxiliaryLightOn);
+//    this->renderer->ResetCameraClippingRange();
+//    if (gui->customBackground)
+//    {
+//        this->renderer->SetBackground(gui->background);
+//    }
+//    else
+//    {
+//        this->renderer->SetBackground(1, 1, 1);
+//    }
+//    //}}
+//
+//    ////this->renderer->ResetCamera();
+//    this->mainWidget()->renderWindow()->Render();
+//}
 
 void MvView::onUpdate(QAbstractView* sender, QObject* hint)
 {
@@ -201,8 +223,27 @@ void MvView::onUpdate(QAbstractView* sender, QObject* hint)
     //    QGuiApplication::restoreOverrideCursor();
     //}
 
+    //{{ added for File->New
+    this->renderer->GetViewProps()->RemoveAllItems();
+    vtkSmartPointer<vtkPropCollection> props = GetDocument()->propCollection();
+    props->InitTraversal();
+    for (int i = 0; i < props->GetNumberOfItems(); i++)
+    {
+        this->renderer->AddViewProp(props->GetNextProp());
+    }
+    if (!this->GetDocument()->isAnimating())
+    {
+        QGuiApplication::setOverrideCursor(Qt::WaitCursor);
+    }
+    this->renderer->ResetCameraClippingRange();
+    if (!GetDocument()->isAnimating())
+    {
+        QGuiApplication::restoreOverrideCursor();
+    }
+    //}} added for File->New
+
     //{{
-    renderer->ResetCameraClippingRange();
+    //renderer->ResetCamera();
     //}}
 
     widget->renderWindow()->Render();
@@ -230,51 +271,29 @@ void MvView::resetExportImageParameters()
 }
 
 
-void MvView::getViewSettings(mvGUISettings* gui)
-{
-    /* void CMvView::GetViewSettings(mvGUISettings *gui)
-    * 
-    m_Renderer->GetBackground(gui->background);
-    m_AuxiliaryLight->GetPosition(gui->auxiliaryLightDirection);
-    vtkCamera* camera = m_Renderer->GetActiveCamera();
-    camera->GetPosition(gui->cameraPosition);
-    camera->GetFocalPoint(gui->focalPoint);
-    camera->GetViewUp(gui->viewUp);
-    gui->parallelProjection = camera->GetParallelProjection();
-    gui->parallelScale      = camera->GetParallelScale();
-    */
-    this->renderer->GetBackground(gui->background);
-    this->auxiliaryLight->GetPosition(gui->auxiliaryLightDirection);
-    vtkCamera* camera = this->renderer->GetActiveCamera();
-    camera->GetPosition(gui->cameraPosition);
-    camera->GetFocalPoint(gui->focalPoint);
-    camera->GetViewUp(gui->viewUp);
-    gui->parallelProjection = camera->GetParallelProjection();
-    gui->parallelScale      = camera->GetParallelScale();
-}
 
 /////////////////////////////////////////////////////////////////////////////
 // Protected methods
 
-void MvView::PlaceHeadlightWithCamera()
-{
-    /*
-    vtkCamera*          camera = m_Renderer->GetActiveCamera();
-    vtkLightCollection* lights = m_Renderer->GetLights();
-    lights->InitTraversal();
-    vtkLight* light = lights->GetNextItem();
-    light->SetPosition(camera->GetPosition());
-    light->SetFocalPoint(camera->GetFocalPoint());
-    */
-
-    vtkCamera*          camera = this->renderer->GetActiveCamera();
-    vtkLightCollection* lights = this->renderer->GetLights();
-    lights->InitTraversal();
-    vtkLight* light = lights->GetNextItem();
-    assert(light == this->headlight);
-    light->SetPosition(camera->GetPosition());
-    light->SetFocalPoint(camera->GetFocalPoint());
-}
+//void MvView::PlaceHeadlightWithCamera()
+//{
+//    /*
+//    vtkCamera*          camera = m_Renderer->GetActiveCamera();
+//    vtkLightCollection* lights = m_Renderer->GetLights();
+//    lights->InitTraversal();
+//    vtkLight* light = lights->GetNextItem();
+//    light->SetPosition(camera->GetPosition());
+//    light->SetFocalPoint(camera->GetFocalPoint());
+//    */
+//
+//    vtkCamera*          camera = this->renderer->GetActiveCamera();
+//    vtkLightCollection* lights = this->renderer->GetLights();
+//    lights->InitTraversal();
+//    vtkLight* light = lights->GetNextItem();
+//    assert(light == this->headlight);
+//    light->SetPosition(camera->GetPosition());
+//    light->SetFocalPoint(camera->GetFocalPoint());
+//}
 
 void MvView::WriteBmp(const char* filename, bool useScreenResolution)
 {
@@ -584,3 +603,186 @@ void MvView::onFileExportAnimation(QWidget* parent)
     }
     QApplication::restoreOverrideCursor();
 }
+
+void MvView::onUpdateViewFrom(QAction* action)
+{
+    action->setEnabled(renderer->VisibleActorCount() > 0 &&
+                       !GetDocument()->isAnimating());
+}
+
+
+void MvView::onViewFromNextDirection()
+{
+    switch (viewFromDirection)
+    {
+    case MV_VIEW_FROM_NEGATIVE_X:
+        onViewFromNy();
+        return;
+    case MV_VIEW_FROM_NEGATIVE_Y:
+        onViewFromPx();
+        return;
+    case MV_VIEW_FROM_POSITIVE_X:
+        onViewFromPy();
+        return;
+    case MV_VIEW_FROM_POSITIVE_Y:
+        onViewFromNz();
+        return;
+    case MV_VIEW_FROM_NEGATIVE_Z:
+        onViewFromPz();
+        return;
+    case MV_VIEW_FROM_POSITIVE_Z:
+        onViewFromNx();
+        return;
+    default:
+        assert(false);
+    }
+}
+
+void MvView::invalidate(bool erase /* = true */)
+{
+    //widget->update();
+    //widget->repaint();
+    widget->renderWindow()->Render();
+}
+
+void MvView::onUpdateViewFromNextDirection(QAction* action)
+{
+    action->setEnabled(renderer->VisibleActorCount() > 0 &&
+                       !GetDocument()->isAnimating());
+}
+
+void MvView::onViewFromPx()
+{
+    vtkCamera* camera = renderer->GetActiveCamera();
+    double*    pos    = camera->GetPosition();
+    double*    fp     = camera->GetFocalPoint();
+    double     dist   = sqrt((pos[0] - fp[0]) * (pos[0] - fp[0]) +
+                       (pos[1] - fp[1]) * (pos[1] - fp[1]) + (pos[2] - fp[2]) * (pos[2] - fp[2]));
+    camera->SetPosition(fp[0] + dist, fp[1], fp[2]);
+    camera->SetViewUp(0, 0, 1);
+    PlaceHeadlightWithCamera();
+    renderer->ResetCameraClippingRange();
+    viewFromDirection = MV_VIEW_FROM_POSITIVE_X;
+    invalidate();
+}
+
+void MvView::onViewFromNx()
+{
+    vtkCamera* camera = renderer->GetActiveCamera();
+    double*    pos    = camera->GetPosition();
+    double*    fp     = camera->GetFocalPoint();
+    double     dist   = sqrt((pos[0] - fp[0]) * (pos[0] - fp[0]) +
+                       (pos[1] - fp[1]) * (pos[1] - fp[1]) + (pos[2] - fp[2]) * (pos[2] - fp[2]));
+    camera->SetPosition(fp[0] - dist, fp[1], fp[2]);
+    camera->SetViewUp(0, 0, 1);
+    PlaceHeadlightWithCamera();
+    renderer->ResetCameraClippingRange();
+    viewFromDirection = MV_VIEW_FROM_NEGATIVE_X;
+    invalidate();
+}
+
+void MvView::onViewFromPy()
+{
+    vtkCamera* camera = renderer->GetActiveCamera();
+    double*    pos    = camera->GetPosition();
+    double*    fp     = camera->GetFocalPoint();
+    double     dist   = sqrt((pos[0] - fp[0]) * (pos[0] - fp[0]) +
+                       (pos[1] - fp[1]) * (pos[1] - fp[1]) + (pos[2] - fp[2]) * (pos[2] - fp[2]));
+    camera->SetPosition(fp[0], fp[1] + dist, fp[2]);
+    camera->SetViewUp(0, 0, 1);
+    PlaceHeadlightWithCamera();
+    renderer->ResetCameraClippingRange();
+    viewFromDirection = MV_VIEW_FROM_POSITIVE_Y;
+    invalidate();
+}
+
+void MvView::onViewFromNy()
+{
+    vtkCamera* camera = renderer->GetActiveCamera();
+    double*    pos    = camera->GetPosition();
+    double*    fp     = camera->GetFocalPoint();
+    double     dist   = sqrt((pos[0] - fp[0]) * (pos[0] - fp[0]) +
+                       (pos[1] - fp[1]) * (pos[1] - fp[1]) + (pos[2] - fp[2]) * (pos[2] - fp[2]));
+    camera->SetPosition(fp[0], fp[1] - dist, fp[2]);
+    camera->SetViewUp(0, 0, 1);
+    PlaceHeadlightWithCamera();
+    renderer->ResetCameraClippingRange();
+    viewFromDirection = MV_VIEW_FROM_NEGATIVE_Y;
+    invalidate();
+}
+
+void MvView::onViewFromPz()
+{
+    vtkCamera* camera = renderer->GetActiveCamera();
+    double*    pos    = camera->GetPosition();
+    double*    fp     = camera->GetFocalPoint();
+    double     dist   = sqrt((pos[0] - fp[0]) * (pos[0] - fp[0]) +
+                       (pos[1] - fp[1]) * (pos[1] - fp[1]) + (pos[2] - fp[2]) * (pos[2] - fp[2]));
+    camera->SetPosition(fp[0], fp[1], fp[2] + dist);
+    camera->SetViewUp(0, 1, 0);
+    PlaceHeadlightWithCamera();
+    renderer->ResetCameraClippingRange();
+    viewFromDirection = MV_VIEW_FROM_POSITIVE_Z;
+    invalidate();
+}
+
+
+void MvView::onViewFromNz()
+{
+    vtkCamera* camera = renderer->GetActiveCamera();
+    double*    pos    = camera->GetPosition();
+    double*    fp     = camera->GetFocalPoint();
+    double     dist   = sqrt((pos[0] - fp[0]) * (pos[0] - fp[0]) +
+                       (pos[1] - fp[1]) * (pos[1] - fp[1]) + (pos[2] - fp[2]) * (pos[2] - fp[2]));
+    camera->SetPosition(fp[0], fp[1], fp[2] - dist);
+    camera->SetViewUp(0, -1, 0);
+    PlaceHeadlightWithCamera();
+    renderer->ResetCameraClippingRange();
+    viewFromDirection = MV_VIEW_FROM_NEGATIVE_Z;
+    invalidate();
+}
+
+void MvView::discardSavedViewpoint()
+{
+    ////doResetViewpoint = false; @todo check
+    viewpointSaved = false;
+}
+
+void MvView::setProjectionToPerspective()
+{
+    renderer->GetActiveCamera()->ParallelProjectionOff();
+}
+
+void MvView::setProjectionToParallel()
+{
+    renderer->GetActiveCamera()->ParallelProjectionOn();
+}
+
+void MvView::onSaveViewpoint()
+{
+    vtkCamera* camera     = renderer->GetActiveCamera();
+    double*    position   = camera->GetPosition();
+    double*    focalPoint = camera->GetFocalPoint();
+    double*    viewUp     = camera->GetViewUp();
+
+    for (int i = 0; i < 3; i++)
+    {
+        savedCameraPosition[i] = position[i];
+        savedFocalPoint[i]     = focalPoint[i];
+        savedViewUp[i]         = viewUp[i];
+    }
+    viewpointSaved = true;
+}
+
+void MvView::onRecallViewpoint()
+{
+    vtkCamera* camera = renderer->GetActiveCamera();
+    camera->SetPosition(savedCameraPosition);
+    camera->SetFocalPoint(savedFocalPoint);
+    camera->SetViewUp(savedViewUp);
+    camera->OrthogonalizeViewUp();
+    PlaceHeadlightWithCamera();
+    renderer->ResetCameraClippingRange();
+    invalidate();
+}
+

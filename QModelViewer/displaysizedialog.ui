@@ -13,6 +13,9 @@
   <property name="windowTitle">
    <string>Display Size</string>
   </property>
+  <property name="sizeGripEnabled">
+   <bool>true</bool>
+  </property>
   <layout class="QFormLayout" name="formLayout">
    <property name="horizontalSpacing">
     <number>9</number>

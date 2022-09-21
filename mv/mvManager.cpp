@@ -84,6 +84,9 @@ constexpr auto MAX_PATH = 4096;
 #endif
 
 mvManager::mvManager()
+//{{
+    : m_ColorBarDataSource{0}
+//}}
 {
     // initial values
     m_ActiveDataType             = 0;

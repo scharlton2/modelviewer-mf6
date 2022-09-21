@@ -1,18 +1,71 @@
 #ifndef QABSTRACTVIEW_H
 #define QABSTRACTVIEW_H
 
+
+#include <QPointer>
 #include <QObject>
 
+//#include <vtkViewport.h>
+
+class mvGUISettings;
+
+class vtkLight;
+class vtkProp;
+class vtkRenderer;
+class QVTKOpenGLNativeWidget; //    vtkMFCWindow;
+class QAction;
+
+
+// class QAbstractView : public QObject, public vtkViewport
+// or
+// class QAbstractView : public QObject, public vtkRenderer
 class QAbstractView : public QObject
 {
     Q_OBJECT
 public:
     explicit QAbstractView(QObject *parent = nullptr);
 
+    ~QAbstractView() override;
+
     virtual void onUpdate(QAbstractView* pSender, QObject* pHint);
+
+    void         getViewSettings(mvGUISettings* gui);
+    void         applyViewSettings(mvGUISettings* gui);
+
+    void         resetViewPoint();
+
+    void         addActor(vtkProp* p);
+    void         addViewProp(vtkProp* p);
+
+    void         removeAllViewProps();
+
+    void         setProjectionToPerspective();
+    void         setProjectionToParallel();
+
+    void         switchOnHeadlight(bool switchOn);
+    void         setHeadlightIntensity(double intensity);
+    void         switchOnAuxiliaryLight(bool switchOn);
+    void         setAuxiliaryLightIntensity(double intensity);
+    void         setAuxiliaryLightPosition(double x, double y, double z);
+
+    void         resetCameraClippingRange();
 
 signals:
 
+protected:
+    int                              headlightOn;
+    int                              auxiliaryLightOn;
+    double                           headlightIntensity;
+    double                           auxiliaryLightIntensity;
+
+
+    void         PlaceHeadlightWithCamera();
+
+    vtkRenderer* renderer;
+    vtkLight*    headlight;
+    vtkLight*    auxiliaryLight;
+
+    QPointer<QVTKOpenGLNativeWidget> widget;
 };
 
 #endif // QABSTRACTVIEW_H

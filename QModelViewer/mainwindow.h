@@ -24,7 +24,8 @@ public:
     ~MainWindow();
 
 private slots:
-    void newFile();
+    //void newFile();
+    void onFileNew();
     void onFileOpen();        // application MainWindow::open
     void closeFile();
     //bool save();
@@ -37,6 +38,8 @@ private slots:
 
     void updateFileActions();
     void updateShowActions();
+    void updateActionActions();
+    void updateToolboxActions();
 
     //void about();
     //void documentWasModified();
@@ -58,30 +61,41 @@ private slots:
     void onShowTime();
     void onShowColorBar();
 
-    bool onSaveDocument(const char *lpszPathName);
-
     void setSize();
+
+    void onViewFromPx();
+    void onViewFromNx();
+    void onViewFromPy();
+    void onViewFromNy();
+    void onViewFromPz();
+    void onViewFromNz();
+    void onViewFromNextDirection();
+
+    // Toolbox
+    void onToolboxGeometry();
 
 protected:
     void closeEvent(QCloseEvent *) override;
 
 private:
-    bool            isModified() const;
+    //bool            isModified() const;
     bool            isAnimating() const;
 
 private:
+    friend class MvDoc;
+
     void            createActions();
     void            createStatusBar();
     void            createMenus();
 
-    void            updateActions();
+    //void            updateActions();
     void            updateAllViews();
     void            updateStatusBar();
 
     void            readSettings();
     void            writeSettings();
     bool            maybeSave();
-    bool            saveFile(const QString &fileName);           // bool onSaveDocument(const char *lpszPathName);
+    bool            saveFile(const QString &fileName);
     void            setCurrentFile(const QString &fileName);
     QString         strippedName(const QString &fullFileName);
 
@@ -103,7 +117,7 @@ private:
 
 
     //QPlainTextEdit *textEdit;
-    QString         curFile;
+    //QString         curFile;
 
     Ui::MainWindow *ui;
 
@@ -147,6 +161,24 @@ private:
 
     // Action
     QAction *       setSizeAction;
+
+    QAction *       viewFromPx;
+    QAction *       viewFromNx;
+    QAction *       viewFromPy;
+    QAction *       viewFromNy;
+    QAction *       viewFromPz;
+    QAction *       viewFromNz;
+    QAction *       viewFromNextDirection;
+
+    QAction *       setProjectionToPerspective;
+    QAction *       setProjectionToParallel;
+
+    QAction *       saveViewpoint;
+    QAction *       recallViewpoint;
+
+
+    // Toolbox
+    QAction *       geometryAction;
 };
 
 #endif // MAINWINDOW_H

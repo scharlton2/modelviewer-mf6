@@ -15,15 +15,17 @@ class mvGUISettings;
 class mvManager;
 //class mvView;
 class QAbstractView;
+class QAction;
 class QObject;
 class QWidget;
 class QMainWindow;
+class GeometryDialog;
 
 class vtkPropCollection;
 
 enum class ProjectionType {
     ptPerspective,
-    ptProjection
+    ptParallel
 };
 
 enum class AnimationType {
@@ -61,6 +63,11 @@ public:
     void                               updateAnimationPosition();
 
 
+    // File menu
+    void                               onFileNew();
+    void                               onFileOpen();
+
+
 
     // Time Label
     void           SetTimeLabelFontSize(int size, bool update = true);
@@ -94,6 +101,7 @@ public:
 
     
     bool                               modified() const;
+    bool                               isModified() const;
     void                               setModified(bool modifed);
 
     bool                               isAnimating() const;
@@ -108,6 +116,20 @@ public:
     QString                            currentFile();
 
     QDir                               defaultDir() const;
+
+    // Toolbox->Geometry
+    void                               onToolboxGeometry();
+    void                               onUpdateToolboxGeometry(QAction* action);
+
+    // Geometry
+    void                               setScale(double xScale, double yScale, double zScale);
+    void                               setAxesRepresentationToLine();
+    void                               setAxesRepresentationToTube();
+    void                               setAxesProperties(double xPos, double yPos, double zPos,
+                                                         double axesSize, double tubeDiameter);
+    void                               setBoundingBoxColor(double red, double green, double blue);
+    //void                               ApplySubgrid(int col_min, int col_max, int row_min, int row_max, int lay_min, int lay_max);
+    //void                               SubgridOff();
 
 
 public slots:
@@ -187,7 +209,32 @@ private:
     CModelFeaturesDlg* m_ModelFeaturesDlg;
     COverlayDlg*       m_OverlayDlg;
 ***/
+    GeometryDialog*           geometryDialog;
 
+    // Protected methods;
+    //void                      LoadPreviousAppSettings();
+    //void                      SaveCurrentAppSettings();
+    void                      updateToolDialogs(mvGUISettings* gui);
+    //void                      UpdateSolidDlg();
+    //void                      UpdateIsosurfaceDlg();
+    //void                      UpdateLightingDlg(mvGUISettings* gui);
+    void                      updateGeometryDialog();
+    //void                      UpdateGridDlg();
+    //void                      UpdateVectorDlg();
+    //void                      UpdateCropDlg(mvGUISettings* gui);
+    //void                      UpdateDataDlg();
+    //void                      UpdateModelFeaturesDlg();
+    //void                      UpdateAnimationDlg(mvGUISettings* gui);
+    //void                      UpdateOverlayDlg();
+    //void                      UpdateAnimation();
+    //void                      UpdateAnimationPosition();
+
+
+    void                      onParallelProjection();
+    void                      onUpdateParallelProjection(QAction* action);
+    void                      onPerspectiveProjection();
+    void                      onUpdatePerspectiveProjection(QAction* action);
 };
+
 
 #endif // MVDOC_H
