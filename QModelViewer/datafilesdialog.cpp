@@ -4,7 +4,9 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include <direct.h>
+///#include <direct.h>
+#include "mvUtil.h"
+
 
 #include "modflow6datafilesdialog.h"
 
@@ -19,7 +21,7 @@
 
 char *DataFilesDialog::GetDataFileList(char *model, QWidget *parent /* = nullptr */)
 {
-    if (stricmp(model, Modflow6DataSource::GetNameStatic()) == 0)
+    if (mvUtil::stricmp(model, Modflow6DataSource::GetNameStatic()) == 0)
     {
         return GetModflow6DataFiles(parent);
     }
