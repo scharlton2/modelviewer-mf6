@@ -5231,7 +5231,7 @@ void mvManager::Deserialize(const char *fileName, mvGUISettings *gui, std::strin
                 errorMsg = oss.str();
                 return;
             }
-            strcat(dataFileList, QDir::toNativeSeparators(fullPath).toStdString().c_str());
+            strcat(dataFileList, mvUtil::toNativeSeparators(fullPath).toStdString().c_str());
 #else
             strcpy(szDest, dirname.c_str());
             mvUtil::PathAppendA(szDest, buffer);

@@ -8,6 +8,7 @@
 #include <string.h>
 
 #if defined(QT_GUI_LIB)
+#include <QDebug>
 #include <QDir>
 #include <QString>
 #endif
@@ -419,7 +420,7 @@ const char *Modflow6DataSource::ExtractModflowOutputFileNames(char *nameFile,
 #if defined(QT_GUI_LIB)
                 QString gf(aline + 5);
                 gf = gf.trimmed();
-                gf = QDir::toNativeSeparators(gf);
+                gf = mvUtil::toNativeSeparators(gf);
                 strcpy(gridFile, gf.toStdString().c_str());
 #else
                 strcpy(gridFile, aline + 5);
@@ -434,7 +435,7 @@ const char *Modflow6DataSource::ExtractModflowOutputFileNames(char *nameFile,
 #if defined(QT_GUI_LIB)
                 QString gf(aline + 6);
                 gf = gf.trimmed();
-                gf = QDir::toNativeSeparators(gf);
+                gf = mvUtil::toNativeSeparators(gf);
                 strcpy(gridFile, gf.toStdString().c_str());
 #else
                 strcpy(gridFile, aline + 6);
@@ -449,7 +450,7 @@ const char *Modflow6DataSource::ExtractModflowOutputFileNames(char *nameFile,
 #if defined(QT_GUI_LIB)
                 QString gf(aline + 6);
                 gf = gf.trimmed();
-                gf = QDir::toNativeSeparators(gf);
+                gf = mvUtil::toNativeSeparators(gf);
                 strcpy(gridFile, gf.toStdString().c_str());
 #else
                 strcpy(gridFile, aline + 5);
@@ -464,7 +465,7 @@ const char *Modflow6DataSource::ExtractModflowOutputFileNames(char *nameFile,
 #if defined(QT_GUI_LIB)
                 QString oc(aline + 4);
                 oc = oc.trimmed();
-                oc = QDir::toNativeSeparators(oc);
+                oc = mvUtil::toNativeSeparators(oc);
                 strcpy(ocFile, oc.toStdString().c_str());
 #else
                 strcpy(ocFile, aline + 4);

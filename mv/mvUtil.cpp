@@ -534,3 +534,48 @@ char *mvUtil::strlwr(char *str)
     return str;
 #endif
 }
+
+#if defined(QT_GUI_LIB)
+//
+// modified from QDir::toNativeSeparators
+//
+QString mvUtil::toNativeSeparators(const QString &pathName)
+{
+#if defined(Q_OS_WIN)
+    int i = pathName.indexOf(QLatin1Char('/'));
+    if (i != -1)
+    {
+        QString      n(pathName);
+
+        QChar *const data = n.data();
+        data[i++]         = QLatin1Char('\\');
+
+        for (; i < n.length(); ++i)
+        {
+            if (data[i] == QLatin1Char('/'))
+                data[i] = QLatin1Char('\\');
+        }
+
+        return n;
+    }
+#else
+    int i = pathName.indexOf(QLatin1Char('\\'));
+    if (i != -1)
+    {
+        QString      n(pathName);
+
+        QChar *const data = n.data();
+        data[i++]         = QLatin1Char('\\');
+
+        for (; i < n.length(); ++i)
+        {
+            if (data[i] == QLatin1Char('\\'))
+                data[i] = QLatin1Char('/');
+        }
+
+        return n;
+    }
+#endif
+    return pathName;
+}
+#endif

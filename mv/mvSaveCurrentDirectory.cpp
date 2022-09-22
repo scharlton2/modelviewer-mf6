@@ -1,5 +1,6 @@
 
 #include "mvSaveCurrentDirectory.h"
+#include "mvUtil.h"
 
 #include <QDir>
 #include <QFileInfo>
@@ -174,10 +175,10 @@ std::string mvSaveCurrentDirectory::GetDirName(const char* fullPath)
     QString   absolutePath = fileInfo.canonicalPath();
 
 #if defined(_MSC_VER)
-    assert((QDir::toNativeSeparators(absolutePath).toStdString() + "\\").compare(szPath) == 0);
+    assert((mvUtil::toNativeSeparators(absolutePath).toStdString() + "\\").compare(szPath) == 0);
 #endif
     assert(QDir(absolutePath).exists());
-    return QDir::toNativeSeparators(absolutePath).toStdString();
+    return mvUtil::toNativeSeparators(absolutePath).toStdString();
 
 #endif
 }
@@ -222,7 +223,7 @@ std::string mvSaveCurrentDirectory::GetRelativePath(const char* pszFrom, const c
 
     QDir        dir(GetDirName(pszFrom).c_str());
     QString     s      = dir.relativeFilePath(pszTo);
-    QString     ns     = QDir::toNativeSeparators(s);
+    QString     ns     = mvUtil::toNativeSeparators(s);
     std::string native = ns.toStdString();
 
     return native;
@@ -285,7 +286,7 @@ std::string mvSaveCurrentDirectory::GetFullPath(const char* szMore, const char* 
         QFileInfo fileInfo(abs);
         abs = fileInfo.canonicalFilePath();
 
-        abs = QDir::toNativeSeparators(abs);
+        abs = mvUtil::toNativeSeparators(abs);
 
 #if defined(_MSC_VER)
         assert(retval.compare(abs.toStdString()) == 0);

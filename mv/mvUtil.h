@@ -72,6 +72,10 @@ public:
     static char * NextNonSpaceChar(char *str, int len);
 
     static void   Wavelength2RGBA(double wavelength, double *RGB);
+
+#if defined(QT_GUI_LIB)
+    static QString toNativeSeparators(const QString &pathName);
+#endif
 };
 
 #endif
