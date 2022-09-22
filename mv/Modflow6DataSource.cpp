@@ -7,6 +7,11 @@
 #include <stdlib.h>
 #include <string.h>
 
+#if defined(QT_GUI_LIB)
+#include <QDir>
+#include <QString>
+#endif
+
 // This must be below vtkStandardNewMacro
 #if defined(_MSC_VER) && defined(_DEBUG) && defined(MV_DEBUG_MEMORY_LEAKS)
 #include <afx.h>
@@ -386,7 +391,7 @@ const char *Modflow6DataSource::ExtractModflowOutputFileNames(char *nameFile,
                                                               char *gridFile, char *headFile, char *budgetFile)
 {
     char  aline[300];
-    char  ocFile[256];
+    char  ocFile[300];
     char *p;
     headFile[0]   = '\0';
     budgetFile[0] = '\0';
@@ -411,32 +416,60 @@ const char *Modflow6DataSource::ExtractModflowOutputFileNames(char *nameFile,
         {
             if (!mvUtil::strnicmp(aline, "dis6 ", 5))
             {
+#if defined(QT_GUI_LIB)
+                QString gf(aline + 5);
+                gf = gf.trimmed();
+                gf = QDir::toNativeSeparators(gf);
+                strcpy(gridFile, gf.toStdString().c_str());
+#else
                 strcpy(gridFile, aline + 5);
                 mvUtil::TrimLeft(gridFile);
+#endif
                 ExtractFileName(gridFile);
                 strcat(gridFile, ".grb");
                 m_GridType = GridType::MV_STRUCTURED_GRID;
             }
             else if (!mvUtil::strnicmp(aline, "disv6 ", 6))
             {
+#if defined(QT_GUI_LIB)
+                QString gf(aline + 6);
+                gf = gf.trimmed();
+                gf = QDir::toNativeSeparators(gf);
+                strcpy(gridFile, gf.toStdString().c_str());
+#else
                 strcpy(gridFile, aline + 6);
                 mvUtil::TrimLeft(gridFile);
+#endif
                 ExtractFileName(gridFile);
                 strcat(gridFile, ".grb");
                 m_GridType = GridType::MV_LAYERED_GRID;
             }
             else if (!mvUtil::strnicmp(aline, "disu6 ", 6))
             {
+#if defined(QT_GUI_LIB)
+                QString gf(aline + 6);
+                gf = gf.trimmed();
+                gf = QDir::toNativeSeparators(gf);
+                strcpy(gridFile, gf.toStdString().c_str());
+#else
                 strcpy(gridFile, aline + 5);
                 mvUtil::TrimLeft(gridFile);
-                strcat(gridFile, ".grb");
+#endif
+                strcat(gridFile, ".grb");                       // @todo check this (seems to me that the strcat should be after the ExtractFileName call
                 ExtractFileName(gridFile);
                 m_GridType = GridType::MV_UNSTRUCTURED_GRID;
             }
             if (!mvUtil::strnicmp(aline, "oc6 ", 4))
             {
+#if defined(QT_GUI_LIB)
+                QString oc(aline + 4);
+                oc = oc.trimmed();
+                oc = QDir::toNativeSeparators(oc);
+                strcpy(ocFile, oc.toStdString().c_str());
+#else
                 strcpy(ocFile, aline + 4);
                 mvUtil::TrimLeft(ocFile);
+#endif
                 ExtractFileName(ocFile);
             }
         }

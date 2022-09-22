@@ -6,9 +6,9 @@
 #include <QFileInfo>
 #include <QMessageBox>
 
-Modflow6DataFilesDialog::Modflow6DataFilesDialog(QWidget *parent) :
-    QDialog(parent),
-    ui(new Ui::Modflow6DataFilesDialog)
+Modflow6DataFilesDialog::Modflow6DataFilesDialog(QWidget *parent)
+    : QDialog(parent, Qt::WindowCloseButtonHint)
+    , ui(new Ui::Modflow6DataFilesDialog)
 {
     ui->setupUi(this);
 

@@ -59,6 +59,10 @@
 
 #include "mvDefine.h"
 
+#if defined(QT_GUI_LIB)
+#include <QDir>
+#endif
+
 #include <sstream>
 
 using std::log;
@@ -5214,9 +5218,24 @@ void mvManager::Deserialize(const char *fileName, mvGUISettings *gui, std::strin
         }
         if (strlen(buffer))
         {
+#if defined(QT_GUI_LIB)
+            QString dest(dirname.c_str());
+            dest = mvUtil::PathAppendA(dest, buffer);
+            QString fullPath = mvUtil::PathCanonicalizeA(dest);
+            if (!mvUtil::PathFileExistsA(fullPath))
+            {
+                delete hashTable;
+                delete[] dataFileList;
+                std::ostringstream oss;
+                oss << "Unable to open \"" << fullpath << "\".";
+                errorMsg = oss.str();
+                return;
+            }
+            strcat(dataFileList, QDir::toNativeSeparators(fullPath).toStdString().c_str());
+#else
             strcpy(szDest, dirname.c_str());
-            VERIFY(mvUtil::PathAppendA(szDest, buffer));
-            VERIFY(mvUtil::PathCanonicalizeA(fullpath, szDest));
+            mvUtil::PathAppendA(szDest, buffer);
+            mvUtil::PathCanonicalizeA(fullpath, szDest);
             if (!mvUtil::PathFileExistsA(fullpath))
             {
                 delete hashTable;
@@ -5227,6 +5246,7 @@ void mvManager::Deserialize(const char *fileName, mvGUISettings *gui, std::strin
                 return;
             }
             strcat(dataFileList, fullpath);
+#endif
         }
         else
         {

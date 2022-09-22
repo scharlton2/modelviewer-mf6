@@ -4,6 +4,10 @@
 #include "mvHeader.h"
 #include <fstream>
 
+#if defined(QT_GUI_LIB)
+#include <QString>
+#endif
+
 // class vtkObject;
 
 using std::ifstream;
@@ -37,11 +41,24 @@ public:
 
     static void   ToLowerCase(char *aString);
 
-    static int    PathAppendA(char *path, const char *more);
+#if defined(QT_GUI_LIB)
+    static QString PathAppendA(const QString &path, const QString &more);
+#else
+    static int     PathAppendA(char *path, const char *more);
+#endif
 
-    static int    PathCanonicalizeA(char *buf, const char *path);
 
-    static int    PathFileExistsA(const char *path);
+#if defined(QT_GUI_LIB)
+    static QString PathCanonicalizeA(const QString &path);
+#else
+    static int     PathCanonicalizeA(char *buf, const char *path);
+#endif
+
+#if defined(QT_GUI_LIB)
+    static bool PathFileExistsA(const QString &path);
+#else
+    static int     PathFileExistsA(const char *path);
+#endif
 
     static void   RemoveQuotes(char *sString);
 

@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Dialog</string>
+   <string>Modflow 6 Data Files</string>
   </property>
   <property name="sizeGripEnabled">
    <bool>true</bool>

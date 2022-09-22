@@ -3,6 +3,10 @@
 #include <string.h>
 #include <stdlib.h>
 
+#if defined(QT_GUI_LIB)
+#include <QDir>
+#endif
+
 // This must be below vtkStandardNewMacro
 #if defined(_MSC_VER) && defined(_DEBUG) && defined(MV_DEBUG_MEMORY_LEAKS)
 #include <afx.h>
@@ -11,9 +15,11 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
+#if !defined(QT_GUI_LIB)
 #if defined(_MSC_VER)
 // This must be below <afx.h>
 #include <shlwapi.h>
+#endif
 #endif
 
 void mvUtil::interp2d(double *x, double *y, double *z, double *dx, double *dy, double *zc,
@@ -461,6 +467,12 @@ int mvUtil::strnicmp(const char *a, const char *b, size_t n)
 #endif
 }
 
+#if defined(QT_GUI_LIB)
+QString mvUtil::PathAppendA(const QString &path, const QString &more)
+{
+    return QDir::cleanPath(path + QDir::separator() + more);
+}
+#else
 int mvUtil::PathAppendA(char *path, const char *more)
 {
 #if defined(_MSC_VER)
@@ -470,7 +482,15 @@ int mvUtil::PathAppendA(char *path, const char *more)
     return 0;
 #endif
 }
+#endif
 
+#if defined(QT_GUI_LIB)
+QString mvUtil::PathCanonicalizeA(const QString &path)
+{
+    QDir dir(path);
+    return dir.canonicalPath();
+}
+#else
 int mvUtil::PathCanonicalizeA(char *buf, const char *path)
 {
 #if defined(_MSC_VER)
@@ -480,7 +500,15 @@ int mvUtil::PathCanonicalizeA(char *buf, const char *path)
     return 0;
 #endif
 }
+#endif
 
+#if defined(QT_GUI_LIB)
+bool mvUtil::PathFileExistsA(const QString &path)
+{
+    QFileInfo info(path);
+    return info.exists() && info.isFile();
+}
+#else
 int mvUtil::PathFileExistsA(const char *path)
 {
 #if defined(_MSC_VER)
@@ -490,6 +518,7 @@ int mvUtil::PathFileExistsA(const char *path)
     return 0;
 #endif
 }
+#endif
 
 char *mvUtil::strlwr(char *str)
 {
