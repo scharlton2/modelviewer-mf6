@@ -565,7 +565,7 @@ QString mvUtil::toNativeSeparators(const QString &pathName)
         QString      n(pathName);
 
         QChar *const data = n.data();
-        data[i++]         = QLatin1Char('\\');
+        data[i++]         = QLatin1Char('/');
 
         for (; i < n.length(); ++i)
         {

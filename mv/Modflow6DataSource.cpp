@@ -482,6 +482,7 @@ const char *Modflow6DataSource::ExtractModflowOutputFileNames(char *nameFile,
     {
         return "Error: Unable to determine the oc file.";
     }
+    qDebug() << "attempting to open " << ocFile;
     in.open(ocFile, ios::in);
     if (!in.is_open())
     {
