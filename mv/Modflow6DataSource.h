@@ -10,35 +10,35 @@ class MV_EXPORT Modflow6DataSource : public mvDataSource
 {
 public:
     Modflow6DataSource();
-    virtual ~Modflow6DataSource();
+    ~Modflow6DataSource() override;
 
-    static const char * GetNameStatic() { return "Modflow 6"; }
-    const char *        GetName() override { return GetNameStatic(); }
-    virtual int         GetPrimaryScalarMode() { return MV_CELL_SCALARS; }
-    virtual GridType    GetGridType() { return m_GridType; }
+    static const char *GetNameStatic() { return "Modflow 6"; }
+    const char        *GetName() override { return GetNameStatic(); }
+    int                GetPrimaryScalarMode() override { return MV_CELL_SCALARS; }
+    GridType           GetGridType() override { return m_GridType; }
     //   virtual int AreAllCellsActive() { return 0; }
-    virtual const char *LoadData(char *dataFileList);
-    virtual void        AdvanceOneTimePoint() { SetTimePointTo(-1); }
-    virtual void        SetTimePointTo(int timePointIndex);
-    virtual void        SetScalarDataTypeTo(int dataTypeIndex) { /* Not used */ }
-    virtual int  GetModelFeatureDisplayMode() { return MV_DISPLAY_MODEL_FEATURES_AS_CELLS; }
-    virtual void GetDefaultModelFeatureColor(int i, double *rgba);
+    const char *LoadData(char *dataFileList) override;
+    void        AdvanceOneTimePoint() override { SetTimePointTo(-1); }
+    void        SetTimePointTo(int timePointIndex) override;
+    void        SetScalarDataTypeTo(int dataTypeIndex) override { /* Not used */ }
+    int  GetModelFeatureDisplayMode() override { return MV_DISPLAY_MODEL_FEATURES_AS_CELLS; }
+    void GetDefaultModelFeatureColor(int i, double *rgba) override;
 
-    virtual int  GetNumVTKPoints();
-    virtual int  GetNumVTKCells();
-    virtual int  GetNumModelCells();
+    int  GetNumVTKPoints() override;
+    int  GetNumVTKCells() override;
+    int  GetNumModelCells() override;
 
     double       GetXOrigin() const;
     double       GetYOrigin() const;
     double       GetAngRot() const;
 
-    virtual int  GetNumberOfCellLayers() { return m_NumberOfCellLayers; }
-    virtual int  GetNumberOfVTKCellsInLayer(int k);
+    int  GetNumberOfCellLayers() override { return m_NumberOfCellLayers; }
+    int  GetNumberOfVTKCellsInLayer(int k) override;
 
-    virtual int *GetConnectivityArray() { return m_ConnectivityArray; }
-    virtual int *GetStairsteppedGridConnectivity() { return m_StairsteppedGridConnectivity; }
-    virtual int *GetLayerConnectivity() { return m_LayerConnectivity; }
-    virtual int  GetStairsteppedGridCoordinatesSize() { return 3 * m_NumberOfVTKPointsForStairsteppedGrid; }
+    int *GetConnectivityArray() override { return m_ConnectivityArray; }
+    int *GetStairsteppedGridConnectivity() override { return m_StairsteppedGridConnectivity; }
+    int *GetLayerConnectivity() override { return m_LayerConnectivity; }
+    int  GetStairsteppedGridCoordinatesSize() override { return 3 * m_NumberOfVTKPointsForStairsteppedGrid; }
 
 protected:
     int           m_NumberOfVTKPoints;
