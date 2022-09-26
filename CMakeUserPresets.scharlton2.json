@@ -26,6 +26,42 @@
       }
     },
     {
+      "name": "default-apple",
+      "displayName": "macOS Ninja Multi-Config qt-vtk build",
+      "description": "macOS build using Ninja Multi-Config",
+      "generator": "Ninja Multi-Config",
+      "binaryDir": "${sourceDir}/_${presetName}",
+      "cacheVariables": {
+        "CMAKE_INSTALL_PREFIX": "${sourceDir}/_${presetName}/INSTALL",
+        "VTK_DIR": "$env{HOME}/qt5-vtk-9.1.0/lib/cmake/vtk-9.1",
+        "Qt5_DIR": "$env{HOME}/Qt/5.15.2/clang_64/lib/cmake/Qt5"
+      },
+      "environment": {},
+      "vendor": {
+        "example.com/ExampleIDE/1.0": {
+          "autoFormat": true
+        }
+      }
+    },
+    {
+      "name": "xcode",
+      "displayName": "macOS xcode qt-vtk build",
+      "description": "macOS build using Xcode",
+      "generator": "Xcode",
+      "binaryDir": "${sourceDir}/_${presetName}",
+      "cacheVariables": {
+        "CMAKE_INSTALL_PREFIX": "${sourceDir}/_${presetName}/INSTALL",
+        "VTK_DIR": "$env{HOME}/qt5-vtk-9.1.0/lib/cmake/vtk-9.1",
+        "Qt5_DIR": "$env{HOME}/Qt/5.15.2/clang_64/lib/cmake/Qt5"
+      },
+      "environment": {},
+      "vendor": {
+        "example.com/ExampleIDE/1.0": {
+          "autoFormat": true
+        }
+      }
+    },
+    {
       "name": "memory",
       "displayName": "default qt-vtk build",
       "description": "TODO desc",
@@ -50,6 +86,14 @@
     {
       "name": "default",
       "configurePreset": "default"
+    },
+    {
+      "name": "default-apple",
+      "configurePreset": "default-apple"
+    },
+    {
+      "name": "xcode",
+      "configurePreset": "xcode"
     },
     {
       "name": "memory",

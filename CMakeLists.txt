@@ -9,6 +9,10 @@ project (
 # set standard directory locations
 include(GNUInstallDirs)
 
+if(APPLE)
+  set(CMAKE_INSTALL_BINDIR .)
+endif()
+
 # check for vtk
 find_package(VTK REQUIRED)
 
@@ -85,10 +89,61 @@ else()
   set(BUILD_SHARED_LIBS ON)
 endif()
 
-add_subdirectory(doc)
-add_subdirectory(examples)
+if(NOT APPLE)
+  add_subdirectory(doc)
+  add_subdirectory(examples)
+endif()
 add_subdirectory(mv)
 add_subdirectory(QModelViewer)
 
 # set default startup project
 set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT QModelViewer)
+
+# based on code from CMake's QtDialog/CMakeLists.txt
+macro(install_qt5_plugin _qt_plugin_name _qt_plugins_var)
+    get_target_property(_qt_plugin_path "${_qt_plugin_name}" LOCATION)
+    if(EXISTS "${_qt_plugin_path}")
+        get_filename_component(_qt_plugin_file "${_qt_plugin_path}" NAME)
+        get_filename_component(_qt_plugin_type "${_qt_plugin_path}" PATH)
+        get_filename_component(_qt_plugin_type "${_qt_plugin_type}" NAME)
+        set(_qt_plugin_dest "QModelViewer.app/Contents/PlugIns/${_qt_plugin_type}")
+        install(FILES "${_qt_plugin_path}"
+            DESTINATION "${_qt_plugin_dest}")
+        set(${_qt_plugins_var}
+            "${${_qt_plugins_var}};\$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/${_qt_plugin_dest}/${_qt_plugin_file}")
+    else()
+        message(FATAL_ERROR "QT plugin ${_qt_plugin_name} not found")
+    endif()
+endmacro()
+
+install_qt5_plugin("Qt5::QCocoaIntegrationPlugin" QT_PLUGINS)
+
+set(APP "\$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/QModelViewer.app")
+set(DIRS "${Qt5Widgets_DIR}")
+if(NOT DIRS MATCHES "/$")
+    string(APPEND DIRS "/")
+endif()
+string(APPEND DIRS "../..")
+list(APPEND DIRS "${VTK_PREFIX_PATH}/lib")
+
+message(STATUS "CMAKE_BUNDLE_LOCATION: ${CMAKE_BUNDLE_LOCATION}")
+message(STATUS "APP: ${APP}")
+message(STATUS "QT_PLUGINS: ${QT_PLUGINS}")
+message(STATUS "DIRS: ${DIRS}")
+message(STATUS "VTK_LIBRARIES: ${VTK_LIBRARIES}")
+
+install(CODE "include(BundleUtilities)
+    fixup_bundle(\"${APP}\" \"${QT_PLUGINS}\" \"${DIRS}\")")
+
+set(CPACK_GENERATOR "DragNDrop")
+set(CPACK_PACKAGE_NAME "QModelViewer")
+include(CPack)
+
+# cmake variable debugging
+if (OFF)
+  get_cmake_property(_variableNames VARIABLES)
+  list (SORT _variableNames)
+  foreach(_variableName ${_variableNames})
+    message(STATUS "${_variableName}=${${_variableName}}")
+  endforeach()
+endif()
