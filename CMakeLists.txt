@@ -110,6 +110,8 @@ macro(install_qt5_plugin _qt_plugin_name _qt_plugins_var)
       set(_qt_plugin_dest "QModelViewer.app/Contents/PlugIns/${_qt_plugin_type}")
     elseif(WIN32)
       set(_qt_plugin_dest "bin/${_qt_plugin_type}")
+    elseif(LINUX)
+      set(_qt_plugin_dest "bin/${_qt_plugin_type}")
     endif()
     install(FILES "${_qt_plugin_path}"
         DESTINATION "${_qt_plugin_dest}")
@@ -120,14 +122,18 @@ macro(install_qt5_plugin _qt_plugin_name _qt_plugins_var)
   endif()
 endmacro()
 
+# set platform plugin
 if(APPLE)
   install_qt5_plugin("Qt5::QCocoaIntegrationPlugin" QT_PLUGINS)
 endif()
-
+if(UNIX AND NOT APPLE)
+  install_qt5_plugin("Qt5::QXcbIntegrationPlugin" QT_PLUGINS)
+endif()
 if(WIN32)
   install_qt5_plugin("Qt5::QWindowsIntegrationPlugin" QT_PLUGINS)
 endif()
 
+# set executable
 if(APPLE)
   set(APP "\$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/QModelViewer.app")
 endif()
@@ -137,7 +143,6 @@ endif()
 if(WIN32)
   set(APP "\$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/bin/QModelViewer.exe")
 endif()
-
 
 # add qt5 dir to DIRS
 set(DIRS "${Qt5Widgets_DIR}")

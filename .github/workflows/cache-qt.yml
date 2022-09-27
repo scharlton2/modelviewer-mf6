@@ -203,7 +203,7 @@ jobs:
 
       - name: "*** Package modelviewer-mf6 release with cmake ***"
         working-directory: ./_ninja
-        run: cpack
+        run: cpack --verbose
 
       - name: "*** Upload macos package ***"
         if: matrix.config.os == 'macos-11'
@@ -219,7 +219,7 @@ jobs:
           name: ${{ matrix.config.os }}-artifact
           path: ${{ github.workspace }}/_ninja/*-Linux.tar.gz
 
-      - name: "*** Upload ubuntu package ***"
+      - name: "*** Upload windows package ***"
         if: matrix.config.os == 'windows-2019'
         uses: actions/upload-artifact@v3
         with:
