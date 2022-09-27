@@ -101,30 +101,59 @@ set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT Q
 
 # based on code from CMake's QtDialog/CMakeLists.txt
 macro(install_qt5_plugin _qt_plugin_name _qt_plugins_var)
-    get_target_property(_qt_plugin_path "${_qt_plugin_name}" LOCATION)
-    if(EXISTS "${_qt_plugin_path}")
-        get_filename_component(_qt_plugin_file "${_qt_plugin_path}" NAME)
-        get_filename_component(_qt_plugin_type "${_qt_plugin_path}" PATH)
-        get_filename_component(_qt_plugin_type "${_qt_plugin_type}" NAME)
-        set(_qt_plugin_dest "QModelViewer.app/Contents/PlugIns/${_qt_plugin_type}")
-        install(FILES "${_qt_plugin_path}"
-            DESTINATION "${_qt_plugin_dest}")
-        set(${_qt_plugins_var}
-            "${${_qt_plugins_var}};\$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/${_qt_plugin_dest}/${_qt_plugin_file}")
-    else()
-        message(FATAL_ERROR "QT plugin ${_qt_plugin_name} not found")
+  get_target_property(_qt_plugin_path "${_qt_plugin_name}" LOCATION)
+  if(EXISTS "${_qt_plugin_path}")
+    get_filename_component(_qt_plugin_file "${_qt_plugin_path}" NAME)
+    get_filename_component(_qt_plugin_type "${_qt_plugin_path}" PATH)
+    get_filename_component(_qt_plugin_type "${_qt_plugin_type}" NAME)
+    if(APPLE)
+      set(_qt_plugin_dest "QModelViewer.app/Contents/PlugIns/${_qt_plugin_type}")
+    elseif(WIN32)
+      set(_qt_plugin_dest "bin/${_qt_plugin_type}")
     endif()
+    install(FILES "${_qt_plugin_path}"
+        DESTINATION "${_qt_plugin_dest}")
+    set(${_qt_plugins_var}
+        "${${_qt_plugins_var}};\$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/${_qt_plugin_dest}/${_qt_plugin_file}")
+  else()
+    message(FATAL_ERROR "QT plugin ${_qt_plugin_name} not found")
+  endif()
 endmacro()
 
-install_qt5_plugin("Qt5::QCocoaIntegrationPlugin" QT_PLUGINS)
+if(APPLE)
+  install_qt5_plugin("Qt5::QCocoaIntegrationPlugin" QT_PLUGINS)
+endif()
 
-set(APP "\$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/QModelViewer.app")
+if(WIN32)
+  install_qt5_plugin("Qt5::QWindowsIntegrationPlugin" QT_PLUGINS)
+endif()
+
+if(APPLE)
+  set(APP "\$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/QModelViewer.app")
+endif()
+if(WIN32)
+  set(APP "\$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/bin/QModelViewer.exe")
+endif()
+
+# add qt5 dir to DIRS
 set(DIRS "${Qt5Widgets_DIR}")
 if(NOT DIRS MATCHES "/$")
-    string(APPEND DIRS "/")
+  string(APPEND DIRS "/")
 endif()
-string(APPEND DIRS "../..")
-list(APPEND DIRS "${VTK_PREFIX_PATH}/lib")
+if(APPLE)
+  string(APPEND DIRS "../..")
+endif()
+if(WIN32)
+  string(APPEND DIRS "../../../bin")
+endif()
+
+# add qt5-vtk to DIRS
+if(APPLE)
+  list(APPEND DIRS "${VTK_PREFIX_PATH}/lib")
+endif()
+if(WIN32)
+  list(APPEND DIRS "${VTK_PREFIX_PATH}/bin")
+endif()
 
 message(STATUS "CMAKE_BUNDLE_LOCATION: ${CMAKE_BUNDLE_LOCATION}")
 message(STATUS "APP: ${APP}")

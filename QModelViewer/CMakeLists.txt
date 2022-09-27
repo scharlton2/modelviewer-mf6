@@ -234,7 +234,7 @@ if(APPLE)
   )
 endif()
 
-if(WIN32)
+if(WIN32 AND FALSE)
   # install vtk dlls
   foreach(_lib ${VTK_LIBRARIES})
     install(FILES $<TARGET_FILE:${_lib}>
@@ -243,7 +243,7 @@ if(WIN32)
   endforeach()
 endif()
 
-if(WIN32)
+if(WIN32 AND FALSE)
   # install extra vtk dlls
   foreach(_lib VTK::InteractionWidgets VTK::RenderingContext2D VTK::FiltersTexture VTK::ImagingGeneral VTK::ImagingHybrid VTK::RenderingAnnotation VTK::ImagingColor)
     install(FILES $<TARGET_FILE:${_lib}>
