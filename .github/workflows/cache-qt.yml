@@ -8,6 +8,7 @@ on:
   pull_request:
     branches:
       - 'main'
+      - '_develop-qt-refactor'
 
   workflow_dispatch:
 
