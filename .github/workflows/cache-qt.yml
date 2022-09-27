@@ -201,7 +201,9 @@ jobs:
       - name: "*** Build modelviewer-mf6 release with cmake ***"
         run: cmake --build ./_ninja --config Release
 
-
+      - name: "*** Package modelviewer-mf6 release with cmake ***"
+        working-directory: ./_ninja
+        run: cpack
 
       # - name: Configure test3 with cmake
       #   env:
