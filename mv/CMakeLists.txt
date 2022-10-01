@@ -106,9 +106,17 @@ if (WIN32)
 endif()
 
 target_link_libraries(mv ${VTK_LIBRARIES})
-if (WIN32)
+
+if(WIN32)
   target_link_libraries(mv Shlwapi)
 endif()
+
+if(UNIX AND NOT APPLE)
+  ##set_target_properties(CMAKE_SKIP_BUILD_RPATH FALSE)
+  ##set_target_properties(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
+  set_target_properties(mv PROPERTIES INSTALL_RPATH "\$ORIGIN")
+endif()
+
 
 # precompiled headers
 target_precompile_headers(mv
@@ -208,7 +216,7 @@ if(${mv_library_type} STREQUAL SHARED)
   # install
   install(TARGETS mv
     BUNDLE DESTINATION ${CMAKE_INSTALL_BINDIR}
-    LIBRARY DESTINATION ${CMAKE_INSTALL_BINDIR}
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
   )
 endif()

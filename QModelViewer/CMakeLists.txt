@@ -1,14 +1,14 @@
-cmake_minimum_required(VERSION 3.20 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.21 FATAL_ERROR)
 
 if(POLICY CMP0020)
   cmake_policy(SET CMP0020 NEW)
   cmake_policy(SET CMP0071 NEW)
 endif()
 
-project (
-  QModelViewer
-  LANGUAGES CXX
-)
+# project (
+#   QModelViewer
+#   LANGUAGES CXX
+# )
 
 # find_package(VTK
 #   COMPONENTS
@@ -26,9 +26,9 @@ project (
 #     RenderingQt
 # )
 
-if(NOT VTK_FOUND)
-  message(FATAL_ERROR "QModelViewer: Unable to find the VTK build folder.")
-endif()
+# if(NOT VTK_FOUND)
+#   message(FATAL_ERROR "QModelViewer: Unable to find the VTK build folder.")
+# endif()
 
 if(NOT(TARGET VTK::GUISupportQt))
   message(FATAL_ERROR "QModelViewer: VTK not built with Qt support.")
@@ -62,7 +62,6 @@ set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTORCC ON)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
-
 
 set(UI_FILES
   bitmapresolutiondialog.ui
@@ -196,6 +195,10 @@ target_link_libraries(QModelViewer mv)
 
 set_target_properties(QModelViewer PROPERTIES VS_DEBUGGER_ENVIRONMENT "PATH=$(SolutionDir)\\mv\\$(Configuration);C:\\QT-VTK-9.1.0-leaks-vs2019-x64\\bin;C:\\Qt\\5.15.2\\msvc2019_64\\bin;%PATH%")
 
+if(UNIX AND NOT APPLE)
+  set_target_properties(QModelViewer PROPERTIES INSTALL_RPATH "\$ORIGIN/../lib")
+endif()
+
 # vtk_module_autoinit is needed
 vtk_module_autoinit(
   TARGETS QModelViewer
@@ -205,7 +208,7 @@ vtk_module_autoinit(
 # install
 install(TARGETS QModelViewer
   BUNDLE DESTINATION ${CMAKE_INSTALL_BINDIR}
-  LIBRARY DESTINATION ${CMAKE_INSTALL_BINDIR}
+  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
   RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 )
 
@@ -215,14 +218,14 @@ if(APPLE)
       ${examples_ex-gwf-csub-p04}
   )
   set_source_files_properties(${examples_ex-gwf-csub-p04} PROPERTIES
-      MACOSX_PACKAGE_LOCATION SharedSupport/examples/ex-gwf-csub-p04
+    MACOSX_PACKAGE_LOCATION SharedSupport/examples/ex-gwf-csub-p04
   )
   target_sources(QModelViewer
     PUBLIC
       ${examples_ex-gwf-disvmesh}
   )
   set_source_files_properties(${examples_ex-gwf-disvmesh} PROPERTIES
-      MACOSX_PACKAGE_LOCATION SharedSupport/examples/ex-gwf-disvmesh
+    MACOSX_PACKAGE_LOCATION SharedSupport/examples/ex-gwf-disvmesh
   )
   
   target_sources(QModelViewer
@@ -230,7 +233,7 @@ if(APPLE)
       ${doc_files}
   )
   set_source_files_properties(${doc_files} PROPERTIES
-      MACOSX_PACKAGE_LOCATION SharedSupport/doc
+    MACOSX_PACKAGE_LOCATION SharedSupport/doc
   )
 endif()
 
