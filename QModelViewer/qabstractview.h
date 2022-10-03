@@ -15,6 +15,10 @@ class vtkRenderer;
 class QVTKOpenGLNativeWidget; //    vtkMFCWindow;
 class QAction;
 
+enum class MouseMode {
+    mmTrackball,
+    mmJoystick
+};
 
 // class QAbstractView : public QObject, public vtkViewport
 // or
@@ -38,6 +42,8 @@ public:
     void         addViewProp(vtkProp* p);
 
     void         removeAllViewProps();
+
+    void         setInteractorStyle(MouseMode mouseMode);
 
     void         setProjectionToPerspective();
     void         setProjectionToParallel();

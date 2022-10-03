@@ -8,13 +8,15 @@
 #include <QVTKOpenGLNativeWidget.h>
 #include <vtkGenericOpenGLRenderWindow.h>
 
+#include <vtkBMPWriter.h>
 #include <vtkCamera.h>
+#include <vtkInteractorStyleSwitch.h>
 #include <vtkLight.h>
 #include <vtkLightCollection.h>
-#include <vtkRenderer.h>
 #include <vtkProp.h>
+#include <vtkRenderer.h>
 #include <vtkRenderLargeImage.h>
-#include <vtkBMPWriter.h>
+
 
 //#include <vtkViewport.h> // testing
 
@@ -62,6 +64,9 @@ MvView::MvView(QObject *parent)
     bitmapSideOption       = SideType::stWidth;
     bitmapWidthInInches    = 0;
     bitmapHeightInInches   = 0;
+
+    // mouseMode
+    setInteractorStyle(GetDocument()->interactorStyle());
 
     // export image sequance
     resetExportImageParameters();
@@ -269,8 +274,6 @@ void MvView::resetExportImageParameters()
     filePrefix        = "";
     fileStartNumber   = "001";
 }
-
-
 
 /////////////////////////////////////////////////////////////////////////////
 // Protected methods
@@ -746,16 +749,6 @@ void MvView::discardSavedViewpoint()
 {
     ////doResetViewpoint = false; @todo check
     viewpointSaved = false;
-}
-
-void MvView::setProjectionToPerspective()
-{
-    renderer->GetActiveCamera()->ParallelProjectionOff();
-}
-
-void MvView::setProjectionToParallel()
-{
-    renderer->GetActiveCamera()->ParallelProjectionOn();
 }
 
 void MvView::onSaveViewpoint()

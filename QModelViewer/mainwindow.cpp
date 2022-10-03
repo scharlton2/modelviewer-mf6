@@ -148,6 +148,11 @@ void MainWindow::createActions()
     exportAnimationAction->setStatusTip(tr("Export an animation as a sequence of bitmap files"));
     connect(exportAnimationAction, &QAction::triggered, this, &MainWindow::onExportAnimation);
 
+    // File->Preferences...
+    preferencesAction = new QAction(tr("Pre&ferences..."), this);
+    preferencesAction->setStatusTip(tr("Set application preferences"));
+    connect(preferencesAction, &QAction::triggered, this, &MainWindow::onPreferences);
+
 
     // -----------------------------
 
@@ -367,6 +372,9 @@ void MainWindow::updateFileActions()
     // File->Export Animation...
     exportAnimationAction->setEnabled(this->view->renderer->VisibleActorCount() > 0 &&
                                       !this->isAnimating());
+
+    // File->Preferences...
+    // preferencesAction->setEnabled(true);
 }
 
 void MainWindow::updateShowActions()
@@ -526,8 +534,14 @@ void MainWindow::createMenus()
     // File->Export As Bmp...
     fileMenu->addAction(exportAsBmpAction);
 
-    // File->Export Ani&mation...
+    // File->Export Animation...
     fileMenu->addAction(exportAnimationAction);
+
+    // -----------------------------
+    fileMenu->addSeparator();
+
+    // File->Preferences...
+    fileMenu->addAction(preferencesAction);
 
     // -----------------------------
     recentFileSeparatorAction = fileMenu->addSeparator();
@@ -1078,6 +1092,11 @@ void MainWindow::onExportAnimation()
     view->onFileExportAnimation(this);
 }
 
+void MainWindow::onPreferences()
+{
+    doc->onPreferences();
+}
+
 void MainWindow::setCurrentFile(const QString &fileName)
 {
     doc->setCurrentFile(fileName);
@@ -1092,7 +1111,7 @@ void MainWindow::readSettings()
 {
     // default settings use QCoreApplication::organizationName() and QCoreApplication::applicationName()
     QSettings        settings;
-    const QByteArray geometry = settings.value("geometry", QByteArray()).toByteArray();
+    const QByteArray geometry = settings.value(MainWindow::geometryKey, QByteArray()).toByteArray();
     if (geometry.isEmpty())
     {
         const QRect availableGeometry = screen()->availableGeometry();

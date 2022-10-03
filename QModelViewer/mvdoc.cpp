@@ -1,14 +1,16 @@
 #include "mvdoc.h"
 
+#include <algorithm>
+
 #include <QAction>
 #include <QApplication>
 #include <QDir>
+#include <QFileDialog>
 #include <QMainWindow>
 #include <QMessageBox>
 #include <QSettings>
 
-
-//#include "qabstractview.h"
+#include <vtkPropCollection.h>
 
 #include "mainwindow.h"
 #include "datafilesdialog.h"
@@ -21,9 +23,7 @@
 #include "mvManager.h"
 
 #include "geometrydialog.h"
-
-
-#include <algorithm>
+#include "preferencesdialog.h"
 
 
 MvDoc::MvDoc(QMainWindow* parent)
@@ -31,22 +31,26 @@ MvDoc::MvDoc(QMainWindow* parent)
     , _gui{nullptr}
     , _isAnimating{false}
     , _modified{false}
+    , _interactorStyle{MouseMode::mmTrackball}
 {
     // Initialize variables
-    startup           = true;
-    projectionMode    = ProjectionType::ptPerspective;
-    readyToClose      = false;
-    animationType     = AnimationType::atTime;
-    animationSteps    = 10;
+    startup        = true;
+    projectionMode = ProjectionType::ptPerspective;
+    readyToClose   = false;
+    animationType  = AnimationType::atTime;
+    animationSteps = 10;
 
-    defaultXOrigin    = 0.;
-    defaultYOrigin    = 0.;
-    defaultAngRot     = 0.;
+    defaultXOrigin = 0.;
+    defaultYOrigin = 0.;
+    defaultAngRot  = 0.;
+
+    QSettings settings;
+    _interactorStyle = static_cast<enum MouseMode>(settings.value("interactorStyle", (int)MouseMode::mmTrackball).toInt());
 
 #if TODO
     // Get the models supported by this application
-    m_NumberOfModels  = mvModelList::GetNumberOfModels();
-    m_ModelNames      = new char *[m_NumberOfModels];
+    m_NumberOfModels = mvModelList::GetNumberOfModels();
+    m_ModelNames     = new char*[m_NumberOfModels];
     for (int i = 0; i < m_NumberOfModels; i++)
     {
         m_ModelNames[i] = new char[30];
@@ -80,6 +84,8 @@ MvDoc::MvDoc(QMainWindow* parent)
 #endif
     geometryDialog = new GeometryDialog(parent, this);
     geometryDialog->reinitialize();
+
+    // Note: views have not been created yet they depend on MvDoc
 }
 
 MvDoc::~MvDoc()
@@ -139,6 +145,11 @@ void MvDoc::saveCurrentAppSettings()
 //    return _pathName;
 //}
 
+MouseMode MvDoc::interactorStyle() const
+{
+    return _interactorStyle;
+}
+
 QString MvDoc::modelName() const
 {
     return _manager->GetModelName();
@@ -173,10 +184,6 @@ std::vector<QString> MvDoc::timePointLabels()
 
 /////////////////////////////////////////////////////////////////////////////
 // File->
-
-#include <QFileDialog>
-#include <QMessageBox>
-#include <vtkPropCollection.h>
 
 void MvDoc::onFileNew()
 {
@@ -435,6 +442,27 @@ void MvDoc::loadFile(const QString& fileName)
     setCurrentFile(fileName);
 
     QApplication::restoreOverrideCursor();
+}
+
+void MvDoc::onPreferences()
+{
+    MainWindow* mainWindow = dynamic_cast<MainWindow*>(parent());
+    assert(mainWindow);
+
+    PreferencesDialog dlg(_interactorStyle, mainWindow);
+    if (dlg.exec() != QDialog::Accepted)
+    {
+        return;
+    }
+
+    _interactorStyle = dlg.interactorStyle;
+    for (auto view : _views)
+    {
+        view->setInteractorStyle(_interactorStyle);
+    }
+
+    QSettings settings;
+    settings.setValue("interactorStyle", (int)_interactorStyle);
 }
 
 /////////////////////////////////////////////////////////////////////////////

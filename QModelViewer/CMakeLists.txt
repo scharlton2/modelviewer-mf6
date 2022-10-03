@@ -70,6 +70,7 @@ set(UI_FILES
   geometrydialog.ui
   mainwindow.ui
   modflow6datafilesdialog.ui
+  preferencesdialog.ui
 )
 
 set(HXX_FILES
@@ -82,6 +83,7 @@ set(HXX_FILES
   mvdoc.h
   mvview.h
   modflow6datafilesdialog.h
+  preferencesdialog.h
   qabstractview.h
   resource.h
 )
@@ -97,6 +99,7 @@ set(CXX_FILES
   modflow6datafilesdialog.cpp
   mvdoc.cpp
   mvview.cpp
+  preferencesdialog.cpp
   qabstractview.cpp
 )
 

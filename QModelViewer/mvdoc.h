@@ -23,6 +23,9 @@ class GeometryDialog;
 
 class vtkPropCollection;
 
+// enum forward declarations
+enum class MouseMode;
+
 enum class ProjectionType {
     ptPerspective,
     ptParallel
@@ -33,11 +36,6 @@ enum class AnimationType {
     atSpace
 };
 
-enum class MouseMode {
-    mmTrackball,
-    mmJoystick
-};
-
 class MvDoc : public QObject
 {
     Q_OBJECT
@@ -45,6 +43,8 @@ public:
     explicit MvDoc(QMainWindow* parent);
     ~MvDoc() override;
 
+
+    MouseMode                          interactorStyle() const;
 
     const QString& pathName() const;
     //void setPathName(const QString* pathName);
@@ -173,7 +173,7 @@ private:
 
     AnimationType            animationType;         // m_AnimationType
     size_t                   animationSteps;        // m_AnimationSteps
-    MouseMode                interactorStyle;       // m_InteractorStyle
+    MouseMode                _interactorStyle;      // m_InteractorStyle
     ProjectionType           projectionMode;        // m_ProjectionMode
     size_t                   numberOfModels;        // m_NumberOfModels
     bool                     readyToClose;          // m_ReadyToClose
@@ -236,6 +236,8 @@ private:
     void                      onUpdateParallelProjection(QAction* action);
     void                      onPerspectiveProjection();
     void                      onUpdatePerspectiveProjection(QAction* action);
+
+    void                      onPreferences();
 };
 
 

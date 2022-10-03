@@ -16,9 +16,9 @@ class vtkProp;
 class mvGUISettings;
 //class MvDoc;
 
+// enum forward declarations
 enum class ResolutionType;
 enum class SideType;
-
 
 #include "mvdoc.h"
 
@@ -48,9 +48,6 @@ public:
     //void                    ElevateCamera(double angle);
     //void                    ResetViewpoint() { m_DoResetViewpoint = TRUE; }
     //void                    ResetCameraClippingRange();
-    //void                    SetInteractorStyle(int interactorStyle);
-    void                    setProjectionToPerspective();
-    void                    setProjectionToParallel();
     ////////void                    SwitchOnHeadlight(BOOL switchOn);
     ////////void                    SetHeadlightIntensity(double intensity);
     ////////void                    SwitchOnAuxiliaryLight(BOOL switchOn);
@@ -84,12 +81,6 @@ public:
 
     void                    onUpdateViewFromNextDirection(QAction* action);
 
-    //void                    OnUpdateViewFromNx(QAction* action);
-    //void                    OnUpdateViewFromNy(QAction* action);
-    //void                    OnUpdateViewFromNz(QAction* action);
-    //void                    OnUpdateViewFromPx(QAction* action);
-    //void                    OnUpdateViewFromPy(QAction* action);
-    //void                    OnUpdateViewFromPz(QAction* action);
     void                    onUpdateViewFrom(QAction* action);
 
     void                    invalidate(bool erase = true);
@@ -138,14 +129,6 @@ signals:
 
 private:
     friend class MainWindow;
-
-    ///QPointer<QVTKOpenGLNativeWidget>     widget;
-    ///vtkRenderer*                         renderer;
-    vtkNew<vtkGenericOpenGLRenderWindow> renderWindow;
-
-
-    ///vtkLight*                            headlight;
-    ///vtkLight*                            auxiliaryLight;
 };
 
 #ifndef _DEBUG // debug version in MvView.cpp

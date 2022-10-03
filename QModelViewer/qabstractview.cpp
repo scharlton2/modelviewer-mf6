@@ -3,6 +3,7 @@
 #include "mvGUISettings.h"
 
 #include <vtkCamera.h>
+#include <vtkInteractorStyleSwitch.h>
 #include <vtkLight.h>
 #include <vtkLightCollection.h>
 #include <vtkRenderer.h>
@@ -26,10 +27,11 @@ QAbstractView::QAbstractView(QObject *parent)
     //renderer->SetDebug(true);
 #endif
 
-    //{{
     widget    = new QVTKOpenGLNativeWidget();
     widget->renderWindow()->AddRenderer(renderer);
-    //}}
+
+    // default style is not vtkInteractorStyleSwitch
+    widget->interactor()->SetInteractorStyle(vtkSmartPointer<vtkInteractorStyleSwitch>::New());
 
     headlight = vtkLight::New();
     headlight->SetLightTypeToHeadlight();
@@ -220,17 +222,19 @@ void QAbstractView::setAuxiliaryLightPosition(double x, double y, double z)
     auxiliaryLight->SetPosition(x, y, z);
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+void QAbstractView::setInteractorStyle(MouseMode mouseMode)
+{
+    // This assumes that the interactor style is an vtkInteractorStyleSwitch (see ctor)
+    vtkInteractorStyleSwitch* iss = vtkInteractorStyleSwitch::SafeDownCast(widget->interactor()->GetInteractorStyle());
+    if (iss)
+    {
+        if (mouseMode == MouseMode::mmJoystick)
+        {
+            iss->SetCurrentStyleToJoystickCamera();
+        }
+        else
+        {
+            iss->SetCurrentStyleToTrackballCamera();
+        }
+    }
+}

@@ -37,6 +37,8 @@ private slots:
     void onFileExportAsBmp();
     void onExportAnimation();
 
+    void onPreferences();
+
     void updateFileActions();
     void updateShowActions();
     void updateActionActions();
