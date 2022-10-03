@@ -1,13 +1,11 @@
 #include "mvdoc.h"
 
-
-#include <QMessageBox>
+#include <QAction>
 #include <QApplication>
 #include <QDir>
 #include <QMainWindow>
-#include <QAction>
-
-
+#include <QMessageBox>
+#include <QSettings>
 
 
 //#include "qabstractview.h"
@@ -355,6 +353,7 @@ void MvDoc::onFileOpen()
         return;
     }
 
+#if 0
     //{{ application MainWindow::loadFile(QString fileName) -> MvDoc::openDocument(QString fileName, QWidget* parent = nullptr)
     delete _manager;
     delete _gui;
@@ -388,6 +387,50 @@ void MvDoc::onFileOpen()
     updateToolDialogs(_gui);
     //}}
     //mainWindow->updateActions();
+    mainWindow->updateStatusBar();
+    setCurrentFile(fileName);
+
+    QApplication::restoreOverrideCursor();
+#else
+    loadFile(fileName);
+#endif
+}
+
+void MvDoc::loadFile(const QString& fileName)
+{
+    QApplication::setOverrideCursor(Qt::WaitCursor);
+
+    MainWindow* mainWindow = dynamic_cast<MainWindow*>(parent());
+    assert(mainWindow);
+
+    delete _manager;
+    delete _gui;
+
+    std::string errorMsg;
+    _gui     = new mvGUISettings();
+    _manager = new mvManager();
+    _manager->Deserialize(QDir::toNativeSeparators(fileName).toStdString().c_str(), _gui, errorMsg);
+    if (errorMsg.size())
+    {
+        QMessageBox::information(mainWindow, "Error", errorMsg.c_str());
+        return;
+    }
+
+    for (auto view : _views)
+    {
+        view->removeAllViewProps();
+        vtkSmartPointer<vtkPropCollection> props = _manager->GetPropCollection();
+        props->InitTraversal();
+        for (int i = 0; i < props->GetNumberOfItems(); i++)
+        {
+            view->addViewProp(props->GetNextProp());
+        }
+        view->applyViewSettings(_gui);
+        view->onUpdate(nullptr, nullptr);
+    }
+
+    updateToolDialogs(_gui);
+    // mainWindow->updateActions();
     mainWindow->updateStatusBar();
     setCurrentFile(fileName);
 
@@ -812,10 +855,24 @@ void MvDoc::setCurrentFile(const QString& fileName)
     _currentFile = QDir::toNativeSeparators(fileName);
     setModified(false);
 
-    QMainWindow* mainWindow = dynamic_cast<QMainWindow*>(parent());
+    MainWindow* mainWindow = dynamic_cast<MainWindow*>(parent());
     assert(mainWindow);
     if (mainWindow)
     {
+        if (!fileName.isEmpty())
+        {
+            // default settings use QCoreApplication::organizationName() and QCoreApplication::applicationName()
+            QSettings   settings;
+            QStringList files = settings.value(MainWindow::recentFilesKey).toStringList();
+            files.removeAll(fileName);
+            files.prepend(fileName);
+            while (files.size() > MainWindow::MaxRecentFiles)
+                files.removeLast();
+
+            settings.setValue(MainWindow::recentFilesKey, files);
+            mainWindow->updateRecentFileActions();
+        }
+
         mainWindow->setWindowModified(false);
 
         QString shownName = _currentFile;

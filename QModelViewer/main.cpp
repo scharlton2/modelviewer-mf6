@@ -60,6 +60,9 @@ int main(int argc, char** argv)
   QSurfaceFormat::setDefaultFormat(QVTKOpenGLNativeWidget::defaultFormat());
 
   QApplication app(argc, argv);
+  app.setOrganizationName("USGS");
+  app.setApplicationName("QModel Viewer for Modflow 6");
+  app.setOrganizationDomain("gov.usgs.ModelViewer");
   QGuiApplication::setApplicationDisplayName(QObject::tr("Model Viewer for Modflow 6"));
 
   QIcon icon(":/images/ModelViewer-32x32.png");

@@ -67,6 +67,8 @@ public:
     void                               onFileNew();
     void                               onFileOpen();
 
+    void                               loadFile(const QString& fileName);
+
 
 
     // Time Label
