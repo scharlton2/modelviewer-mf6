@@ -30,6 +30,7 @@ private slots:
     void closeFile();
     //bool save();
     //bool saveAs();
+    void openRecentFile();
 
     bool onFileSave();         // save
     bool onFileSaveAs();       // saveAs
@@ -91,6 +92,7 @@ private:
     //void            updateActions();
     void            updateAllViews();
     void            updateStatusBar();
+    void            updateRecentFileActions();
 
     void            readSettings();
     void            writeSettings();
@@ -136,6 +138,13 @@ private:
     QAction *       printSetupAction;
 
     QAction *       preferencesAction;
+
+    QAction *       recentFileSeparatorAction;
+    enum { MaxRecentFiles = 4 };
+    QAction *       recentFileActions[MaxRecentFiles];
+    static const QString recentFilesKey;
+
+    static const QString geometryKey;
 
     QAction *       exitAct;
 

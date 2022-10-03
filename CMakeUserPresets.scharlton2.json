@@ -17,13 +17,72 @@
         "VTK_DIR": "C:/QT-VTK-9.1.0-leaks-vs2019-x64/lib/cmake/vtk-9.1",
         "Qt5_DIR": "C:/qt/5.15.2/msvc2019_64/lib/cmake/Qt5"
       },
-      "environment": {
+      "environment": {},
+      "vendor": {}
+    },
+    {
+      "name": "default-apple",
+      "displayName": "macOS Ninja Multi-Config qt-vtk build",
+      "description": "macOS build using Ninja Multi-Config",
+      "generator": "Ninja Multi-Config",
+      "binaryDir": "${sourceDir}/_${presetName}",
+      "cacheVariables": {
+        "CMAKE_INSTALL_PREFIX": "${sourceDir}/_${presetName}/INSTALL",
+        "VTK_DIR": "$env{HOME}/qt5-vtk-9.1.0/lib/cmake/vtk-9.1",
+        "Qt5_DIR": "$env{HOME}/Qt/5.15.2/clang_64/lib/cmake/Qt5"
       },
-      "vendor": {
-        "example.com/ExampleIDE/1.0": {
-          "autoFormat": true
-        }
-      }
+      "environment": {},
+      "vendor": {}
+    },
+    {
+      "name": "xcode",
+      "displayName": "macOS xcode qt-vtk build",
+      "description": "macOS build using Xcode",
+      "generator": "Xcode",
+      "binaryDir": "${sourceDir}/_${presetName}",
+      "cacheVariables": {
+        "CMAKE_INSTALL_PREFIX": "${sourceDir}/_${presetName}/INSTALL",
+        "VTK_DIR": "$env{HOME}/qt5-vtk-9.1.0/lib/cmake/vtk-9.1",
+        "Qt5_DIR": "$env{HOME}/Qt/5.15.2/clang_64/lib/cmake/Qt5"
+      },
+      "environment": {},
+      "vendor": {}
+    },
+    {
+      "name": "focal",
+      "displayName": "focal -- Ubuntu 20.04 gcc_64 build",
+      "description": "focal -- Ubuntu 20.04 gcc_64 build using make",
+      "generator": "Unix Makefiles",
+      "binaryDir": "${sourceDir}/_${presetName}",
+      "cacheVariables": {
+        "CMAKE_INSTALL_PREFIX": "${sourceDir}/_${presetName}/INSTALL",
+        "VTK_DIR": "$env{HOME}/work/modelviewer-mf6/qt5-vtk-9.1.0/lib/cmake/vtk-9.1",
+        "Qt5_DIR": "$env{HOME}/work/modelviewer-mf6/Qt/5.15.2/gcc_64/lib/cmake/Qt5"
+      },
+      "environment": {},
+      "vendor": {}
+    },
+    {
+      "name": "focal-ninja",
+      "inherits": "focal",
+      "displayName": "focal-ninja -- Ubuntu 20.04 gcc_64 build",
+      "description": "focal-ninja -- Ubuntu 20.04 gcc_64 build using Ninja",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/_${presetName}",
+      "cacheVariables": {},
+      "environment": {},
+      "vendor": {}
+    },
+    {
+      "name": "focal-ninja-multi",
+      "inherits": "focal",
+      "displayName": "focal-ninja-multi -- Ubuntu 20.04 gcc_64 build",
+      "description": "focal-ninja-multi -- Ubuntu 20.04 gcc_64 build using Ninja Multi-Config",
+      "generator": "Ninja Multi-Config",
+      "binaryDir": "${sourceDir}/_${presetName}",
+      "cacheVariables": {},
+      "environment": {},
+      "vendor": {}
     },
     {
       "name": "memory",
@@ -37,19 +96,34 @@
         "Qt5_DIR": "C:/qt/5.15.2/msvc2019_64/lib/cmake/Qt5",
         "MV_DEBUG_MEMORY_LEAKS": "ON"
       },
-      "environment": {
-      },
-      "vendor": {
-        "example.com/ExampleIDE/1.0": {
-          "autoFormat": true
-        }
-      }
+      "environment": {},
+      "vendor": {}
     }
   ],
   "buildPresets": [
     {
       "name": "default",
       "configurePreset": "default"
+    },
+    {
+      "name": "default-apple",
+      "configurePreset": "default-apple"
+    },
+    {
+      "name": "focal",
+      "configurePreset": "focal"
+    },
+    {
+      "name": "focal-ninja",
+      "configurePreset": "focal-ninja"
+    },
+    {
+      "name": "focal-ninja-multi",
+      "configurePreset": "focal-ninja-multi"
+    },
+    {
+      "name": "xcode",
+      "configurePreset": "xcode"
     },
     {
       "name": "memory",

@@ -8,6 +8,7 @@ on:
   pull_request:
     branches:
       - 'main'
+      - '_develop-qt-refactor'
 
   workflow_dispatch:
 
@@ -200,6 +201,30 @@ jobs:
       - name: "*** Build modelviewer-mf6 release with cmake ***"
         run: cmake --build ./_ninja --config Release
 
+      - name: "*** Package modelviewer-mf6 release with cmake ***"
+        working-directory: ./_ninja
+        run: cpack --verbose
+
+      - name: "*** Upload macos package ***"
+        if: matrix.config.os == 'macos-11'
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ matrix.config.os }}-artifact
+          path: ${{ github.workspace }}/_ninja/*.dmg
+
+      - name: "*** Upload ubuntu package ***"
+        if: matrix.config.os == 'ubuntu-20.04'
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ matrix.config.os }}-artifact
+          path: ${{ github.workspace }}/_ninja/*-Linux.tar.gz
+
+      - name: "*** Upload windows package ***"
+        if: matrix.config.os == 'windows-2019'
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ matrix.config.os }}-artifact
+          path: ${{ github.workspace }}/_ninja/*.zip
 
 
       # - name: Configure test3 with cmake

@@ -7,7 +7,6 @@
 //#include <QMessageBox>
 //#include <QSaveFile>
 //#include <QScreen>
-//#include <QSettings>
 
 //
 // vtkMFCWindow*    m_MFCWindow                        ->   QVTKOpenGLNativeWidget*   mainWidget
@@ -58,6 +57,9 @@
 #include "mvGUISettings.h"
 #include "mvSaveCurrentDirectory.h"
 
+const QString MainWindow::geometryKey    = "geometry";
+const QString MainWindow::recentFilesKey = "recentFileList";
+
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , doc{nullptr}
@@ -90,6 +92,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     setCurrentFile(QString());
 
+    updateRecentFileActions();
     updateStatusBar();
 }
 
@@ -155,6 +158,16 @@ void MainWindow::createActions()
     // -----------------------------
 
     //QAction *preferencesAction;
+
+    // -----------------------------
+
+    // Recent Files
+    for (int i = 0; i < MainWindow::MaxRecentFiles; ++i)
+    {
+        recentFileActions[i] = new QAction(this);
+        recentFileActions[i]->setVisible(false);
+        connect(recentFileActions[i], &QAction::triggered, this, &MainWindow::openRecentFile);
+    }
 
     // -----------------------------
 
@@ -515,6 +528,14 @@ void MainWindow::createMenus()
 
     // File->Export Ani&mation...
     fileMenu->addAction(exportAnimationAction);
+
+    // -----------------------------
+    recentFileSeparatorAction = fileMenu->addSeparator();
+
+    for (int i = 0; i < MainWindow::MaxRecentFiles; ++i)
+    {
+        fileMenu->addAction(recentFileActions[i]);
+    }
 
     // -----------------------------
     fileMenu->addSeparator();
@@ -1069,8 +1090,8 @@ QString MainWindow::strippedName(const QString &fullFileName)
 
 void MainWindow::readSettings()
 {
-    ///QSettings        settings(QCoreApplication::organizationName(), QCoreApplication::applicationName());
-    QSettings        settings(tr("USGS"), tr("QModel Viewer for Modflow 6"));
+    // default settings use QCoreApplication::organizationName() and QCoreApplication::applicationName()
+    QSettings        settings;
     const QByteArray geometry = settings.value("geometry", QByteArray()).toByteArray();
     if (geometry.isEmpty())
     {
@@ -1085,9 +1106,9 @@ void MainWindow::readSettings()
 
 void MainWindow::writeSettings()
 {
-    ///QSettings settings(QCoreApplication::organizationName(), QCoreApplication::applicationName());
-    QSettings settings(tr("USGS"), tr("QModel Viewer for Modflow 6"));
-    settings.setValue("geometry", saveGeometry());
+    // default settings use QCoreApplication::organizationName() and QCoreApplication::applicationName()
+    QSettings settings;
+    settings.setValue(MainWindow::geometryKey, saveGeometry());
 }
 
 void MainWindow::setSize()
@@ -1308,4 +1329,36 @@ bool MainWindow::saveFile(const QString &fileName)
     setCurrentFile(fileName);
     setModifiedFlag(false);
     return true;
+}
+
+void MainWindow::openRecentFile()
+{
+    QAction *action = qobject_cast<QAction *>(sender());
+    if (action)
+    {
+        doc->loadFile(action->data().toString());
+    }
+}
+
+void MainWindow::updateRecentFileActions()
+{
+    // default settings use QCoreApplication::organizationName() and QCoreApplication::applicationName()
+    QSettings   settings;
+    QStringList files          = settings.value(MainWindow::recentFilesKey).toStringList();
+
+    int         numRecentFiles = qMin(files.size(), (int) MainWindow::MaxRecentFiles);
+
+    for (int i = 0; i < numRecentFiles; ++i)
+    {
+        QString text = tr("&%1 %2").arg(i + 1).arg(strippedName(files[i]));
+        recentFileActions[i]->setText(text);
+        recentFileActions[i]->setData(files[i]);
+        recentFileActions[i]->setVisible(true);
+    }
+    for (int j = numRecentFiles; j < MainWindow::MaxRecentFiles; ++j)
+    {
+        recentFileActions[j]->setVisible(false);
+    }
+
+    recentFileSeparatorAction->setVisible(numRecentFiles > 0);
 }

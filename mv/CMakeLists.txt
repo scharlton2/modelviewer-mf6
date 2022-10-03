@@ -6,8 +6,14 @@ project (
   LANGUAGES CXX C
 )
 
+if(APPLE)
+  set(mv_library_type STATIC)
+else()
+  set(mv_library_type SHARED)
+endif() 
+
 # add_library(mv SHARED
-add_library(mv
+add_library(mv ${mv_library_type}
   Modflow6DataSource.cpp
   Modflow6DataSource.h
   ModpathReader.cpp
@@ -80,13 +86,17 @@ target_compile_definitions(mv PRIVATE $<$<CONFIG:Debug>:_DEBUG>)
 
 # @TODO clean this up
 # # # target_compile_definitions(mv PRIVATE MV_USE_VTKMFCWINDOW)
-target_compile_definitions(mv PRIVATE _WIN32_WINNT=_WIN32_WINNT_WIN7)
+if(WIN32)
+  target_compile_definitions(mv PRIVATE _WIN32_WINNT=_WIN32_WINNT_WIN7)
+endif()
 
 if (MV_DEBUG_MEMORY_LEAKS)
   # set for all configs
   target_compile_definitions(mv PRIVATE MV_DEBUG_MEMORY_LEAKS)
-  # set only for debug config
-  target_compile_definitions(mv PRIVATE $<$<CONFIG:Debug>:_CRTDBG_MAP_ALLOC>)
+  if(WIN32)
+    # set only for debug config
+    target_compile_definitions(mv PRIVATE $<$<CONFIG:Debug>:_CRTDBG_MAP_ALLOC>)
+  endif()
 endif()
 
 target_include_directories(mv PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
@@ -96,9 +106,17 @@ if (WIN32)
 endif()
 
 target_link_libraries(mv ${VTK_LIBRARIES})
-if (WIN32)
+
+if(WIN32)
   target_link_libraries(mv Shlwapi)
 endif()
+
+if(UNIX AND NOT APPLE)
+  ##set_target_properties(CMAKE_SKIP_BUILD_RPATH FALSE)
+  ##set_target_properties(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
+  set_target_properties(mv PROPERTIES INSTALL_RPATH "\$ORIGIN")
+endif()
+
 
 # precompiled headers
 target_precompile_headers(mv
@@ -194,9 +212,11 @@ target_precompile_headers(mv
 #   )
 # endif()
 
-# install
-install(TARGETS mv
-  BUNDLE DESTINATION ${CMAKE_INSTALL_BINDIR}
-  LIBRARY DESTINATION ${CMAKE_INSTALL_BINDIR}
-  RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-)
+if(${mv_library_type} STREQUAL SHARED)
+  # install
+  install(TARGETS mv
+    BUNDLE DESTINATION ${CMAKE_INSTALL_BINDIR}
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+  )
+endif()

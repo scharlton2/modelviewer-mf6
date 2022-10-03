@@ -56,7 +56,10 @@
           "type": "equals",
           "lhs": "${hostSystemName}",
           "rhs": "Linux"
-        },  
+        },
+        "cacheVariables": {
+          "CMAKE_INSTALL_RPATH": "$ORIGIN"
+        },
         "vendor": {
           "usgs.gov/modflow": {
             "Name": "U.S. Geological Survey",
