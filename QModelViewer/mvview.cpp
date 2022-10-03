@@ -767,6 +767,12 @@ void MvView::onSaveViewpoint()
     viewpointSaved = true;
 }
 
+void MvView::onUpdateRecallViewport(QAction* action)
+{
+    action->setEnabled(viewpointSaved &&
+                       !GetDocument()->isAnimating());
+}
+
 void MvView::onRecallViewpoint()
 {
     vtkCamera* camera = renderer->GetActiveCamera();

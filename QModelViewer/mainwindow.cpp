@@ -486,8 +486,8 @@ void MainWindow::updateActionActions()
     // Action->Set Projection To->Parallel
     doc->onUpdateParallelProjection(setProjectionToParallel);
 
-
-
+    // Action->Recall Viewpoint
+    view->onUpdateRecallViewport(recallViewpoint);
 }
 
 void MainWindow::updateToolboxActions()
@@ -577,8 +577,10 @@ void MainWindow::createMenus()
     // Show->Vectors
     showMenu->addAction(showVectorsAction);
 
+#if 0 // @todo
     // Show->Pathlines
     showMenu->addAction(showPathlinesAction);
+#endif
 
     // Show->Model Features
     showMenu->addAction(showModelFeaturesAction);

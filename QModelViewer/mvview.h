@@ -88,6 +88,7 @@ public:
 
     void                    onSaveViewpoint();
     void                    onRecallViewpoint();
+    void                    onUpdateRecallViewport(QAction* action);
 
 protected:
 
