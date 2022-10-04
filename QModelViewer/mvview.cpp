@@ -55,7 +55,6 @@ MvView::MvView(QObject *parent)
     //widget->renderWindow()->AddRenderer(renderer);
 
     // camera position
-    viewpointSaved       = false;
     viewFromDirection    = MV_VIEW_FROM_POSITIVE_Z;
     doResetViewpoint     = false;
 
@@ -743,12 +742,6 @@ void MvView::onViewFromNz()
     renderer->ResetCameraClippingRange();
     viewFromDirection = MV_VIEW_FROM_NEGATIVE_Z;
     invalidate();
-}
-
-void MvView::discardSavedViewpoint()
-{
-    ////doResetViewpoint = false; @todo check
-    viewpointSaved = false;
 }
 
 void MvView::onSaveViewpoint()

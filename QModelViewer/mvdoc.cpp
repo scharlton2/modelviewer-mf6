@@ -329,6 +329,7 @@ void MvDoc::onFileNew()
             view->addViewProp(props->GetNextProp());
         }
         view->setProjectionToPerspective();
+        view->discardSavedViewpoint();
         view->applyViewSettings(gui);
         view->resetViewPoint();
         view->onUpdate(nullptr, nullptr);
@@ -432,6 +433,7 @@ void MvDoc::loadFile(const QString& fileName)
         {
             view->addViewProp(props->GetNextProp());
         }
+        view->discardSavedViewpoint();
         view->applyViewSettings(_gui);
         view->onUpdate(nullptr, nullptr);
     }

@@ -17,6 +17,7 @@
 
 QAbstractView::QAbstractView(QObject *parent)
     : QObject{parent}
+    , viewpointSaved{false}
 {
     renderer = vtkRenderer::New();
     renderer->SetBackground(1, 1, 1);
@@ -176,9 +177,6 @@ void QAbstractView::setProjectionToParallel()
     renderer->GetActiveCamera()->ParallelProjectionOn();
 }
 
-
-
-
 void QAbstractView::switchOnHeadlight(bool switchOn)
 {
     if (switchOn)
@@ -237,4 +235,10 @@ void QAbstractView::setInteractorStyle(MouseMode mouseMode)
             iss->SetCurrentStyleToTrackballCamera();
         }
     }
+}
+
+void QAbstractView::discardSavedViewpoint()
+{
+    ////doResetViewpoint = false; @todo check
+    viewpointSaved = false;
 }

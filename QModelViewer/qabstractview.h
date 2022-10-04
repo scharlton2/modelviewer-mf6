@@ -55,6 +55,7 @@ public:
     void         setAuxiliaryLightPosition(double x, double y, double z);
 
     void         resetCameraClippingRange();
+    void         discardSavedViewpoint();
 
 signals:
 
@@ -64,6 +65,8 @@ protected:
     double                           headlightIntensity;
     double                           auxiliaryLightIntensity;
 
+    // Paramters relating to camera position
+    bool                             viewpointSaved;
 
     void         PlaceHeadlightWithCamera();
 

@@ -56,7 +56,6 @@ public:
     //void                    SetBackgroundColor(double red, double green, double blue);
     //void                    GetViewSettings(mvGUISettings* gui);
     //void                    applyViewSettings(mvGUISettings* gui);  // void ApplyViewSettings(mvGUISettings* gui);
-    //void                    DiscardSavedViewpoint();
 
     QVTKOpenGLNativeWidget* mainWidget();
     //void                    addActor(vtkProp* p);
@@ -84,7 +83,6 @@ public:
     void                    onUpdateViewFrom(QAction* action);
 
     void                    invalidate(bool erase = true);
-    void                    discardSavedViewpoint();
 
     void                    onSaveViewpoint();
     void                    onRecallViewpoint();
@@ -96,7 +94,6 @@ protected:
     double         savedCameraPosition[3];
     double         savedFocalPoint[3];
     double         savedViewUp[3];
-    bool           viewpointSaved;
     int            viewFromDirection;
     bool           doResetViewpoint;
 

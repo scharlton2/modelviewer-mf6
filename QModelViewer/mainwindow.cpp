@@ -841,6 +841,7 @@ void MainWindow::closeFile()
     {
         view->addViewProp(props->GetNextProp());
     }
+    view->discardSavedViewpoint();
     view->applyViewSettings(doc->_gui);
 
     //this->updateActions();
