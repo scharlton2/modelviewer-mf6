@@ -34,7 +34,6 @@ public:
 public Q_SLOTS:
 
     void onApply();
-    void onDone();
 
 public:
 
@@ -58,10 +57,6 @@ protected:
 
     void onRadioButtonLine();
     void onRadioButtonTube();
-
-    void onRadioButtonBlack();
-    void onRadioButtonGray();
-    void onRadioButtonWhite();
 
     void onTabChanged(int index);
 

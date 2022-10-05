@@ -9,6 +9,7 @@
 #include <QObject>
 #include <QString>
 
+#include <vtkColor.h>
 #include <vtkSmartPointer.h>
 
 class mvGUISettings;
@@ -130,6 +131,7 @@ public:
     void                               setAxesProperties(double xPos, double yPos, double zPos,
                                                          double axesSize, double tubeDiameter);
     void                               setBoundingBoxColor(double red, double green, double blue);
+    void                               setBoundingBoxColor(vtkColor3d color3d);
     //void                               ApplySubgrid(int col_min, int col_max, int row_min, int row_max, int lay_min, int lay_max);
     //void                               SubgridOff();
 

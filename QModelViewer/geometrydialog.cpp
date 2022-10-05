@@ -4,6 +4,9 @@
 #include <QMessageBox>
 #include <QString>
 
+#include <vtkColor.h>
+#include <vtkNamedColors.h>
+
 #include <mvdoc.h>
 
 GeometryDialog::GeometryDialog(QWidget *parent, MvDoc *doc)
@@ -28,16 +31,23 @@ GeometryDialog::GeometryDialog(QWidget *parent, MvDoc *doc)
     connect(ui->radioButtonTube, &QAbstractButton::pressed, this, &GeometryDialog::onRadioButtonTube);
 
     // bounding box
-    connect(ui->radioButtonBlack, &QAbstractButton::pressed, this, &GeometryDialog::onRadioButtonBlack);
-    connect(ui->radioButtonGray, &QAbstractButton::pressed, this, &GeometryDialog::onRadioButtonGray);
-    connect(ui->radioButtonWhite, &QAbstractButton::pressed, this, &GeometryDialog::onRadioButtonWhite);
+    // https://htmlpreview.github.io/?https://github.com/Kitware/vtk-examples/blob/gh-pages/VTKNamedColorPatches.html#VTKColorNames
+    vtkNew<vtkNamedColors> colors;
+    vtkColor3d             Black = colors->GetColor3d("Black");
+    vtkColor3d             Gray  = colors->GetColor3d("Gray");
+    vtkColor3d             White = colors->GetColor3d("White");
+
+    // how does this work? seems that the vtkColor3d vars go out of scope  -- note that colors can't be used in the lamdas
+    connect(ui->radioButtonBlack, &QAbstractButton::pressed, [=]() { doc->setBoundingBoxColor(Black); });
+    connect(ui->radioButtonGray, &QAbstractButton::pressed, [=]() { doc->setBoundingBoxColor(Gray); });
+    connect(ui->radioButtonWhite, &QAbstractButton::pressed, [=]() { doc->setBoundingBoxColor(White); });
 
     // tab
     connect(ui->tabWidget, QOverload<int>::of(&QTabWidget::currentChanged), this, QOverload<int>::of(&GeometryDialog::onTabChanged));
 
     // buttons
     connect(ui->pushButtonApply, &QAbstractButton::clicked, this, &GeometryDialog::onApply);
-    connect(ui->pushButtonDone, &QAbstractButton::clicked, this, &GeometryDialog::onDone);
+    connect(ui->pushButtonDone, &QAbstractButton::clicked, [=]() { hide(); });
 }
 
 GeometryDialog::~GeometryDialog()
@@ -67,9 +77,6 @@ void GeometryDialog::reinitialize()
     // bounding box
     ui->radioButtonBlack->setChecked(true);
     activateBoundingBox(false);
-
-    // tab
-    ui->tabWidget->setCurrentIndex(0);          // 0 = scale, 1 = axes, 2 = bounding box
 }
 
 bool GeometryDialog::updateData(bool saveAndValidate)
@@ -296,11 +303,6 @@ void GeometryDialog::onApply()
     }
 }
 
-void GeometryDialog::onDone()
-{
-    hide();
-}
-
 void GeometryDialog::activateScale(bool b)
 {
     // scale tab
@@ -339,21 +341,6 @@ void GeometryDialog::activateBoundingBox(bool b)
     ui->radioButtonBlack->setEnabled(b);
     ui->radioButtonGray->setEnabled(b);
     ui->radioButtonWhite->setEnabled(b);
-}
-
-void GeometryDialog::onRadioButtonBlack()
-{
-    doc->setBoundingBoxColor(0, 0, 0);
-}
-
-void GeometryDialog::onRadioButtonGray()
-{
-    doc->setBoundingBoxColor(0.5, 0.5, 0.5);
-}
-
-void GeometryDialog::onRadioButtonWhite()
-{
-    doc->setBoundingBoxColor(1, 1, 1);
 }
 
 void GeometryDialog::onTabChanged(int index)
