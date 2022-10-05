@@ -450,7 +450,7 @@ void MvView::onFileExportAsBmp(QWidget* parent)
     light->SetFocalPoint(camera->GetFocalPoint());
 
     QApplication::setOverrideCursor(Qt::WaitCursor);
-    WriteBmp(fileName.toStdString().c_str(), this->bitmapResolutionOption == ResolutionType::rtScreen);
+    WriteBmp(fileName.toLocal8Bit().data(), this->bitmapResolutionOption == ResolutionType::rtScreen);
     QApplication::restoreOverrideCursor();
 }
 
@@ -555,7 +555,7 @@ void MvView::onFileExportAnimation(QWidget* parent)
     }
 
     //int fileNumber = atoi((char*)((LPCTSTR)m_FileStartNumber));
-    int fileNumber = atoi(fileStartNumber.toStdString().c_str());
+    int  fileNumber = atoi(fileStartNumber.toLocal8Bit().data());
     int len        = fileStartNumber.length();
     int i          = StartIndex;
     int fill;
@@ -574,7 +574,7 @@ void MvView::onFileExportAnimation(QWidget* parent)
             {
                 strcat(b1, "0");
             }
-            WriteBmp((path + b1 + b2 + ".bmp").toStdString().c_str(), true);
+            WriteBmp((path + b1 + b2 + ".bmp").toLocal8Bit().data(), true);
             fileNumber++;
         }
         i++;

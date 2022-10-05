@@ -18,7 +18,7 @@ public:
     explicit ExportAnimationDialog(QWidget *parent = nullptr);
     ~ExportAnimationDialog();
 
-    std::vector<QString> timePointLabels;
+    QStringList          timePointLabels;
     double               MBPerFile;
     bool                 preview;
 

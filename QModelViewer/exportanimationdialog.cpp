@@ -1,6 +1,9 @@
 #include "exportanimationdialog.h"
 #include "ui_exportanimationdialog.h"
 
+#include <QMessageBox>
+#include <QFileDialog>
+
 #include "mvdoc.h"  // enum class AnimationType
 
 ExportAnimationDialog::ExportAnimationDialog(QWidget *parent)
@@ -46,11 +49,11 @@ void ExportAnimationDialog::onInitDialog()
 
     doAnimationTypeChange();
 
-    for (auto label : timePointLabels)
-    {
-        ui->comboBoxStartIndex->addItem(label);
-        ui->comboBoxEndIndex->addItem(label);
-    }
+    assert(ui->comboBoxStartIndex->count() == 0);
+    assert(ui->comboBoxEndIndex->count() == 0);
+    ui->comboBoxStartIndex->insertItems(0, timePointLabels);
+    ui->comboBoxEndIndex->insertItems(0, timePointLabels);
+
     ui->comboBoxStartIndex->setCurrentIndex(startIndex);
     ui->comboBoxEndIndex->setCurrentIndex(endIndex);
 
@@ -100,12 +103,8 @@ void ExportAnimationDialog::showEvent(QShowEvent *event)
     QDialog::showEvent(event);
 }
 
-#include <QMessageBox>
-#include <QFileDialog>
-
 void ExportAnimationDialog::onBrowse()
 {
-    //QMessageBox::information(this, "title", "onBrowse");
     QString dir = QFileDialog::getExistingDirectory(this,
                                                     tr("Browse for Folder"),
                                                     defaultOutputFolder,

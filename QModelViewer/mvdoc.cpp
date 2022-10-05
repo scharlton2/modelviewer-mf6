@@ -22,7 +22,9 @@
 #include "mvGUISettings.h"
 #include "mvManager.h"
 
+#include "datadialog.h"
 #include "geometrydialog.h"
+
 #include "preferencesdialog.h"
 
 
@@ -32,6 +34,7 @@ MvDoc::MvDoc(QMainWindow* parent)
     , _isAnimating{false}
     , _modified{false}
     , _interactorStyle{MouseMode::mmTrackball}
+    , numberOfModels{1}
 {
     // Initialize variables
     startup        = true;
@@ -84,6 +87,9 @@ MvDoc::MvDoc(QMainWindow* parent)
 #endif
     geometryDialog = new GeometryDialog(parent, this);
     geometryDialog->reinitialize();
+
+    dataDialog = new DataDialog(parent, this);
+    dataDialog->reinitialize();
 
     // Note: views have not been created yet they depend on MvDoc
 }
@@ -170,103 +176,79 @@ bool MvDoc::isAnimating() const
     return _isAnimating;
 }
 
-std::vector<QString> MvDoc::timePointLabels()
+QStringList MvDoc::timePointLabels()
 {
-    std::vector<QString> timePointLabels;
+    QStringList          slist;
     int                  n      = _manager->GetNumberOfTimePoints();
     char**               labels = _manager->GetTimePointLabels();
     for (int i = 0; i < n; ++i)
     {
-        timePointLabels.push_back(labels[i]);
+        slist.append(labels[i]);
     }
-    return timePointLabels;
+    return slist;
+}
+
+QStringList MvDoc::dataTypeLabels()
+{
+    QStringList slist;
+    char**      labels = _manager->GetDataTypeLabels();
+    int         n      = _manager->GetNumberOfScalarDataTypes();
+    for (int i = 0; i < n; ++i)
+    {
+        slist.append(labels[i]);
+    }
+    return slist;
 }
 
 /////////////////////////////////////////////////////////////////////////////
 // File->
 
+void MvDoc::onFileClose()
+{
+    if (!maybeSave())
+    {
+        return;
+    }
+
+    delete _manager;
+    delete _gui;
+
+    QApplication::setOverrideCursor(Qt::WaitCursor);
+
+    _manager = new mvManager();
+    _gui     = new mvGUISettings();
+
+    for (auto view : _views)
+    {
+        //view->renderer->GetViewProps()->RemoveAllItems();
+        view->removeAllViewProps();
+        vtkSmartPointer<vtkPropCollection> props = _manager->GetPropCollection();
+        props->InitTraversal();
+        for (int i = 0; i < props->GetNumberOfItems(); i++)
+        {
+            view->addViewProp(props->GetNextProp());
+        }
+        view->discardSavedViewpoint();
+        view->applyViewSettings(_gui);
+    }
+
+    geometryDialog->reinitialize();
+    dataDialog->reinitialize();
+    setCurrentFile("");
+
+    QApplication::restoreOverrideCursor();
+}
+
 void MvDoc::onFileNew()
 {
-    //{{ OLD
-    //char selectedModel[20];
-    //// This version of Model View is customized to display only Modflow 6 results.
-    //// In other words, the variable "selectedModel" is set to "Modflow 6"
-    //strcpy(selectedModel, Modflow6DataSource::GetNameStatic());
-
-    //// Display dialog box for user to specify data files for the
-    //// selected model. Note that memory for dataFileList is allocated
-    //// by the dataFileList method
-    //char* dataFileList = DataFilesDialog::GetDataFileList(selectedModel);
-    //if (dataFileList == NULL)
-    //{
-    //    return; // User clicked the Cancel button
-    //}
-
-    //// Load data
-    //char* errorMsg = m_Manager->LoadData(selectedModel, dataFileList);
-    //delete[] dataFileList;
-
-    //// Check for error in reading data files
-    //if (errorMsg != 0)
-    //{
-    //    AfxMessageBox(errorMsg);
-    //    return;
-    //}
-
-    //// Display dialog box for user to select time and type of data to view
-    //CDataSelectionDlg dlg2;
-    //dlg2.m_NumberOfTimePoints      = m_Manager->GetNumberOfTimePoints();
-    //dlg2.m_TimePointLabels         = m_Manager->GetTimePointLabels();
-    //dlg2.m_NumberOfScalarDataTypes = m_Manager->GetNumberOfScalarDataTypes();
-    //dlg2.m_DataTypeLabels          = m_Manager->GetDataTypeLabels();
-    //dlg2.m_TimeLabelOption         = m_Manager->GetTimeLabelOption();
-    //dlg2.m_InitialDisplayTimePoint = m_Manager->GetInitialDisplayTimePoint();
-    //dlg2.DoModal(); // Cancel not allowed.
-    //m_Manager->SetTimePointTo(dlg2.m_SelectedTimePoint);
-    //m_Manager->SetScalarDataTypeTo(dlg2.m_SelectedDataType);
-
-    //// Apply default settings and then turn on bounding box
-    //m_Manager->ApplyDefaultSettings();
-
-    //// If there are more than one time points, turn on the
-    //// time label
-    //if (m_Manager->GetNumberOfTimePoints() > 1)
-    //{
-    //    m_Manager->ShowTimeLabel();
-    //}
-
-    //// Create a gui settings object with initial settings. These
-    //// are used to update the tool dialog boxes and view.
-    //mvGUISettings* gui = new mvGUISettings;
-
-    //// Update the tool (modeless) dialog boxes
-    //UpdateToolDialogs(gui);
-
-    //// Set the view parameters
-    //m_ProjectionMode = MV_PERSPECTIVE_PROJECTION;
-    //POSITION pos     = GetFirstViewPosition();
-    //CMvView* pView   = (CMvView*)GetNextView(pos);
-    //pView->SetProjectionToPerspective();
-    //pView->ApplyViewSettings(gui);
-    //pView->ResetViewpoint();
-    //delete gui;
-
-    //// Mark this document as modified
-    //SetModifiedFlag(TRUE);
-
-    //// Redraw the view;
-    //UpdateAllViews(NULL);
-    //}} OLD
-
     MainWindow* mainWindow = dynamic_cast<MainWindow*>(parent());
     assert(mainWindow);
 
-    //{{NEW
     delete _manager;
     _manager = new mvManager;
 
     geometryDialog->reinitialize();
-    //}}NEW
+    dataDialog->reinitialize();
 
 
     char selectedModel[20];
@@ -299,17 +281,17 @@ void MvDoc::onFileNew()
 
     // Display dialog box for user to select time and type of data to view
     // @todo
-    this->_manager->SetTimePointTo(0);
-    this->_manager->SetScalarDataTypeTo(0);
+    _manager->SetTimePointTo(0);
+    _manager->SetScalarDataTypeTo(0);
 
     // Apply default settings and then turn on bounding box
-    this->_manager->ApplyDefaultSettings();
+    _manager->ApplyDefaultSettings();
 
     // If there are more than one time points, turn on the
     // time label
-    if (this->_manager->GetNumberOfTimePoints() > 1)
+    if (_manager->GetNumberOfTimePoints() > 1)
     {
-        this->_manager->ShowTimeLabel();
+        _manager->ShowTimeLabel();
     }
 
     // Create a gui settings object with initial settings. These
@@ -352,7 +334,8 @@ void MvDoc::onFileOpen()
     MainWindow* mainWindow = dynamic_cast<MainWindow*>(parent());
     assert(mainWindow);
 
-    if (!mainWindow->maybeSave()) return;
+    //if (!mainWindow->maybeSave()) return;
+    if (!maybeSave()) return;
 
     QString fileName = QFileDialog::getOpenFileName(mainWindow, tr("Open"), QString(), tr("MvMf6 Files (*.mvmf6)"));
 
@@ -371,7 +354,7 @@ void MvDoc::onFileOpen()
     std::string errorMsg;
     _gui     = new mvGUISettings();
     _manager = new mvManager();
-    _manager->Deserialize(QDir::toNativeSeparators(fileName).toStdString().c_str(), _gui, errorMsg);
+    _manager->Deserialize(QDir::toNativeSeparators(fileName).toLocal8Bit().data(), _gui, errorMsg);
     if (errorMsg.size())
     {
         QMessageBox::information(mainWindow, "Error", errorMsg.c_str());
@@ -399,6 +382,7 @@ void MvDoc::onFileOpen()
     setCurrentFile(fileName);
 
     QApplication::restoreOverrideCursor();
+
 #else
     loadFile(fileName);
 #endif
@@ -417,7 +401,7 @@ void MvDoc::loadFile(const QString& fileName)
     std::string errorMsg;
     _gui     = new mvGUISettings();
     _manager = new mvManager();
-    _manager->Deserialize(QDir::toNativeSeparators(fileName).toStdString().c_str(), _gui, errorMsg);
+    _manager->Deserialize(QDir::toNativeSeparators(fileName).toLocal8Bit().data(), _gui, errorMsg);
     if (errorMsg.size())
     {
         QMessageBox::information(mainWindow, "Error", errorMsg.c_str());
@@ -444,6 +428,70 @@ void MvDoc::loadFile(const QString& fileName)
     setCurrentFile(fileName);
 
     QApplication::restoreOverrideCursor();
+}
+
+bool MvDoc::saveFile(const QString& fileName)
+{
+    assert(_gui);
+    mvGUISettings settings(*_gui);
+
+    // @todo replace this with m_CropDlg
+    // @todo replace this with m_AnimationDlg->m_OptionsPage
+    // @todo replace this with m_LightingDlg->m_LightsPage
+    // @todo replace this with m_LightingDlg->m_BackgroundPage
+
+    _views.front()->getViewSettings(&settings);
+
+    // The visualization pipeline doc->_manager will serialize everything along
+    // with the gui settings
+    ///char *errorMsg = this->doc->_manager->Serialize(lpszPathName, &settings);
+    char *errorMsg = _manager->Serialize(fileName.toLocal8Bit().data(), &settings);
+    if (errorMsg != 0)
+    {
+        QWidget* widget = dynamic_cast<QWidget*>(parent());
+        assert(widget);
+        QMessageBox::information(widget, tr(""), tr(errorMsg));
+        return false;
+    }
+    setCurrentFile(fileName);
+    setModified(false);
+    return true;
+}
+
+bool MvDoc::maybeSave()
+{
+    if (!this->isModified())
+        return true;
+
+    QString shownName = this->_currentFile;
+    if (shownName.isEmpty())
+    {
+        shownName = "Untitled";
+    }
+    else
+    {
+        QFileInfo info(shownName);
+        shownName = info.fileName();
+    }
+
+    //QWidget*                          widget = dynamic_cast<QWidget*>(parent());
+    //assert(widget);
+    MainWindow* mainWindow = dynamic_cast<MainWindow*>(parent());
+    assert(mainWindow);
+    const QMessageBox::StandardButton ret = QMessageBox::question(mainWindow,
+                                                                  tr("Model Viewer for Modflow 6"),
+                                                                  tr("Save changes to %1?").arg(shownName),
+                                                                  QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
+    switch (ret)
+    {
+    case QMessageBox::Yes:
+        return mainWindow->onFileSave();
+    case QMessageBox::Cancel:
+        return false;
+    default:
+        break;
+    }
+    return true;
 }
 
 void MvDoc::onPreferences()
@@ -857,27 +905,6 @@ void MvDoc::onModelFeatures()
     }
     updateAllViews(nullptr);
     setModified(true);
-}
-
-void MvDoc::onToolboxGeometry()
-{
-    assert(geometryDialog);
-    if (geometryDialog->isVisible())
-    {
-        geometryDialog->hide();
-        //geometryDialog->setVisible(false);
-    }
-    else
-    {
-        geometryDialog->show();
-        //geometryDialog->setVisible(true);
-    }
-}
-
-void MvDoc::onUpdateToolboxGeometry(QAction *action)
-{
-    assert(geometryDialog);
-    action->setChecked(geometryDialog->isVisible());
 }
 
 void MvDoc::setCurrentFile(const QString& fileName)
@@ -1347,7 +1374,7 @@ void MvDoc::updateToolDialogs(mvGUISettings* gui)
     //UpdateAnimationDlg(gui);
     //UpdateVectorDlg();
     //UpdateCropDlg(gui);
-    //UpdateDataDlg();
+    updateDataDialog();
     //UpdatePathlinesDlg();
     //UpdateModelFeaturesDlg();
     //UpdateOverlayDlg();
@@ -1411,6 +1438,36 @@ void MvDoc::setBoundingBoxColor(double red, double green, double blue)
     setModified(true);
 }
 
+void MvDoc::setBoundingBoxColor(vtkColor3d color3d)
+{
+    _manager->SetBoundingBoxColor(color3d.GetRed(), color3d.GetGreen(), color3d.GetBlue());
+    updateAllViews(nullptr);
+    setModified(true);
+}
+
+/////////////////////////////////////////////////////////////////////////////
+// Toolbox->Geometry
+
+void MvDoc::onToolboxGeometry()
+{
+    assert(geometryDialog);
+    if (geometryDialog->isVisible())
+    {
+        geometryDialog->hide();
+        //geometryDialog->setVisible(false);
+    }
+    else
+    {
+        geometryDialog->show();
+        //geometryDialog->setVisible(true);
+    }
+}
+
+void MvDoc::onUpdateToolboxGeometry(QAction* action)
+{
+    assert(geometryDialog);
+    action->setChecked(geometryDialog->isVisible());
+}
 
 void MvDoc::updateGeometryDialog()
 {
@@ -1441,4 +1498,75 @@ void MvDoc::updateGeometryDialog()
 
     geometryDialog->enableApplyButton(true);
     geometryDialog->setCurrentIndex(0);
+}
+
+/////////////////////////////////////////////////////////////////////////////
+// Toolbox->Data
+
+void MvDoc::onToolboxData()
+{
+    assert(dataDialog);
+    if (dataDialog->isVisible())
+    {
+        dataDialog->hide();
+    }
+    else
+    {
+        dataDialog->show();
+    }
+}
+
+void MvDoc::onUpdateToolboxData(QAction* action)
+{
+    assert(dataDialog);
+    action->setChecked(dataDialog->isVisible());
+}
+
+void MvDoc::updateDataDialog()
+{
+    double range[2];
+    _manager->GetScalarDataRange(range);
+    dataDialog->setScalarDataRange(range);
+    if (_manager->HasVectorData())
+    {
+        _manager->GetVectorMagnitudeRange(range);
+        dataDialog->setVectorMagnitudeRange(range);
+    }
+    else
+    {
+        dataDialog->setVectorMagnitudeRange(nullptr);
+    }
+    if (_manager->HasPathlineData())
+    {
+        _manager->GetPathlineTimeRange(range);
+        dataDialog->setPathlineTimeRange(range);
+    }
+    else
+    {
+        dataDialog->setPathlineTimeRange(nullptr);
+    }
+    assert(_manager->GetActiveScalarDataType() >= 0);
+    assert(_manager->GetNumberOfScalarDataTypes() > 0);
+    assert(_manager->GetNumberOfScalarDataTypes() > _manager->GetActiveScalarDataType());
+    dataDialog->setDataTypeLabels(dataTypeLabels(), _manager->GetActiveScalarDataType());
+    dataDialog->activate(true);
+}
+
+void MvDoc::setScalarDataTypeTo(int index)
+{
+    assert(index >= 0);
+    int n = _manager->GetNumberOfScalarDataTypes();
+    assert(index < _manager->GetNumberOfScalarDataTypes());
+
+    _manager->SetScalarDataTypeTo(index);
+
+    //updateColorBarDlg();          // @todo
+    //updateSolidDlg();             // @todo
+    //updateIsosurfaceDlg();        // @todo
+    double range[2];
+    _manager->GetScalarDataRange(range);
+    dataDialog->setScalarDataRange(range);
+
+    updateAllViews(nullptr);
+    setModified(true);
 }

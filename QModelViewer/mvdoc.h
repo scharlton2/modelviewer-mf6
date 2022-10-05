@@ -20,6 +20,7 @@ class QAction;
 class QObject;
 class QWidget;
 class QMainWindow;
+class DataDialog;
 class GeometryDialog;
 
 class vtkPropCollection;
@@ -56,7 +57,9 @@ public:
 
     //char**                             GetTimePointLabels();
     //int                                GetNumberOfTimePoints();
-    std::vector<QString>               timePointLabels();
+    QStringList                        timePointLabels();
+
+    QStringList                        dataTypeLabels();
 
     void                               setTimePointTo(int timePointIndex);
     void                               updateAnimation();
@@ -65,11 +68,12 @@ public:
 
 
     // File menu
+    void                               onFileClose();
     void                               onFileNew();
     void                               onFileOpen();
 
     void                               loadFile(const QString& fileName);
-
+    bool                               saveFile(const QString& fileName);
 
 
     // Time Label
@@ -118,7 +122,15 @@ public:
     // 
     QString                            currentFile();
 
+    bool                               maybeSave();
+
     QDir                               defaultDir() const;
+
+    // Toolbox->Data
+    void                               onToolboxData();
+    void                               onUpdateToolboxData(QAction* action);
+    void                               setScalarDataTypeTo(int index);
+
 
     // Toolbox->Geometry
     void                               onToolboxGeometry();
@@ -202,8 +214,6 @@ private:
     CGridDlg*          m_GridDlg;
     CColorBarDlg*      m_ColorBarDlg;
     CLightingDlg*      m_LightingDlg;
-    CGeometryDlg*      m_GeometryDlg;
-    CDataDlg*          m_DataDlg;
     CSolidDlg*         m_SolidDlg;
     CIsosurfaceDlg*    m_IsosurfaceDlg;
     CCropDlg*          m_CropDlg;
@@ -213,6 +223,8 @@ private:
     CModelFeaturesDlg* m_ModelFeaturesDlg;
     COverlayDlg*       m_OverlayDlg;
 ***/
+
+    DataDialog*               dataDialog;
     GeometryDialog*           geometryDialog;
 
     // Protected methods;
@@ -226,7 +238,7 @@ private:
     //void                      UpdateGridDlg();
     //void                      UpdateVectorDlg();
     //void                      UpdateCropDlg(mvGUISettings* gui);
-    //void                      UpdateDataDlg();
+    void                      updateDataDialog();
     //void                      UpdateModelFeaturesDlg();
     //void                      UpdateAnimationDlg(mvGUISettings* gui);
     //void                      UpdateOverlayDlg();

@@ -421,7 +421,7 @@ const char *Modflow6DataSource::ExtractModflowOutputFileNames(char *nameFile,
                 QString gf(aline + 5);
                 gf = gf.trimmed();
                 gf = mvUtil::toNativeSeparators(gf);
-                strcpy(gridFile, gf.toStdString().c_str());
+                strcpy(gridFile, gf.toLocal8Bit().data());
 #else
                 strcpy(gridFile, aline + 5);
                 mvUtil::TrimLeft(gridFile);
@@ -436,7 +436,7 @@ const char *Modflow6DataSource::ExtractModflowOutputFileNames(char *nameFile,
                 QString gf(aline + 6);
                 gf = gf.trimmed();
                 gf = mvUtil::toNativeSeparators(gf);
-                strcpy(gridFile, gf.toStdString().c_str());
+                strcpy(gridFile, gf.toLocal8Bit().data());
 #else
                 strcpy(gridFile, aline + 6);
                 mvUtil::TrimLeft(gridFile);
@@ -451,7 +451,7 @@ const char *Modflow6DataSource::ExtractModflowOutputFileNames(char *nameFile,
                 QString gf(aline + 6);
                 gf = gf.trimmed();
                 gf = mvUtil::toNativeSeparators(gf);
-                strcpy(gridFile, gf.toStdString().c_str());
+                strcpy(gridFile, gf.toLocal8Bit().data());
 #else
                 strcpy(gridFile, aline + 5);
                 mvUtil::TrimLeft(gridFile);
@@ -466,7 +466,7 @@ const char *Modflow6DataSource::ExtractModflowOutputFileNames(char *nameFile,
                 QString oc(aline + 4);
                 oc = oc.trimmed();
                 oc = mvUtil::toNativeSeparators(oc);
-                strcpy(ocFile, oc.toStdString().c_str());
+                strcpy(ocFile, oc.toLocal8Bit().data());
 #else
                 strcpy(ocFile, aline + 4);
                 mvUtil::TrimLeft(ocFile);
@@ -482,7 +482,9 @@ const char *Modflow6DataSource::ExtractModflowOutputFileNames(char *nameFile,
     {
         return "Error: Unable to determine the oc file.";
     }
+#if !defined(NDEBUG)
     qDebug() << "attempting to open " << ocFile;
+#endif
     in.open(ocFile, ios::in);
     if (!in.is_open())
     {

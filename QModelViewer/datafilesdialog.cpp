@@ -96,11 +96,11 @@ char *DataFilesDialog::GetModflow6DataFiles(QWidget *parent /* = nullptr */)
         int     pos  = name.lastIndexOf(QDir::separator());
         if (pos != -1)
         {
-            //_chdir(name.left(pos).toStdString().c_str());
+            //_chdir(name.left(pos).toLocal8Bit().data());
             QDir::setCurrent(name.left(pos));
         }
         dataFileList = new char[name.size() + 20];
-        strcpy(dataFileList, name.toStdString().c_str());
+        strcpy(dataFileList, name.toLocal8Bit().data());
         strcat(dataFileList, "\n");
     }
     else
@@ -117,11 +117,11 @@ char *DataFilesDialog::GetModflow6DataFiles(QWidget *parent /* = nullptr */)
         dataFileList           = new char[gridFile.size() + headOrConcFile.size() + budgetFile.size() + 20];
         // no name file
         strcpy(dataFileList, "\n");
-        strcat(dataFileList, gridFile.toStdString().c_str());
+        strcat(dataFileList, gridFile.toLocal8Bit().data());
         strcat(dataFileList, "\n");
-        strcat(dataFileList, headOrConcFile.toStdString().c_str());
+        strcat(dataFileList, headOrConcFile.toLocal8Bit().data());
         strcat(dataFileList, "\n");
-        strcat(dataFileList, budgetFile.toStdString().c_str());
+        strcat(dataFileList, budgetFile.toLocal8Bit().data());
         strcat(dataFileList, "\n");
     }
     return dataFileList;

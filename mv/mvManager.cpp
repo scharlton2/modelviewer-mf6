@@ -5231,7 +5231,7 @@ void mvManager::Deserialize(const char *fileName, mvGUISettings *gui, std::strin
                 errorMsg = oss.str();
                 return;
             }
-            strcat(dataFileList, mvUtil::toNativeSeparators(fullPath).toStdString().c_str());
+            strcat(dataFileList, mvUtil::toNativeSeparators(fullPath).toLocal8Bit().data());
 #else
             strcpy(szDest, dirname.c_str());
             mvUtil::PathAppendA(szDest, buffer);

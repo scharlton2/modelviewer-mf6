@@ -65,7 +65,7 @@ MainWindow::MainWindow(QWidget *parent)
     , doc{nullptr}
     , view{nullptr}
     //, gui{nullptr}
-    , _modifiedFlag{false}
+    //, _modifiedFlag{false}
 
 {
 #if defined(Q_OS_WINDOWS)
@@ -121,7 +121,7 @@ void MainWindow::createActions()
     closeAct->setShortcuts(QKeySequence::Close);
 #endif
     closeAct->setStatusTip(tr("Close the current mvmv6 file"));
-    connect(closeAct, &QAction::triggered, this, &MainWindow::closeFile);
+    connect(closeAct, &QAction::triggered, this, &MainWindow::onFileClose);
 
     // File->Save
     saveAction = new QAction(tr("&Save"), this);
@@ -340,11 +340,18 @@ void MainWindow::createActions()
     connect(recallViewpoint, &QAction::triggered, view, &MvView::onRecallViewpoint);
 
 
-    // Toolbox
+    // Toolbox->Data
+    dataAction = new QAction(tr("&Data"), this);
+    dataAction->setCheckable(true);
+    dataAction->setStatusTip(tr("Show or hide the Data Toolbox"));
+    connect(dataAction, &QAction::triggered, doc, &MvDoc::onToolboxData);
+
+
+    // Toolbox->Geometry
     geometryAction = new QAction(tr("Geo&metry"), this);
     geometryAction->setCheckable(true);
     geometryAction->setStatusTip(tr("Show or hide the Geometry Toolbox"));
-    connect(geometryAction, &QAction::triggered, this, &MainWindow::onToolboxGeometry);
+    connect(geometryAction, &QAction::triggered, doc, &MvDoc::onToolboxGeometry);
 }
 
 void MainWindow::updateFileActions()
@@ -352,7 +359,9 @@ void MainWindow::updateFileActions()
     ///////////////////////////////////////////////////////////////////////////
     // File
     ///////////////////////////////////////////////////////////////////////////
+#if !defined(NDEBUG)
     qDebug() << "updateFileActions\n";
+#endif
     
     // File->Close
     closeAct->setEnabled(this->doc->_manager->GetDataFileList() && !this->isAnimating());
@@ -382,7 +391,9 @@ void MainWindow::updateShowActions()
     ///////////////////////////////////////////////////////////////////////////
     // Show
     ///////////////////////////////////////////////////////////////////////////
+#if !defined(NDEBUG)
     qDebug() << "updateShowActions\n";
+#endif
 
     // Show->Solid
     showSolidAction->setChecked(this->doc->_manager->IsSolidVisible());
@@ -457,7 +468,9 @@ void MainWindow::updateActionActions()
     ///////////////////////////////////////////////////////////////////////////
     // Action
     ///////////////////////////////////////////////////////////////////////////
+#if !defined(NDEBUG)
     qDebug() << "updateActionActions\n";
+#endif
 
     // Action->View From Direction->+x
     view->onUpdateViewFrom(viewFromPx);
@@ -495,7 +508,12 @@ void MainWindow::updateToolboxActions()
     ///////////////////////////////////////////////////////////////////////////
     // Toolbox
     ///////////////////////////////////////////////////////////////////////////
+#if !defined(NDEBUG)
     qDebug() << "updateToolboxActions\n";
+#endif
+
+    // Toolbox->Data
+    doc->onUpdateToolboxData(this->dataAction);
 
     // Toolbox->Geometry
     doc->onUpdateToolboxGeometry(this->geometryAction);
@@ -679,6 +697,12 @@ void MainWindow::createMenus()
     QMenu *toolboxMenu = menuBar()->addMenu(tr("&Toolbox"));
     connect(toolboxMenu, &QMenu::aboutToShow, this, &MainWindow::updateToolboxActions);
 
+    // Toolbox->Data
+    toolboxMenu->addAction(dataAction);
+
+    // -----------------------------
+    toolboxMenu->addSeparator();
+
     // Toolbox->Geometry
     toolboxMenu->addAction(geometryAction);
 }
@@ -706,7 +730,6 @@ void MainWindow::createStatusBar()
 
 void MainWindow::updateStatusBar()
 {
-    assert(this);
     assert(doc);
     setModelName(doc->modelName());
     setDataName(doc->activeScalarName());
@@ -724,7 +747,7 @@ void MainWindow::setModelName(const QString &name)
 
 void MainWindow::closeEvent(QCloseEvent *event)
 {
-    if (maybeSave())
+    if (doc->maybeSave())
     {
         writeSettings();
         event->accept();
@@ -745,7 +768,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
 
 void MainWindow::onFileNew()
 {
-    if (maybeSave())
+    if (doc->maybeSave())
     {
         doc->onFileNew();
     }
@@ -792,7 +815,7 @@ void MainWindow::onFileOpen()
     //std::string errorMsg;
     //doc->_gui     = new mvGUISettings();
     //doc->_manager = new mvManager();
-    //doc->_manager->Deserialize(QDir::toNativeSeparators(fileName).toStdString().c_str(), doc->_gui, errorMsg);
+    //doc->_manager->Deserialize(QDir::toNativeSeparators(fileName).toLocal8Bit().data(), doc->_gui, errorMsg);
     //if (errorMsg.size())
     //{
     //    QMessageBox::information(this, "Error", errorMsg.c_str());
@@ -819,36 +842,10 @@ void MainWindow::onFileOpen()
     doc->onFileOpen();
 }
 
-void MainWindow::closeFile()
+void MainWindow::onFileClose()
 {
-    if (!maybeSave())
-    {
-        return;
-    }
-
-    delete doc->_manager;
-    delete doc->_gui;
-
-    QApplication::setOverrideCursor(Qt::WaitCursor);
-
-    doc->_manager = new mvManager();
-    doc->_gui     = new mvGUISettings();
-
-    view->renderer->GetViewProps()->RemoveAllItems();
-    vtkSmartPointer<vtkPropCollection> props = doc->_manager->GetPropCollection();
-    props->InitTraversal();
-    for (int i = 0; i < props->GetNumberOfItems(); i++)
-    {
-        view->addViewProp(props->GetNextProp());
-    }
-    view->discardSavedViewpoint();
-    view->applyViewSettings(doc->_gui);
-
-    //this->updateActions();
-    this->updateStatusBar();
-    doc->setCurrentFile("");
-
-    QApplication::restoreOverrideCursor();
+    doc->onFileClose();
+    updateStatusBar();
 }
 
 //bool MainWindow::isModified() const
@@ -856,100 +853,18 @@ void MainWindow::closeFile()
 //    return _modifiedFlag;
 //}
 
-// similar to doc::SaveModified()
-bool MainWindow::maybeSave()
-{
-    if (!doc->isModified())
-        return true;
-
-    QString shownName = doc->_currentFile;
-    if (shownName.isEmpty())
-    {
-        shownName = "Untitled";
-    }
-    else
-    {
-        QFileInfo info(shownName);
-        shownName = info.fileName();
-    }
-
-    const QMessageBox::StandardButton ret = QMessageBox::question(this,
-                                                                  tr("Model Viewer for Modflow 6"),
-                                                                  tr("Save changes to %1?").arg(shownName),
-                                                                  QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
-    switch (ret)
-    {
-    case QMessageBox::Yes:
-        return onFileSave();
-    case QMessageBox::Cancel:
-        return false;
-    default:
-        break;
-    }
-    return true;
-}
-
-//bool MainWindow::save()
-//{
-//    if (curFile.isEmpty())
-//    {
-//        return saveAs();
-//    }
-//    else
-//    {
-//        return saveFile(curFile);
-//    }
-//}
-
 bool MainWindow::onFileSave()
 {
-    //if (curFile.isEmpty())
-    //{
-    //    return onFileSaveAs();
-    //}
-    //else
-    //{
-    //    // return return saveFile(curFile);
-    //    return saveFile(curFile.toLocal8Bit().data());
-    //}
-
-    //{{
     if (doc->_currentFile.isEmpty())
     {
         return onFileSaveAs();
     }
     else
     {
-        // return return saveFile(curFile);
-        return saveFile(doc->_currentFile);
+        return doc->saveFile(doc->_currentFile);
     }
-    //}}
 }
 
-
-//bool MainWindow::saveAs()
-//{
-//    QString     selectedFilter;
-//
-//    QString     fileName = QFileDialog::getSaveFileName(this,
-//                                                    tr("Save As"),
-//                                                    tr(""),
-//                                                    tr("MvMf6 Files (*.mvmf6);;All Files (*.*)"),
-//                                                    &selectedFilter);
-//
-//    if (!fileName.isEmpty())
-//    {
-//        return saveFile(fileName);
-//    }
-//    return false;
-//
-//    //QFileDialog dialog(this);
-//    //dialog.setWindowModality(Qt::WindowModal);
-//    //dialog.setAcceptMode(QFileDialog::AcceptSave);
-//    //if (dialog.exec() != QDialog::Accepted)
-//    //    return false;
-//    //return saveFile(dialog.selectedFiles().first());
-//}
 
 bool MainWindow::onFileSaveAs()
 {
@@ -960,138 +875,18 @@ bool MainWindow::onFileSaveAs()
     if (!fileName.isEmpty())
     {
         fileName = QDir::toNativeSeparators(fileName);
-        return saveFile(fileName);
+        return doc->saveFile(fileName);
     }
     return false;
 }
 
-
-
-//bool MainWindow::saveFile(const QString &fileName)
-//{
-//#if TODO
-//    QString errorMessage;
-//
-//    QGuiApplication::setOverrideCursor(Qt::WaitCursor);
-//    QSaveFile file(fileName);
-//    if (file.open(QFile::WriteOnly | QFile::Text))
-//    {
-//        QTextStream out(&file);
-//        //out << textEdit->toPlainText();
-//        out << "#TODO" << "\n";
-//        if (!file.commit())
-//        {
-//            errorMessage = tr("Cannot write file %1:\n%2.")
-//                               .arg(QDir::toNativeSeparators(fileName), file.errorString());
-//        }
-//    }
-//    else
-//    {
-//        errorMessage = tr("Cannot open file %1 for writing:\n%2.")
-//                           .arg(QDir::toNativeSeparators(fileName), file.errorString());
-//    }
-//    QGuiApplication::restoreOverrideCursor();
-//
-//    if (!errorMessage.isEmpty())
-//    {
-//        QMessageBox::warning(this, tr("Application"), errorMessage);
-//        return false;
-//    }
-//
-//    setCurrentFile(fileName);
-//    statusBar()->showMessage(tr("File saved"), 2000);
-//    return true;
-//#else
-//    ////return doc->saveFile(fileName);
-//    QString errorMessage;
-//
-//    QGuiApplication::setOverrideCursor(Qt::WaitCursor);
-//    QSaveFile file(fileName);
-//    if (file.open(QFile::WriteOnly | QFile::Text))
-//    {
-//        QTextStream out(&file);
-//        //out << textEdit->toPlainText();
-//        out << "#TODO"
-//            << "\n";
-//        if (!file.commit())
-//        {
-//            errorMessage = tr("Cannot write file %1:\n%2.")
-//                               .arg(QDir::toNativeSeparators(fileName), file.errorString());
-//        }
-//    }
-//    else
-//    {
-//        errorMessage = tr("Cannot open file %1 for writing:\n%2.")
-//                           .arg(QDir::toNativeSeparators(fileName), file.errorString());
-//    }
-//    QGuiApplication::restoreOverrideCursor();
-//
-//    if (!errorMessage.isEmpty())
-//    {
-//        QMessageBox::warning(this, tr("Application"), errorMessage);
-//        return false;
-//    }
-//
-//    setCurrentFile(fileName);
-//    statusBar()->showMessage(tr("File saved"), 2000);
-//    return true;
-//
-//#endif
-//
-//}
-
 void MainWindow::onFileExportAsBmp()
 {
-    /*
-    QString selectedFilter;
-
-    QString fileName = QFileDialog::getSaveFileName(this,
-                                                    tr("Save As"),
-                                                    tr(""),
-                                                    tr("MvMf6 Files (*.mvmf6);;All Files (*.*)"),
-                                                    &selectedFilter);
-
-    if (!fileName.isEmpty())
-    {
-        return saveFile(fileName);
-    }
-    return false;
-
-    //QFileDialog dialog(this);
-    //dialog.setWindowModality(Qt::WindowModal);
-    //dialog.setAcceptMode(QFileDialog::AcceptSave);
-    //if (dialog.exec() != QDialog::Accepted)
-    //    return false;
-    //return saveFile(dialog.selectedFiles().first());
-    */
-
     view->onFileExportAsBmp(this);
 }
 
 void MainWindow::onExportAnimation()
 {
-    /*
-    QString selectedFilter;
-
-    QString fileName = QFileDialog::getSaveFileName(this,
-                                                    tr("Save As"),
-                                                    tr(""),
-                                                    tr("MvMf6 Files (*.mvmf6);;All Files (*.*)"),
-                                                    &selectedFilter);
-
-    if (!fileName.isEmpty())
-    {
-        return saveFile(fileName);
-    }
-    return false;
-
-    //QFileDialog dialog(this);
-    //dialog.setWindowModality(Qt::WindowModal);
-    //dialog.setAcceptMode(QFileDialog::AcceptSave);
-    //if (dialog.exec() != QDialog::Accepted)
-    //    return false;
-    //return saveFile(dialog.selectedFiles().first());
-    */
     view->onFileExportAnimation(this);
 }
 
@@ -1135,10 +930,12 @@ void MainWindow::writeSettings()
 
 void MainWindow::setSize()
 {
+#if !defined(NDEBUG)
     qDebug() << "MainWindow size: "     << this->size();
     qDebug() << "MainWindow geometry: " << this->geometry();
     qDebug() << "mainWidget size: "     << view->mainWidget()->size();
     qDebug() << "mainWidget geometry: " << view->mainWidget()->geometry();
+#endif
 
     DisplaySizeDialog dlg(view->mainWidget()->size(), this);
     if (dlg.exec() == QDialog::Accepted)
@@ -1271,87 +1068,87 @@ void MainWindow::onToolboxGeometry()
     doc->onToolboxGeometry();
 }
 
-void MainWindow::setModifiedFlag(bool modified)
-{
-    this->_modifiedFlag = modified;
-}
+//void MainWindow::setModifiedFlag(bool modified)
+//{
+//    this->_modifiedFlag = modified;
+//}
 
 void MainWindow::updateAllViews()
 {
     this->view->mainWidget()->renderWindow()->Render();
 }
 
-// bool MainWindow::saveFile(const char *lpszPathName)
-bool MainWindow::saveFile(const QString &fileName)
-{
-    /*
-    * BOOL CMvDoc::OnSaveDocument(LPCTSTR lpszPathName)
-    * 
-    // Note: The base class method CDocument::OnSaveDocument is not called
-    // because serialization is done by the visualization pipeline doc->_manager.
-    // Thus, the method CMvDoc::Serialize is not used in this program.
-
-    // Copy the gui settings from the doc
-    mvGUISettings *gui = new mvGUISettings;
-    m_CropDlg->UpdateData(TRUE);
-    gui->cropBoundsXDelta = m_CropDlg->m_ControlsPage->m_XDelta;
-    gui->cropBoundsYDelta = m_CropDlg->m_ControlsPage->m_YDelta;
-    gui->cropBoundsZDelta = m_CropDlg->m_ControlsPage->m_ZDelta;
-    m_AnimationDlg->m_OptionsPage->UpdateData(TRUE);
-    gui->animationRotate  = m_AnimationDlg->m_OptionsPage->m_Rotate;
-    gui->animationElevate = m_AnimationDlg->m_OptionsPage->m_Elevate;
-    gui->animationDelay   = m_AnimationDlg->m_OptionsPage->m_Delay;
-    m_LightingDlg->m_LightsPage->UpdateData(TRUE);
-    gui->headlightOn             = m_LightingDlg->m_LightsPage->m_HeadlightOn;
-    gui->auxiliaryLightOn        = m_LightingDlg->m_LightsPage->m_AuxiliaryLightOn;
-    gui->headlightIntensity      = m_LightingDlg->m_LightsPage->m_HeadlightIntensity * 0.01;
-    gui->auxiliaryLightIntensity = m_LightingDlg->m_LightsPage->m_AuxiliaryLightIntensity * 0.01;
-    m_LightingDlg->m_BackgroundPage->UpdateData(TRUE);
-    gui->customBackground = m_LightingDlg->m_BackgroundPage->m_Background;
-
-    // Copy the gui settings from the view
-    POSITION pos          = GetFirstViewPosition();
-    CMvView *pView        = (CMvView *)GetNextView(pos);
-    pView->GetViewSettings(gui);
-
-    // The visualization pipeline doc->_manager will serialize everything along
-    // with the gui settings
-    char *errorMsg = m_Manager->Serialize(lpszPathName, gui);
-    delete gui;
-    if (errorMsg != 0)
-    {
-        AfxMessageBox(errorMsg);
-        return FALSE;
-    }
-
-    // Mark this document as saved
-    SetModifiedFlag(FALSE);
-    return TRUE;
-    */
-
-    assert(doc->_gui);
-    mvGUISettings settings(*doc->_gui);
-
-    // @todo replace this with m_CropDlg
-    // @todo replace this with m_AnimationDlg->m_OptionsPage
-    // @todo replace this with m_LightingDlg->m_LightsPage
-    // @todo replace this with m_LightingDlg->m_BackgroundPage
-
-    this->view->getViewSettings(&settings);
-
-    // The visualization pipeline doc->_manager will serialize everything along
-    // with the gui settings
-    ///char *errorMsg = this->doc->_manager->Serialize(lpszPathName, &settings);
-    char *errorMsg = this->doc->_manager->Serialize(fileName.toLocal8Bit().data(), &settings);
-    if (errorMsg != 0)
-    {
-        QMessageBox::information(this, tr(""), tr(errorMsg));
-        return false;
-    }
-    setCurrentFile(fileName);
-    setModifiedFlag(false);
-    return true;
-}
+//// bool MainWindow::saveFile(const char *lpszPathName)
+//bool MainWindow::saveFile(const QString &fileName)
+//{
+//    /*
+//    * BOOL CMvDoc::OnSaveDocument(LPCTSTR lpszPathName)
+//    *
+//    // Note: The base class method CDocument::OnSaveDocument is not called
+//    // because serialization is done by the visualization pipeline doc->_manager.
+//    // Thus, the method CMvDoc::Serialize is not used in this program.
+//
+//    // Copy the gui settings from the doc
+//    mvGUISettings *gui = new mvGUISettings;
+//    m_CropDlg->UpdateData(TRUE);
+//    gui->cropBoundsXDelta = m_CropDlg->m_ControlsPage->m_XDelta;
+//    gui->cropBoundsYDelta = m_CropDlg->m_ControlsPage->m_YDelta;
+//    gui->cropBoundsZDelta = m_CropDlg->m_ControlsPage->m_ZDelta;
+//    m_AnimationDlg->m_OptionsPage->UpdateData(TRUE);
+//    gui->animationRotate  = m_AnimationDlg->m_OptionsPage->m_Rotate;
+//    gui->animationElevate = m_AnimationDlg->m_OptionsPage->m_Elevate;
+//    gui->animationDelay   = m_AnimationDlg->m_OptionsPage->m_Delay;
+//    m_LightingDlg->m_LightsPage->UpdateData(TRUE);
+//    gui->headlightOn             = m_LightingDlg->m_LightsPage->m_HeadlightOn;
+//    gui->auxiliaryLightOn        = m_LightingDlg->m_LightsPage->m_AuxiliaryLightOn;
+//    gui->headlightIntensity      = m_LightingDlg->m_LightsPage->m_HeadlightIntensity * 0.01;
+//    gui->auxiliaryLightIntensity = m_LightingDlg->m_LightsPage->m_AuxiliaryLightIntensity * 0.01;
+//    m_LightingDlg->m_BackgroundPage->UpdateData(TRUE);
+//    gui->customBackground = m_LightingDlg->m_BackgroundPage->m_Background;
+//
+//    // Copy the gui settings from the view
+//    POSITION pos          = GetFirstViewPosition();
+//    CMvView *pView        = (CMvView *)GetNextView(pos);
+//    pView->GetViewSettings(gui);
+//
+//    // The visualization pipeline doc->_manager will serialize everything along
+//    // with the gui settings
+//    char *errorMsg = m_Manager->Serialize(lpszPathName, gui);
+//    delete gui;
+//    if (errorMsg != 0)
+//    {
+//        AfxMessageBox(errorMsg);
+//        return FALSE;
+//    }
+//
+//    // Mark this document as saved
+//    SetModifiedFlag(FALSE);
+//    return TRUE;
+//    */
+//
+//    assert(doc->_gui);
+//    mvGUISettings settings(*doc->_gui);
+//
+//    // @todo replace this with m_CropDlg
+//    // @todo replace this with m_AnimationDlg->m_OptionsPage
+//    // @todo replace this with m_LightingDlg->m_LightsPage
+//    // @todo replace this with m_LightingDlg->m_BackgroundPage
+//
+//    this->view->getViewSettings(&settings);
+//
+//    // The visualization pipeline doc->_manager will serialize everything along
+//    // with the gui settings
+//    ///char *errorMsg = this->doc->_manager->Serialize(lpszPathName, &settings);
+//    char *errorMsg = this->doc->_manager->Serialize(fileName.toLocal8Bit().data(), &settings);
+//    if (errorMsg != 0)
+//    {
+//        QMessageBox::information(this, tr(""), tr(errorMsg));
+//        return false;
+//    }
+//    setCurrentFile(fileName);
+//    setModifiedFlag(false);
+//    return true;
+//}
 
 void MainWindow::openRecentFile()
 {

@@ -27,7 +27,7 @@ private slots:
     //void newFile();
     void onFileNew();
     void onFileOpen();        // application MainWindow::open
-    void closeFile();
+    void onFileClose();
     //bool save();
     //bool saveAs();
     void openRecentFile();
@@ -98,17 +98,17 @@ private:
 
     void            readSettings();
     void            writeSettings();
-    bool            maybeSave();
-    bool            saveFile(const QString &fileName);
+    //bool            maybeSave();
+    //bool            saveFile(const QString &fileName);
     void            setCurrentFile(const QString &fileName);
     QString         strippedName(const QString &fullFileName);
 
     void            setDataName(const QString &name);
     void            setModelName(const QString &name);
 
-    bool            _modifiedFlag;
-    bool            modifiedFlag();
-    void            setModifiedFlag(bool modifed);
+    //bool            _modifiedFlag;
+    //bool            modifiedFlag();
+    //void            setModifiedFlag(bool modifed);
 
     QLabel *        data;
     QLabel *        model;
@@ -189,7 +189,8 @@ private:
 
 
     // Toolbox
-    QAction *       geometryAction;
+    QAction *            dataAction;
+    QAction *            geometryAction;
 };
 
 #endif // MAINWINDOW_H
