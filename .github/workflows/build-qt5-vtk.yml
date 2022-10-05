@@ -71,6 +71,48 @@ jobs:
             aqt_host: windows,
             aqt_arch: win64_msvc2019_64
           }
+        - {
+            name: "qt5-vtk-macos-12-debug",
+            os: macos-12,
+            cmake_config: Debug,
+            aqt_host: mac,
+            aqt_arch: clang_64
+          }
+        - {
+            name: "qt5-vtk-ubuntu-22.04-debug",
+            os: ubuntu-22.04,
+            cmake_config: Debug,
+            aqt_host: linux,
+            aqt_arch: gcc_64
+          }
+        - {
+            name: "qt5-vtk-windows-2022-debug",
+            os: windows-2022,
+            cmake_config: Debug,
+            aqt_host: windows,
+            aqt_arch: win64_msvc2019_64
+          }
+        - {
+            name: "qt5-vtk-macos-12-release",
+            os: macos-12,
+            cmake_config: Release,
+            aqt_host: mac,
+            aqt_arch: clang_64
+          }
+        - {
+            name: "qt5-vtk-ubuntu-22.04-release",
+            os: ubuntu-22.04,
+            cmake_config: Release,
+            aqt_host: linux,
+            aqt_arch: gcc_64
+          }
+        - {
+            name: "qt5-vtk-windows-2022-release",
+            os: windows-2022,
+            cmake_config: Release,
+            aqt_host: windows,
+            aqt_arch: win64_msvc2019_64
+          }
 
     steps:
       - uses: actions/checkout@v3
