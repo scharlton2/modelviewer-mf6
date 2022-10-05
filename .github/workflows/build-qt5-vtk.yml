@@ -22,7 +22,7 @@ env:
 # therefore use ${{ runner.workspace }} instead of ${{ env.RUNNER_WORKSPACE }}
 
 jobs:
-  build:
+  cache:
     name: ${{ matrix.config.name }}
     runs-on: ${{ matrix.config.os }}
     strategy:
@@ -30,42 +30,42 @@ jobs:
       matrix:
         config:
         - {
-            name: "cache-qt5-vtk-macos-11-debug",
+            name: "qt5-vtk-macos-11-debug",
             os: macos-11,
             cmake_config: Debug,
             aqt_host: mac,
             aqt_arch: clang_64
           }
         - {
-            name: "cache-qt5-vtk-ubuntu-20.04-debug",
+            name: "qt5-vtk-ubuntu-20.04-debug",
             os: ubuntu-20.04,
             cmake_config: Debug,
             aqt_host: linux,
             aqt_arch: gcc_64
           }
         - {
-            name: "cache-qt5-vtk-windows-2019-debug",
+            name: "qt5-vtk-windows-2019-debug",
             os: windows-2019,
             cmake_config: Debug,
             aqt_host: windows,
             aqt_arch: win64_msvc2019_64
           }
         - {
-            name: "cache-qt5-vtk-macos-11-release",
+            name: "qt5-vtk-macos-11-release",
             os: macos-11,
             cmake_config: Release,
             aqt_host: mac,
             aqt_arch: clang_64
           }
         - {
-            name: "cache-qt5-vtk-ubuntu-20.04-release",
+            name: "qt5-vtk-ubuntu-20.04-release",
             os: ubuntu-20.04,
             cmake_config: Release,
             aqt_host: linux,
             aqt_arch: gcc_64
           }
         - {
-            name: "cache-qt5-vtk-windows-2019-release",
+            name: "qt5-vtk-windows-2019-release",
             os: windows-2019,
             cmake_config: Release,
             aqt_host: windows,
@@ -118,10 +118,10 @@ jobs:
           cmake --install ${{ runner.workspace }}/qt5-vtk-${{ env.VTK_VER }}-build --config ${{ matrix.config.cmake_config }}
 
 
-  merge:
+  build:
     name: ${{ matrix.config.name }}
     runs-on: ${{ matrix.config.os }}
-    needs: [build]
+    needs: [cache]
     strategy:
       fail-fast: false
       matrix:
@@ -130,19 +130,22 @@ jobs:
             name: "qt5-vtk-macos-11",
             os: macos-11,
             aqt_host: mac,
-            aqt_arch: clang_64
+            aqt_arch: clang_64,
+            package_suffix: "dmg"
           }
         - {
             name: "qt5-vtk-ubuntu-20.04",
             os: ubuntu-20.04,
             aqt_host: linux,
-            aqt_arch: gcc_64
+            aqt_arch: gcc_64,
+            package_suffix: "gz"
           }
         - {
             name: "qt5-vtk-windows-2019",
             os: windows-2019,
             aqt_host: windows,
-            aqt_arch: win64_msvc2019_64
+            aqt_arch: win64_msvc2019_64,
+            package_suffix: "zip"
           }
 
     steps:
@@ -201,138 +204,12 @@ jobs:
       - name: "*** Build modelviewer-mf6 release with cmake ***"
         run: cmake --build ./_ninja --config Release
 
-      - name: "*** Package modelviewer-mf6 release with cmake ***"
+      - name: "*** Package modelviewer-mf6 release with cpack ***"
         working-directory: ./_ninja
         run: cpack --verbose
 
-      - name: "*** Upload macos package ***"
-        if: matrix.config.os == 'macos-11'
+      - name: "*** Upload package ***"
         uses: actions/upload-artifact@v3
         with:
           name: ${{ matrix.config.os }}-artifact
-          path: ${{ github.workspace }}/_ninja/*.dmg
-
-      - name: "*** Upload ubuntu package ***"
-        if: matrix.config.os == 'ubuntu-20.04'
-        uses: actions/upload-artifact@v3
-        with:
-          name: ${{ matrix.config.os }}-artifact
-          path: ${{ github.workspace }}/_ninja/*-Linux.tar.gz
-
-      - name: "*** Upload windows package ***"
-        if: matrix.config.os == 'windows-2019'
-        uses: actions/upload-artifact@v3
-        with:
-          name: ${{ matrix.config.os }}-artifact
-          path: ${{ github.workspace }}/_ninja/*.zip
-
-
-      # - name: Configure test3 with cmake
-      #   env:
-      #     VTK_DIR: ${{ runner.workspace }}/qt5-vtk-${{ env.VTK_VER }}/lib/cmake
-      #   run: cmake -S test3 -B test3/_ninja -G "Ninja Multi-Config"
-
-      # - name: Build test3 debug with cmake
-      #   run: cmake --build test3/_ninja --config Debug
-
-      # - name: Build test3 release with cmake
-      #   run: cmake --build test3/_ninja --config Release
-
-      # - name: Install test3 release with cmake
-      #   run: cmake --install test3/_ninja --prefix ./test3/_ninja/INSTALL/. --config Release
-
-      # - name: Check test3 dependencies before deploy
-      #   shell: cmake -P {0}
-      #   run: |
-      #     if ("${CMAKE_HOST_SYSTEM_NAME}" STREQUAL "Linux")
-      #       execute_process(
-      #         COMMAND         ldd ./test3/_ninja/Release/SimpleView
-      #         RESULT_VARIABLE result
-      #       )
-      #       if (NOT result EQUAL 0)
-      #         message(FATAL_ERROR "ldd failed")
-      #       endif()
-      #     endif()
-      #     if ("${CMAKE_HOST_SYSTEM_NAME}" STREQUAL "Darwin")
-      #       execute_process(
-      #         COMMAND         otool -L ./test3/_ninja/Release/SimpleView.app/Contents/MacOS/SimpleView
-      #         RESULT_VARIABLE result
-      #       )
-      #       if (NOT result EQUAL 0)
-      #         message(FATAL_ERROR "otool -L failed")
-      #       endif()
-      #       execute_process(
-      #         COMMAND         otool -l ./test3/_ninja/Release/SimpleView.app/Contents/MacOS/SimpleView
-      #         RESULT_VARIABLE result
-      #       )
-      #       if (NOT result EQUAL 0)
-      #         message(FATAL_ERROR "otool -l failed")
-      #       endif()
-      #     endif()
-      #     if ("${CMAKE_HOST_SYSTEM_NAME}" STREQUAL "Windows")
-      #       execute_process(
-      #         COMMAND         dumpbin /imports ./test3/_ninja/Release/SimpleView.exe
-      #         RESULT_VARIABLE result
-      #       )
-      #       if (NOT result EQUAL 0)
-      #         message(FATAL_ERROR "dumpbin failed")
-      #       endif()
-      #     endif()
-
-      # - name: install
-      #   if: runner.os == 'Windows'
-      #   run: |
-      #     windeployqt test3/_ninja/INSTALL/bin/SimpleView.exe
-
-      # - name: install
-      #   if: runner.os == 'macOS'
-      #   run: |
-      #     macdeployqt test3/_ninja/INSTALL/bin/SimpleView.app
-
-      # - uses: actions/upload-artifact@v3
-      #   with:
-      #     name: ${{ matrix.config.aqt_host }}-artifact
-      #     path: ${{ github.workspace }}/test3/_ninja/INSTALL
-
-      # - name: Check test3 dependencies after deploy
-      #   shell: cmake -P {0}
-      #   run: |
-      #     if ("${CMAKE_HOST_SYSTEM_NAME}" STREQUAL "Linux")
-      #       execute_process(
-      #         COMMAND         ldd ./test3/_ninja/Release/SimpleView
-      #         RESULT_VARIABLE result
-      #       )
-      #       if (NOT result EQUAL 0)
-      #         message(FATAL_ERROR "ldd failed")
-      #       endif()
-      #     endif()
-      #     if ("${CMAKE_HOST_SYSTEM_NAME}" STREQUAL "Darwin")
-      #       execute_process(
-      #         COMMAND         otool -L ./test3/_ninja/INSTALL/bin/SimpleView.app/Contents/MacOS/SimpleView
-      #         RESULT_VARIABLE result
-      #       )
-      #       if (NOT result EQUAL 0)
-      #         message(FATAL_ERROR "otool -L failed")
-      #       endif()
-      #       execute_process(
-      #         COMMAND         otool -l ./test3/_ninja/INSTALL/bin/SimpleView.app/Contents/MacOS/SimpleView
-      #         RESULT_VARIABLE result
-      #       )
-      #       if (NOT result EQUAL 0)
-      #         message(FATAL_ERROR "otool -l failed")
-      #       endif()
-      #     endif()
-      #     if ("${CMAKE_HOST_SYSTEM_NAME}" STREQUAL "Windows")
-      #       execute_process(
-      #         COMMAND         dumpbin /imports ./test3/_ninja/INSTALL/bin/SimpleView.exe
-      #         RESULT_VARIABLE result
-      #       )
-      #       if (NOT result EQUAL 0)
-      #         message(FATAL_ERROR "dumpbin failed")
-      #       endif()
-      #     endif()
-
-      # - uses: actions/upload-artifact@v3
-      #   with:
-      #     name: ${{ matrix.config.aqt_host }}-artifact
-      #     path: ${{ github.workspace }}/test3/_ninja/INSTALL
+          path: ${{ github.workspace }}/_ninja/*.${{ matrix.config.package_suffix }}
