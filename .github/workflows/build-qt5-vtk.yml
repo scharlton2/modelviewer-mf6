@@ -22,7 +22,7 @@ env:
 # therefore use ${{ runner.workspace }} instead of ${{ env.RUNNER_WORKSPACE }}
 
 jobs:
-  cache:
+  cache-qt5-vtk:
     name: ${{ matrix.config.name }}
     runs-on: ${{ matrix.config.os }}
     strategy:
@@ -30,84 +30,84 @@ jobs:
       matrix:
         config:
         - {
-            name: "qt5-vtk-macos-11-debug",
+            name: "macos-11-debug",
             os: macos-11,
             cmake_config: Debug,
             aqt_host: mac,
             aqt_arch: clang_64
           }
         - {
-            name: "qt5-vtk-ubuntu-20.04-debug",
+            name: "ubuntu-20.04-debug",
             os: ubuntu-20.04,
             cmake_config: Debug,
             aqt_host: linux,
             aqt_arch: gcc_64
           }
         - {
-            name: "qt5-vtk-windows-2019-debug",
+            name: "windows-2019-debug",
             os: windows-2019,
             cmake_config: Debug,
             aqt_host: windows,
             aqt_arch: win64_msvc2019_64
           }
         - {
-            name: "qt5-vtk-macos-11-release",
+            name: "macos-11-release",
             os: macos-11,
             cmake_config: Release,
             aqt_host: mac,
             aqt_arch: clang_64
           }
         - {
-            name: "qt5-vtk-ubuntu-20.04-release",
+            name: "ubuntu-20.04-release",
             os: ubuntu-20.04,
             cmake_config: Release,
             aqt_host: linux,
             aqt_arch: gcc_64
           }
         - {
-            name: "qt5-vtk-windows-2019-release",
+            name: "windows-2019-release",
             os: windows-2019,
             cmake_config: Release,
             aqt_host: windows,
             aqt_arch: win64_msvc2019_64
           }
         - {
-            name: "qt5-vtk-macos-12-debug",
+            name: "macos-12-debug",
             os: macos-12,
             cmake_config: Debug,
             aqt_host: mac,
             aqt_arch: clang_64
           }
         - {
-            name: "qt5-vtk-ubuntu-22.04-debug",
+            name: "ubuntu-22.04-debug",
             os: ubuntu-22.04,
             cmake_config: Debug,
             aqt_host: linux,
             aqt_arch: gcc_64
           }
         - {
-            name: "qt5-vtk-windows-2022-debug",
+            name: "windows-2022-debug",
             os: windows-2022,
             cmake_config: Debug,
             aqt_host: windows,
             aqt_arch: win64_msvc2019_64
           }
         - {
-            name: "qt5-vtk-macos-12-release",
+            name: "macos-12-release",
             os: macos-12,
             cmake_config: Release,
             aqt_host: mac,
             aqt_arch: clang_64
           }
         - {
-            name: "qt5-vtk-ubuntu-22.04-release",
+            name: "ubuntu-22.04-release",
             os: ubuntu-22.04,
             cmake_config: Release,
             aqt_host: linux,
             aqt_arch: gcc_64
           }
         - {
-            name: "qt5-vtk-windows-2022-release",
+            name: "windows-2022-release",
             os: windows-2022,
             cmake_config: Release,
             aqt_host: windows,
@@ -161,30 +161,45 @@ jobs:
 
 
   build:
-    name: ${{ matrix.config.name }}
+    name: ${{ matrix.config.os }}
     runs-on: ${{ matrix.config.os }}
-    needs: [cache]
+    needs: [cache-qt5-vtk]
     strategy:
       fail-fast: false
       matrix:
         config:
         - {
-            name: "qt5-vtk-macos-11",
             os: macos-11,
             aqt_host: mac,
             aqt_arch: clang_64,
             package_suffix: "dmg"
           }
         - {
-            name: "qt5-vtk-ubuntu-20.04",
+            os: macos-12,
+            aqt_host: mac,
+            aqt_arch: clang_64,
+            package_suffix: "dmg"
+          }
+        - {
             os: ubuntu-20.04,
             aqt_host: linux,
             aqt_arch: gcc_64,
             package_suffix: "gz"
           }
         - {
-            name: "qt5-vtk-windows-2019",
+            os: ubuntu-22.04,
+            aqt_host: linux,
+            aqt_arch: gcc_64,
+            package_suffix: "gz"
+          }
+        - {
             os: windows-2019,
+            aqt_host: windows,
+            aqt_arch: win64_msvc2019_64,
+            package_suffix: "zip"
+          }
+        - {
+            os: windows-2022,
             aqt_host: windows,
             aqt_arch: win64_msvc2019_64,
             package_suffix: "zip"
@@ -195,8 +210,11 @@ jobs:
 
       #
       # Open 'PowerShell 7 for VS 2019 x64' in Windows Terminal
-      # @TODO aqt install command here (python)
-      # $env:Qt5_Dir="D:\a\qt-install\Qt\5.15.2\msvc2019_64"
+      #
+      # see https://ddalcino.github.io/aqt-list-server/
+      # aqt install-qt mac desktop 5.15.2 clang_64 --dir ${HOME}/work/modelviewer-mf6/Qt
+      # aqt install-qt linux desktop 5.15.2 gcc_64 --dir ${HOME}/work/modelviewer-mf6/Qt
+      # aqt install-qt windows desktop 5.15.2 win64_msvc2019_64 --dir ${env:USERPROFILE}\work\modelviewer-mf6\Qt
       #
       - name: Install Qt
         uses: jurplel/install-qt-action@v3
@@ -229,29 +247,30 @@ jobs:
           path: ${{ runner.workspace }}/qt5-vtk-${{ env.VTK_VER }}
           key: ${{ matrix.config.os }}-qt5-vtk-Release-${{ hashFiles('misc/CMakePresets-vtk-9.1.0-qt-5.15.2.json') }}
 
+        # the shell needs to be set to use ninja on windows
       - name: Set up Visual Studio shell
         if: runner.os == 'Windows'
         uses: egor-tensin/vs-shell@v2
         with:
           arch: x64
 
-      - name: "*** Configure modelviewer-mf6 ***"
+      - name: "*** Configure modelviewer-mf6 with cmake ***"
         env:
           VTK_DIR: ${{ runner.workspace }}/qt5-vtk-${{ env.VTK_VER }}/lib/cmake
-        run: cmake -S . -B ./_ninja -G "Ninja Multi-Config"
+        run: cmake -S . -B ./_ninja_multi -G "Ninja Multi-Config"
 
       - name: "*** Build modelviewer-mf6 debug with cmake ***"
-        run: cmake --build ./_ninja --config Debug
+        run: cmake --build ./_ninja_multi --config Debug
 
       - name: "*** Build modelviewer-mf6 release with cmake ***"
-        run: cmake --build ./_ninja --config Release
+        run: cmake --build ./_ninja_multi --config Release
 
       - name: "*** Package modelviewer-mf6 release with cpack ***"
-        working-directory: ./_ninja
+        working-directory: ./_ninja_multi
         run: cpack --verbose
 
       - name: "*** Upload package ***"
         uses: actions/upload-artifact@v3
         with:
           name: ${{ matrix.config.os }}-artifact
-          path: ${{ github.workspace }}/_ninja/*.${{ matrix.config.package_suffix }}
+          path: ${{ github.workspace }}/_ninja_multi/*.${{ matrix.config.package_suffix }}
