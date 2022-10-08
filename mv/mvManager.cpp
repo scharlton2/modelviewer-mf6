@@ -3697,13 +3697,13 @@ void mvManager::SetColorBarTextColor(double r, double g, double b)
 void mvManager::SetColorBarNumberOfLabels(int n)
 {
     m_ColorBar->SetNumberOfLabels(n);
-    m_NumColorBarLabels[m_ActiveDataType] = n;
+    if (m_NumColorBarLabels) m_NumColorBarLabels[m_ActiveDataType] = n;
 }
 
 void mvManager::SetColorBarLabelPrecision(int d)
 {
     m_ColorBar->SetLabelPrecision(d);
-    m_ColorBarLabelPrecision[m_ActiveDataType] = d;
+    if (m_ColorBarLabelPrecision) m_ColorBarLabelPrecision[m_ActiveDataType] = d;
 }
 
 void mvManager::SetColorBarColorScheme(int value)

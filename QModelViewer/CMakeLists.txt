@@ -65,6 +65,7 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 set(UI_FILES
   bitmapresolutiondialog.ui
+  colorbardialog.ui
   datadialog.ui
   displaysizedialog.ui
   exportanimationdialog.ui
@@ -76,6 +77,7 @@ set(UI_FILES
 
 set(HXX_FILES
   bitmapresolutiondialog.h
+  colorbardialog.h
   datadialog.h
   datafilesdialog.h
   displaysizedialog.h
@@ -92,6 +94,7 @@ set(HXX_FILES
 
 set(CXX_FILES
   bitmapresolutiondialog.cpp
+  colorbardialog.cpp
   datadialog.cpp
   datafilesdialog.cpp
   displaysizedialog.cpp
