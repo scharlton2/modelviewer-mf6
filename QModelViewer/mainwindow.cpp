@@ -347,6 +347,13 @@ void MainWindow::createActions()
     connect(dataAction, &QAction::triggered, doc, &MvDoc::onToolboxData);
 
 
+    // Toolbox->Color Bar
+    colorBarAction = new QAction(tr("&Color Bar"), this);
+    colorBarAction->setCheckable(true);
+    colorBarAction->setStatusTip(tr("Show or hide the Color Bar Toolbox"));
+    connect(colorBarAction, &QAction::triggered, doc, &MvDoc::onToolboxColorBar);
+
+
     // Toolbox->Geometry
     geometryAction = new QAction(tr("Geo&metry"), this);
     geometryAction->setCheckable(true);
@@ -513,10 +520,13 @@ void MainWindow::updateToolboxActions()
 #endif
 
     // Toolbox->Data
-    doc->onUpdateToolboxData(this->dataAction);
+    doc->onUpdateToolboxData(dataAction);
+
+    // Toolbox->Color Bar
+    doc->onUpdateToolboxColorBar(colorBarAction);
 
     // Toolbox->Geometry
-    doc->onUpdateToolboxGeometry(this->geometryAction);
+    doc->onUpdateToolboxGeometry(geometryAction);
 }
 
 bool MainWindow::isAnimating() const
@@ -703,6 +713,12 @@ void MainWindow::createMenus()
     // -----------------------------
     toolboxMenu->addSeparator();
 
+    // Toolbox->Color Bar
+    toolboxMenu->addAction(colorBarAction);
+
+    // -----------------------------
+    toolboxMenu->addSeparator();
+
     // Toolbox->Geometry
     toolboxMenu->addAction(geometryAction);
 }
@@ -861,7 +877,7 @@ bool MainWindow::onFileSave()
     }
     else
     {
-        return doc->saveFile(doc->_currentFile);
+        return doc->saveFile(doc->currentFile());
     }
 }
 
@@ -870,7 +886,7 @@ bool MainWindow::onFileSaveAs()
 {
     QString fileName = QFileDialog::getSaveFileName(this,
                                                     tr("Save As"),
-                                                    tr(""),
+                                                    doc->currentFile(),
                                                     tr("MvMf6 Files (*.mvmf6);;All Files (*.*)"));
     if (!fileName.isEmpty())
     {

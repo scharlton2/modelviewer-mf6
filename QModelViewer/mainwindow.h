@@ -190,6 +190,7 @@ private:
 
     // Toolbox
     QAction *            dataAction;
+    QAction *            colorBarAction;
     QAction *            geometryAction;
 };
 

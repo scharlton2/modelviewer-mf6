@@ -2,6 +2,10 @@
 
 #include <algorithm>
 
+#if defined(Q_OS_WIN) && !defined(NDEBUG)
+#include <windows.h>        // for testing RGB macro
+#endif
+
 #include <QAction>
 #include <QApplication>
 #include <QDir>
@@ -22,6 +26,7 @@
 #include "mvGUISettings.h"
 #include "mvManager.h"
 
+#include "colorbardialog.h"
 #include "datadialog.h"
 #include "geometrydialog.h"
 
@@ -85,11 +90,17 @@ MvDoc::MvDoc(QMainWindow* parent)
     m_AnimationDlg     = NULL;
     m_OverlayDlg       = NULL;
 #endif
-    geometryDialog = new GeometryDialog(parent, this);
-    geometryDialog->reinitialize();
 
     dataDialog = new DataDialog(parent, this);
-    dataDialog->reinitialize();
+    ///dataDialog->reinitialize();
+
+    colorBarDialog = new ColorBarDialog(parent, this);
+    ///colorBarDialog->reinitialize();
+
+    geometryDialog = new GeometryDialog(parent, this);
+    ///geometryDialog->reinitialize();
+
+    reinitializeToolDialogs();
 
     // Note: views have not been created yet they depend on MvDoc
 }
@@ -232,11 +243,30 @@ void MvDoc::onFileClose()
         view->applyViewSettings(_gui);
     }
 
-    geometryDialog->reinitialize();
-    dataDialog->reinitialize();
+    reinitializeToolDialogs();
     setCurrentFile("");
 
     QApplication::restoreOverrideCursor();
+}
+
+void MvDoc::reinitializeToolDialogs()
+{
+    dataDialog->reinitialize();
+    colorBarDialog->reinitialize();
+    //m_LightingDlg->Reinitialize();
+    //m_GridDlg->Reinitialize();
+    geometryDialog->reinitialize();
+    //m_SolidDlg->Reinitialize();
+    //m_IsosurfaceDlg->Reinitialize();
+    //m_VectorDlg->Reinitialize();
+    //m_VectorDlg->ShowWindow(SW_HIDE);
+    //m_PathlinesDlg->Reinitialize();
+    //m_PathlinesDlg->ShowWindow(SW_HIDE);
+    //m_ModelFeaturesDlg->Reinitialize();
+    //m_ModelFeaturesDlg->ShowWindow(SW_HIDE);
+    //m_OverlayDlg->Reinitialize();
+    //m_CropDlg->Reinitialize();
+    //m_AnimationDlg->Reinitialize();
 }
 
 void MvDoc::onFileNew()
@@ -247,9 +277,10 @@ void MvDoc::onFileNew()
     delete _manager;
     _manager = new mvManager;
 
-    geometryDialog->reinitialize();
-    dataDialog->reinitialize();
-
+    //dataDialog->reinitialize();
+    //colorBarDialog->reinitialize();
+    //geometryDialog->reinitialize();
+    reinitializeToolDialogs();
 
     char selectedModel[20];
     // This version of Model View is customized to display only Modflow 6 results.
@@ -552,7 +583,7 @@ const double* MvDoc::GetTimeLabelPosition() const
 /////////////////////////////////////////////////////////////////////////////
 // Color Bar
 
-void MvDoc::SetColorBarEndPoints(double valueBlue, double valueRed)
+void MvDoc::setColorBarEndPoints(double valueBlue, double valueRed)
 {
     _manager->SetColorBarEndPoints(valueBlue, valueRed);
     updateAllViews(nullptr);
@@ -657,46 +688,62 @@ int MvDoc::GetColorBarColorScheme()
     return _manager->GetColorBarColorScheme();
 }
 
-unsigned long MvDoc::GetColorBarFirstCustomColor()
+std::uint32_t MvDoc::GetColorBarFirstCustomColor()
 {
     return _manager->GetColorBarFirstCustomColor();
 }
 
-unsigned long MvDoc::GetColorBarLastCustomColor()
+std::uint32_t MvDoc::GetColorBarLastCustomColor()
 {
     return _manager->GetColorBarLastCustomColor();
 }
 
-void MvDoc::SetColorBarFirstCustomColor(unsigned long value)
+void MvDoc::SetColorBarFirstCustomColor(std::uint32_t value)
 {
     _manager->SetColorBarFirstCustomColor(value);
     updateAllViews(nullptr);
     setModified(true);
 }
 
-void MvDoc::SetColorBarLastCustomColor(unsigned long value)
+void MvDoc::SetColorBarFirstCustomColor(QColor color)
+{
+#if defined(Q_OS_WIN) && !defined(NDEBUG)
+    assert(RGB(color.red(), color.green(), color.blue()) == qRgba(color.red(), color.green(), color.blue(), 0));
+#endif
+    SetColorBarFirstCustomColor(qRgba(color.red(), color.green(), color.blue(), 0));    
+}
+
+void MvDoc::SetColorBarLastCustomColor(std::uint32_t value)
 {
     _manager->SetColorBarLastCustomColor(value);
     updateAllViews(nullptr);
     setModified(true);
 }
 
-int MvDoc::GetColorBarSource()
+void MvDoc::SetColorBarLastCustomColor(QColor color)
+{
+#if defined(Q_OS_WIN) && !defined(NDEBUG)
+    assert(RGB(color.red(), color.green(), color.blue()) == qRgba(color.red(), color.green(), color.blue(), 0));
+#endif
+    SetColorBarLastCustomColor(qRgba(color.red(), color.green(), color.blue(), 0));
+}
+
+int MvDoc::getColorBarSource()
 {
     return _manager->GetColorBarSource();
 }
 
-void MvDoc::SetColorBarSource(int value)
+void MvDoc::setColorBarSource(int value)
 {
     _manager->SetColorBarSource(value);
 }
 
-double MvDoc::GetColorBarValueBlue() const
+double MvDoc::getColorBarValueBlue() const
 {
     return _manager->GetColorBarValueBlue();
 }
 
-double MvDoc::GetColorBarValueRed() const
+double MvDoc::getColorBarValueRed() const
 {
     return _manager->GetColorBarValueRed();
 }
@@ -1365,19 +1412,19 @@ void MvDoc::updateAnimationPosition()
 
 void MvDoc::updateToolDialogs(mvGUISettings* gui)
 {
-    //UpdateColorBarDlg();
-    //UpdateSolidDlg();
-    //UpdateIsosurfaceDlg();
-    //UpdateLightingDlg(gui);
+    updateColorBarDialog();
+    updateSolidDialog();
+    updateIsosurfaceDialog();
+    updateLightingDialog(gui);
     updateGeometryDialog();
-    //UpdateGridDlg();
-    //UpdateAnimationDlg(gui);
-    //UpdateVectorDlg();
-    //UpdateCropDlg(gui);
+    updateGridDialog();
+    updateAnimationDialog(gui);
+    updateVectorDialog();
+    updateCropDialog(gui);
     updateDataDialog();
-    //UpdatePathlinesDlg();
-    //UpdateModelFeaturesDlg();
-    //UpdateOverlayDlg();
+    updatePathlinesDialog();
+    updateModelFeaturesDialog();
+    updateOverlayDialog();
 }
 
 
@@ -1560,13 +1607,188 @@ void MvDoc::setScalarDataTypeTo(int index)
 
     _manager->SetScalarDataTypeTo(index);
 
-    //updateColorBarDlg();          // @todo
-    //updateSolidDlg();             // @todo
-    //updateIsosurfaceDlg();        // @todo
+    //updateColorBarDialog();          // @todo
+    //updateSolidDialog();             // @todo
+    //updateIsosurfaceDialog();        // @todo
     double range[2];
     _manager->GetScalarDataRange(range);
     dataDialog->setScalarDataRange(range);
 
     updateAllViews(nullptr);
     setModified(true);
+}
+
+/////////////////////////////////////////////////////////////////////////////
+// utilities
+bool MvDoc::hasPathlineData() const
+{
+    return (_manager->HasPathlineData() != 0);
+}
+
+
+/////////////////////////////////////////////////////////////////////////////
+// Toolbox->Color Bar
+
+// afx_msg void OnUpdateColorBarTool(CCmdUI* pCmdUI);
+void MvDoc::onUpdateToolboxColorBar(QAction* action)
+{
+    assert(colorBarDialog);
+    action->setChecked(colorBarDialog->isVisible());
+}
+
+// afx_msg void OnColorBarTool();
+void MvDoc::onToolboxColorBar()
+{
+    assert(colorBarDialog);
+    if (colorBarDialog->isVisible())
+    {
+        colorBarDialog->hide();
+    }
+    else
+    {
+        colorBarDialog->show();
+    }
+}
+
+// void UpdateColorBarDlg()
+void MvDoc::updateColorBarDialog()
+{ 
+    assert(colorBarDialog);
+
+    //CColorBarDataSource* data_source = m_ColorBarDlg->m_DataSource;
+    //data_source->m_DataSourceIndex   = m_Manager->GetColorBarSource();
+    //data_source->CustomUpdateData(FALSE);
+
+    // Source
+    colorBarDialog->dataSourceIndex = _manager->GetColorBarSource();
+    colorBarDialog->updateDataSource(false);
+
+    //CColorBarLimitsPage *lim = m_ColorBarDlg->m_LimitsPage;
+    //lim->m_ValueBlue = m_Manager->GetColorBarValueBlue();
+    //lim->m_ValueRed  = m_Manager->GetColorBarValueRed();
+    //lim->m_LogScaleCheckBox.SetCheck(!m_Manager->IsColorBarLinear());
+    //lim->CustomUpdateData(FALSE);
+
+    // Limits
+    colorBarDialog->valueBlue        = _manager->GetColorBarValueBlue();
+    colorBarDialog->valueRed         = _manager->GetColorBarValueRed();
+    colorBarDialog->isColorBarLinear = _manager->IsColorBarLinear();
+    colorBarDialog->updateDataLimits(false);
+
+
+    //CColorBarSizePage* size = m_ColorBarDlg->m_SizePage;
+    //size->m_Width           = m_Manager->GetColorBarWidth();
+    //size->m_Height          = m_Manager->GetColorBarHeight();
+    //size->m_Offset          = m_Manager->GetColorBarOffset();
+    //size->CustomUpdateData(FALSE);
+
+    // Size
+    colorBarDialog->width  = _manager->GetColorBarWidth();
+    colorBarDialog->height = _manager->GetColorBarHeight();
+    colorBarDialog->offset = _manager->GetColorBarOffset();
+    colorBarDialog->updateDataSize(false);
+
+
+    //CColorBarTextPage* text = m_ColorBarDlg->m_TextPage;
+    //text->m_FontSize        = m_Manager->GetColorBarFontSize();
+    //text->m_NumLabels       = m_Manager->GetColorBarNumberOfLabels();
+    //text->m_Precision       = m_Manager->GetColorBarLabelPrecision();
+    //const double* rgb       = m_Manager->GetColorBarTextColor();
+    //text->m_ColorOption     = (int)(rgb[0] * 2 + 0.1);
+    //text->CustomUpdateData(FALSE);
+
+    // Labels (text)
+    colorBarDialog->fontSize    = _manager->GetColorBarFontSize();
+    colorBarDialog->numLabels   = _manager->GetColorBarNumberOfLabels();
+    colorBarDialog->precision   = _manager->GetColorBarLabelPrecision();
+    const double* rgb           = _manager->GetColorBarTextColor();
+    colorBarDialog->colorOption = (int)(rgb[0] * 2 + 0.1);
+    colorBarDialog->updateDataLabels(false);
+
+
+    //CColorBarColorsPage* scheme = m_ColorBarDlg->m_ColorsPage;
+    //scheme->InitializeDialog();
+
+    // Colors
+    colorBarDialog->updateDataColors(false);
+
+
+    //m_ColorBarDlg->m_PropertySheet->SetActivePage(0);
+    //m_ColorBarDlg->Activate(TRUE);
+    colorBarDialog->setCurrentIndex(0);
+    colorBarDialog->activate(true);
+}
+
+/////////////////////////////////////////////////////////////////////////////
+// Toolbox->???
+
+
+void MvDoc::getPathlineTimeRange(double* range)
+{
+    _manager->GetPathlineTimeRange(range);
+}
+
+void MvDoc::getScalarDataRange(double* range)
+{
+    _manager->GetScalarDataRange(range);
+}
+
+
+void MvDoc::updateSolidDialog()
+{
+    // @todo
+    assert(solidDialog);
+}
+void MvDoc::updateIsosurfaceDialog()
+{
+    // @todo
+    assert(isosurfaceDialog);
+}
+
+void MvDoc::updateLightingDialog(mvGUISettings* gui)
+{
+    // @todo
+    assert(lightingDialog);
+}
+
+void MvDoc::updateGridDialog()
+{
+    // @todo
+    assert(gridDialog);
+}
+
+void MvDoc::updateAnimationDialog(mvGUISettings* gui)
+{
+    // @todo
+    assert(animationDialog);
+}
+
+void MvDoc::updateVectorDialog()
+{
+    // @todo
+    assert(vectorDialog);
+}
+
+void MvDoc::updateCropDialog(mvGUISettings* gui)
+{
+    // @todo
+    assert(cropDialog);
+}
+
+void MvDoc::updatePathlinesDialog()
+{
+    // @todo
+    //assert(pathlinesDialog);
+}
+
+void MvDoc::updateModelFeaturesDialog()
+{
+    // @todo
+    assert(modelFeaturesDialog);
+}
+
+void MvDoc::updateOverlayDialog()
+{
+    // @todo
+    assert(overlayDialog);
 }

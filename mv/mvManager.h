@@ -2,7 +2,11 @@
 #define __mvManager_h
 
 #include "mvDataSource.h"
-#include "vtkSmartPointer.h"
+
+#include <vtkSmartPointer.h>
+
+#include <cstdint>
+#include <math.h>
 #include <math.h>
 #include <typeinfo>
 #include <algorithm>
@@ -323,10 +327,10 @@ public:
     const double                      *GetColorBarTextColor() const;
     int                                GetColorBarNumberOfLabels() const;
     int                                GetColorBarLabelPrecision() const;
-    unsigned long                      GetColorBarFirstCustomColor() const;
-    unsigned long                      GetColorBarLastCustomColor() const;
-    void                               SetColorBarFirstCustomColor(unsigned long value);
-    void                               SetColorBarLastCustomColor(unsigned long value);
+    std::uint32_t                      GetColorBarFirstCustomColor() const;
+    std::uint32_t                      GetColorBarLastCustomColor() const;
+    void                               SetColorBarFirstCustomColor(std::uint32_t value);
+    void                               SetColorBarLastCustomColor(std::uint32_t value);
     int                                GetColorBarSource() const;
     void                               SetColorBarSource(int value);
 

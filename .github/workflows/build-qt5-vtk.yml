@@ -142,7 +142,7 @@ jobs:
 
       - name: Cache qt5-vtk
         id: cache-qt5-vtk
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: ${{ runner.workspace }}/qt5-vtk-${{ env.VTK_VER }}
           key: ${{ matrix.config.os }}-qt5-vtk-${{ matrix.config.cmake_config }}-${{ hashFiles('misc/CMakePresets-vtk-9.1.0-qt-5.15.2.json') }}
@@ -235,14 +235,14 @@ jobs:
 
       - name: Cache qt5-vtk debug
         id: cache-qt5-vtk-debug
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: ${{ runner.workspace }}/qt5-vtk-${{ env.VTK_VER }}
           key: ${{ matrix.config.os }}-qt5-vtk-Debug-${{ hashFiles('misc/CMakePresets-vtk-9.1.0-qt-5.15.2.json') }}
 
       - name: Cache qt5-vtk release
         id: cache-qt5-vtk-release
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: ${{ runner.workspace }}/qt5-vtk-${{ env.VTK_VER }}
           key: ${{ matrix.config.os }}-qt5-vtk-Release-${{ hashFiles('misc/CMakePresets-vtk-9.1.0-qt-5.15.2.json') }}
