@@ -21,6 +21,11 @@ ColorBarDialog::ColorBarDialog(QWidget *parent, MvDoc *doc)
 {
     ui->setupUi(this);
 
+    // Source
+    // @todo need pathlines to test 
+    // ui->comboBoxSource
+
+
     // Limits
     connect(ui->pushButtonReverse, &QAbstractButton::clicked, this, &ColorBarDialog::onReverse);
 
@@ -145,7 +150,7 @@ bool ColorBarDialog::updateData(bool saveAndValidate)
     int n = ui->tabWidget->currentIndex();
     switch (n)
     {
-    case 0: // source
+    case 0: // Source
         return updateDataSource(saveAndValidate);
         break;
     case 1: // Limits
@@ -172,10 +177,12 @@ bool ColorBarDialog::updateDataSource(bool saveAndValidate)
     {
         // Source
         dataSourceIndex = ui->comboBoxSource->currentIndex();
+        assert(dataSourceIndex == 0); // @todo pathlines
     }
     else
     {
         // Source
+        assert(dataSourceIndex == 0); // @todo pathlines
         ui->comboBoxSource->setCurrentIndex(dataSourceIndex);
     }
     return true;
@@ -280,7 +287,7 @@ bool ColorBarDialog::updateDataColors(bool saveAndValidate)
     }
     else
     {
-        // no-op
+        ui->comboBoxColorScheme->setCurrentIndex((doc->GetColorBarColorScheme()));
     }
     return true;
 }
@@ -364,7 +371,7 @@ void ColorBarDialog::onDefaultLimits()
 {
     double range[2];
 
-    if (doc->getColorBarSource() == 0)
+    if (doc->getColorBarSource() == MV_DATASET)
     {
         doc->getScalarDataRange(range);
     }
@@ -399,12 +406,8 @@ void ColorBarDialog::onDefaultLimits()
             valueRed  = range[0];
         }
     }
-    //ui->lineEditValueBlue->setText(QString(tr("%1")).arg(valueBlue));
-    //ui->lineEditValueRed->setText(QString(tr("%1")).arg(valueRed));
-    //ui->checkBoxLogScale->setChecked(false);
     isColorBarLinear = true;
     updateDataLimits(false);
-    //CustomUpdateData(FALSE);
     doc->UseLinearColorBar();
     doc->setColorBarEndPoints(valueBlue, valueRed);
 }
@@ -443,18 +446,12 @@ void ColorBarDialog::onDefaultColors()
 void ColorBarDialog::activate(bool b)
 {
     // Source
-    //GetDlgItem(IDC_COMBO_DATA_SOURCE)->EnableWindow(b && m_pDoc->HasPathlineData());
     ui->labelSource->setEnabled(b && doc->hasPathlineData());
     ui->comboBoxSource->setEnabled(b && doc->hasPathlineData());
 
     // Limits
-    //GetDlgItem(IDC_VALUE_BLUE)->EnableWindow(b);
-    //GetDlgItem(IDC_VALUE_RED)->EnableWindow(b);
-    //GetDlgItem(IDC_REVERSE)->EnableWindow(b);
-    //m_LogScaleCheckBox.EnableWindow(b);
     ui->labelValueBlue->setEnabled(b);
     ui->labelValueRed->setEnabled(b);
-
 
     ui->lineEditValueBlue->setEnabled(b);
     ui->lineEditValueRed->setEnabled(b);
@@ -462,9 +459,6 @@ void ColorBarDialog::activate(bool b)
     ui->checkBoxLogScale->setEnabled(b);
 
     // Size
-    //GetDlgItem(IDC_HEIGHT)->EnableWindow(b);
-    //GetDlgItem(IDC_WIDTH)->EnableWindow(b);
-    //GetDlgItem(IDC_OFFSET)->EnableWindow(b);
     ui->labelHeight->setEnabled(b);
     ui->labelWidth->setEnabled(b);
     ui->labelOffset->setEnabled(b);
@@ -474,12 +468,6 @@ void ColorBarDialog::activate(bool b)
     ui->spinBoxOffset->setEnabled(b);
 
     // Labels (Text)
-    //GetDlgItem(IDC_FONT_SIZE)->EnableWindow(b);
-    //GetDlgItem(IDC_NUM_LABELS)->EnableWindow(b);
-    //GetDlgItem(IDC_PRECISION)->EnableWindow(b);
-    //GetDlgItem(IDC_BLACK)->EnableWindow(b);
-    //GetDlgItem(IDC_GRAY)->EnableWindow(b);
-    //GetDlgItem(IDC_WHITE)->EnableWindow(b);
     ui->labelFontSize->setEnabled(b);
     ui->labelNumLabels->setEnabled(b);
     ui->labelPrecision->setEnabled(b);
@@ -492,21 +480,6 @@ void ColorBarDialog::activate(bool b)
     ui->radioButtonWhite->setEnabled(b);
 
     // Colors
-    //b             = b && (m_pDoc->GetColorBarSource() == 0);
-    //CComboBox *cb = (CComboBox *)GetDlgItem(IDC_COMBO_COLOR_SCHEME);
-    //cb->EnableWindow(b);
-    //if (b)
-    //{
-    //    int selection = cb->GetCurSel();
-    //    // enable color selection buttons if the custom scheme is choosen.
-    //    GetDlgItem(IDC_LowerColorButton)->EnableWindow(selection == 2);
-    //    GetDlgItem(IDC_UpperColorButton)->EnableWindow(selection == 2);
-    //}
-    //else
-    //{
-    //    GetDlgItem(IDC_LowerColorButton)->EnableWindow(FALSE);
-    //    GetDlgItem(IDC_UpperColorButton)->EnableWindow(FALSE);
-    //}
     b = b && (doc->getColorBarSource() == 0);
     ui->labelColorScheme->setEnabled(b);
     ui->comboBoxColorScheme->setEnabled(b);
@@ -553,22 +526,12 @@ void ColorBarDialog::applyDataSize()
 
 void ColorBarDialog::applyDataLabels()
 {
-    //if (CustomUpdateData(TRUE))
-    //{
-    //    if (m_NumLabels < 0)
-    //    {
-    //        m_NumLabels = 0;
-    //        CustomUpdateData(FALSE);
-    //    }
-    //    m_pDoc->SetColorBarFontSize(m_FontSize, FALSE);
-    //    m_pDoc->SetColorBarNumberOfLabels(m_NumLabels, FALSE);
-    //    m_pDoc->SetColorBarLabelPrecision(m_Precision);
-    //}
+    // no-op
 }
 
 void ColorBarDialog::applyDataColors()
 {
-
+    // no-op
 }
 
 void ColorBarDialog::onLowerColor()
@@ -623,13 +586,12 @@ void ColorBarDialog::onLogScale()
         }
         else
         {
-            // doc->SetPathlineLogTransform(!isColorBarLinear);  @todo
+            // doc->SetPathlineLogTransform(!isColorBarLinear);  @todo pathlines
             doc->updatePathlinesDialog();
         }
     }
     else
     {
-        //m_LogScaleCheckBox.SetCheck(FALSE);
         ui->checkBoxLogScale->setChecked(false);
     }
 }

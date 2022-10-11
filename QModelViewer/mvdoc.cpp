@@ -2,6 +2,10 @@
 
 #include <algorithm>
 
+#if defined(Q_OS_WIN) && !defined(NDEBUG)
+#include <windows.h>        // for testing RGB macro
+#endif
+
 #include <QAction>
 #include <QApplication>
 #include <QDir>
@@ -684,32 +688,32 @@ int MvDoc::GetColorBarColorScheme()
     return _manager->GetColorBarColorScheme();
 }
 
-unsigned long MvDoc::GetColorBarFirstCustomColor()
+std::uint32_t MvDoc::GetColorBarFirstCustomColor()
 {
     return _manager->GetColorBarFirstCustomColor();
 }
 
-unsigned long MvDoc::GetColorBarLastCustomColor()
+std::uint32_t MvDoc::GetColorBarLastCustomColor()
 {
     return _manager->GetColorBarLastCustomColor();
 }
 
-void MvDoc::SetColorBarFirstCustomColor(unsigned long value)
+void MvDoc::SetColorBarFirstCustomColor(std::uint32_t value)
 {
     _manager->SetColorBarFirstCustomColor(value);
     updateAllViews(nullptr);
     setModified(true);
 }
 
-// from wingdi.h
-#define RGB(r, g, b) ((unsigned long)(((unsigned char)(r) | ((unsigned short)((unsigned char)(g)) << 8)) | (((unsigned long)(unsigned char)(b)) << 16)))
-
 void MvDoc::SetColorBarFirstCustomColor(QColor color)
 {
-    SetColorBarFirstCustomColor(RGB(color.red(), color.green(), color.blue()));
+#if defined(Q_OS_WIN) && !defined(NDEBUG)
+    assert(RGB(color.red(), color.green(), color.blue()) == qRgba(color.red(), color.green(), color.blue(), 0));
+#endif
+    SetColorBarFirstCustomColor(qRgba(color.red(), color.green(), color.blue(), 0));    
 }
 
-void MvDoc::SetColorBarLastCustomColor(unsigned long value)
+void MvDoc::SetColorBarLastCustomColor(std::uint32_t value)
 {
     _manager->SetColorBarLastCustomColor(value);
     updateAllViews(nullptr);
@@ -718,9 +722,11 @@ void MvDoc::SetColorBarLastCustomColor(unsigned long value)
 
 void MvDoc::SetColorBarLastCustomColor(QColor color)
 {
-    SetColorBarLastCustomColor(RGB(color.red(), color.green(), color.blue()));
+#if defined(Q_OS_WIN) && !defined(NDEBUG)
+    assert(RGB(color.red(), color.green(), color.blue()) == qRgba(color.red(), color.green(), color.blue(), 0));
+#endif
+    SetColorBarLastCustomColor(qRgba(color.red(), color.green(), color.blue(), 0));
 }
-
 
 int MvDoc::getColorBarSource()
 {

@@ -9,17 +9,19 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
+#include <cstdint>
+
 #include "vtkLogLookupTable.h"
 #include "mvColorTable.h"
 
 class mvLogColorTable : public vtkLogLookupTable
 {
 protected:
-    void          FillColorTable(unsigned long lowercolor, unsigned long uppercolor);
+    void          FillColorTable(std::uint32_t lowercolor, std::uint32_t uppercolor);
     bool          m_TransformValues;
     int           m_ColorScheme;
-    unsigned long m_FirstCustomColor;
-    unsigned long m_LastCustomColor;
+    std::uint32_t m_FirstCustomColor;
+    std::uint32_t m_LastCustomColor;
 
 public:
     vtkTypeMacro(mvLogColorTable, vtkLogLookupTable);
@@ -36,10 +38,10 @@ public:
     void                    SetReversedModifiedColorScheme();
     void                    SetCustomColorScheme();
     void                    SetReversedCustomColorScheme();
-    unsigned long           GetFirstCustomColor() { return m_FirstCustomColor; };
-    unsigned long           GetLastCustomColor() { return m_LastCustomColor; };
-    void                    SetFirstCustomColor(unsigned long value);
-    void                    SetLastCustomColor(unsigned long value);
+    std::uint32_t           GetFirstCustomColor() { return m_FirstCustomColor; };
+    std::uint32_t           GetLastCustomColor() { return m_LastCustomColor; };
+    void                    SetFirstCustomColor(std::uint32_t value);
+    void                    SetLastCustomColor(std::uint32_t value);
 
 protected:
     mvLogColorTable();

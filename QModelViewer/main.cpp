@@ -1,4 +1,7 @@
+#include <cstdint>
+
 #include <QApplication>
+#include <QDebug>
 #include <QGuiApplication>
 #include <QIcon>
 #include <QSurfaceFormat>
@@ -55,6 +58,13 @@ int main(int argc, char** argv)
 #if defined(_DEBUG)
   int* leak1968 = (int*)malloc(1968);
 #endif
+
+  qDebug() << "sizeof(unsigned char)"  << sizeof(unsigned char);
+  qDebug() << "sizeof(unsigned short)" << sizeof(unsigned short);
+  qDebug() << "sizeof(unsigned int)"   << sizeof(unsigned int);
+  qDebug() << "sizeof(unsigned long)"  << sizeof(unsigned long);
+  qDebug() << "sizeof(std::uint32_t)"  << sizeof(std::uint32_t);
+  qDebug() << "sizeof(std::uint64_t)"  << sizeof(std::uint64_t);
 
   // needed to ensure appropriate OpenGL context is created for VTK rendering.
   QSurfaceFormat::setDefaultFormat(QVTKOpenGLNativeWidget::defaultFormat());

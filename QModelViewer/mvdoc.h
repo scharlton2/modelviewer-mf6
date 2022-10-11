@@ -1,6 +1,7 @@
 #ifndef MVDOC_H
 #define MVDOC_H
 
+#include <cstdint>
 #include <list>
 #include <vector>
 #include <string>
@@ -119,11 +120,11 @@ public:
     int                                GetColorBarOffset();
     int                                GetColorBarFontSize();
     int                                GetColorBarColorScheme();
-    unsigned long                      GetColorBarFirstCustomColor();
-    unsigned long                      GetColorBarLastCustomColor();
-    void                               SetColorBarFirstCustomColor(unsigned long value);
+    std::uint32_t                      GetColorBarFirstCustomColor();
+    std::uint32_t                      GetColorBarLastCustomColor();
+    void                               SetColorBarFirstCustomColor(std::uint32_t value);
     void                               SetColorBarFirstCustomColor(QColor color);
-    void                               SetColorBarLastCustomColor(unsigned long value);
+    void                               SetColorBarLastCustomColor(std::uint32_t value);
     void                               SetColorBarLastCustomColor(QColor color);
 
     int                                getColorBarSource();

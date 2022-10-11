@@ -8,6 +8,8 @@ project (
   LANGUAGES CXX C
 )
 
+set(CMAKE_CXX_STANDARD 11)
+
 # set standard directory locations
 include(GNUInstallDirs)
 

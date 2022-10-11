@@ -3850,17 +3850,17 @@ int mvManager::GetColorBarColorScheme() const
     return m_ColorBar->GetColorScheme();
 }
 
-unsigned long mvManager::GetColorBarFirstCustomColor() const
+std::uint32_t mvManager::GetColorBarFirstCustomColor() const
 {
     return dynamic_cast<mvColorTable *>(m_LutCustomScale)->GetFirstCustomColor();
 }
 
-unsigned long mvManager::GetColorBarLastCustomColor() const
+std::uint32_t mvManager::GetColorBarLastCustomColor() const
 {
     return dynamic_cast<mvColorTable *>(m_LutCustomScale)->GetLastCustomColor();
 }
 
-void mvManager::SetColorBarFirstCustomColor(unsigned long value)
+void mvManager::SetColorBarFirstCustomColor(std::uint32_t value)
 {
     dynamic_cast<mvColorTable *>(m_LutCustomScale)->SetFirstCustomColor(value);
     dynamic_cast<mvColorTable *>(m_LutCustomScale)->SetCustomColorScheme();
@@ -3875,7 +3875,7 @@ void mvManager::SetColorBarFirstCustomColor(unsigned long value)
     dynamic_cast<mvLogColorTable *>(m_LogLutReversedCustomScale)->SetReversedCustomColorScheme();
 }
 
-void mvManager::SetColorBarLastCustomColor(unsigned long value)
+void mvManager::SetColorBarLastCustomColor(std::uint32_t value)
 {
     dynamic_cast<mvColorTable *>(m_LutCustomScale)->SetLastCustomColor(value);
     dynamic_cast<mvColorTable *>(m_LutCustomScale)->SetCustomColorScheme();
@@ -4881,8 +4881,8 @@ char *mvManager::Serialize(const char *fileName, mvGUISettings *gui) const
     out << "Color bar label color option = " << (int)(rgb[0] * 2 + .1) << endl;
     out << "Color bar color scheme = " << GetColorBarColorScheme() << endl;
 
-    unsigned long color = GetColorBarFirstCustomColor();
-    unsigned long red, green, blue;
+    std::uint32_t color = GetColorBarFirstCustomColor();
+    std::uint32_t red, green, blue;
     // red
     red   = color;
     red   = red << 24;
@@ -5406,7 +5406,7 @@ void mvManager::Deserialize(const char *fileName, mvGUISettings *gui, std::strin
     {
         SetColorBarColorScheme(ivalue);
     }
-    unsigned long color, red, green, blue;
+    std::uint32_t color, red, green, blue;
     if (hashTable->GetHashTableValue("Color bar first custom color red", ivalue))
     {
         red = ivalue;
