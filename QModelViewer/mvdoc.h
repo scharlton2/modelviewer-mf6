@@ -162,6 +162,19 @@ public:
     void                               onUpdateToolboxColorBar(QAction* action);
     //void                               setScalarDataTypeTo(int index);
 
+    // Toolbar->Lighting
+    void                               onToolboxLighting();
+    void                               onUpdateToolboxLighting(QAction* action);
+    void                               switchOnHeadlight(bool switchOn);
+    void                               setHeadlightIntensity(double intensity);
+    void                               switchOnAuxiliaryLight(bool switchOn);
+    void                               setAuxiliaryLightIntensity(double intensity);
+    void                               setAuxiliaryLightPosition(double x, double y, double z);
+    void                               setDiffuseLighting(double diffuse);
+    void                               setAmbientLighting(double ambient);
+    void                               setSpecularLighting(double specular);
+    void                               setSpecularPower(double specularPower);
+    void                               setBackgroundColor(double red, double green, double blue);
 
     // Toolbox->Geometry
     void                               onToolboxGeometry();

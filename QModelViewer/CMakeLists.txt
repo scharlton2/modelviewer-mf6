@@ -70,6 +70,7 @@ set(UI_FILES
   displaysizedialog.ui
   exportanimationdialog.ui
   geometrydialog.ui
+  lightingdialog.ui
   mainwindow.ui
   modflow6datafilesdialog.ui
   preferencesdialog.ui
@@ -83,6 +84,7 @@ set(HXX_FILES
   displaysizedialog.h
   exportanimationdialog.h
   geometrydialog.h
+  lightingdialog.h
   mainwindow.h
   mvdoc.h
   mvview.h
@@ -100,6 +102,7 @@ set(CXX_FILES
   displaysizedialog.cpp
   exportanimationdialog.cpp
   geometrydialog.cpp
+  lightingdialog.cpp
   main.cpp
   mainwindow.cpp
   modflow6datafilesdialog.cpp

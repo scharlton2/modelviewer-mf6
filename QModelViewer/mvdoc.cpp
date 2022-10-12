@@ -29,6 +29,7 @@
 #include "colorbardialog.h"
 #include "datadialog.h"
 #include "geometrydialog.h"
+#include "lightingdialog.h"
 
 #include "preferencesdialog.h"
 
@@ -91,11 +92,13 @@ MvDoc::MvDoc(QMainWindow* parent)
     m_OverlayDlg       = NULL;
 #endif
 
-    dataDialog = new DataDialog(parent, this);
+    dataDialog     = new DataDialog(parent, this);
     ///dataDialog->reinitialize();
 
     colorBarDialog = new ColorBarDialog(parent, this);
     ///colorBarDialog->reinitialize();
+
+    lightingDialog = new LightingDialog(parent, this);
 
     geometryDialog = new GeometryDialog(parent, this);
     ///geometryDialog->reinitialize();
@@ -461,6 +464,7 @@ void MvDoc::loadFile(const QString& fileName)
     QApplication::restoreOverrideCursor();
 }
 
+// BOOL CMvDoc::OnSaveDocument(LPCTSTR lpszPathName)
 bool MvDoc::saveFile(const QString& fileName)
 {
     assert(_gui);
@@ -468,8 +472,13 @@ bool MvDoc::saveFile(const QString& fileName)
 
     // @todo replace this with m_CropDlg
     // @todo replace this with m_AnimationDlg->m_OptionsPage
-    // @todo replace this with m_LightingDlg->m_LightsPage
-    // @todo replace this with m_LightingDlg->m_BackgroundPage
+    lightingDialog->updateDataLights(true);
+    settings.headlightOn             = lightingDialog->headlightOn ? 1 : 0;
+    settings.auxiliaryLightOn        = lightingDialog->auxiliaryLightOn ? 1 : 0;
+    settings.headlightIntensity      = lightingDialog->headlightIntensity * 0.01;
+    settings.auxiliaryLightIntensity = lightingDialog->auxiliaryLightIntensity * 0.01;
+    lightingDialog->updateDataBackground(true);
+    settings.customBackground = lightingDialog->customBackground ? 1 : 0;
 
     _views.front()->getViewSettings(&settings);
 
@@ -1720,6 +1729,155 @@ void MvDoc::updateColorBarDialog()
 }
 
 /////////////////////////////////////////////////////////////////////////////
+// Toolbox->Lighting
+
+void MvDoc::onUpdateToolboxLighting(QAction* action)
+{
+    assert(lightingDialog);
+    action->setChecked(lightingDialog->isVisible());
+}
+
+void MvDoc::onToolboxLighting()
+{
+    assert(lightingDialog);
+    if (lightingDialog->isVisible())
+    {
+        lightingDialog->hide();
+    }
+    else
+    {
+        lightingDialog->show();
+    }
+}
+
+void MvDoc::updateLightingDialog(mvGUISettings* gui)
+{
+    assert(lightingDialog);
+
+    // Lights
+    lightingDialog->headlightOn             = (gui->headlightOn != 0);
+    lightingDialog->auxiliaryLightOn        = (gui->auxiliaryLightOn != 0);
+    lightingDialog->headlightIntensity      = (int)(gui->headlightIntensity * 100 + 0.5);
+    lightingDialog->auxiliaryLightIntensity = (int)(gui->auxiliaryLightIntensity * 100 + 0.5);
+    lightingDialog->dirX                    = (int)(gui->auxiliaryLightDirection[0] * 10 + 10.5);
+    lightingDialog->dirY                    = (int)(gui->auxiliaryLightDirection[1] * 10 + 10.5);
+    lightingDialog->dirZ                    = (int)(gui->auxiliaryLightDirection[2] * 10 + 10.5);
+    lightingDialog->updateDataLights(false);
+    lightingDialog->updateLabelsLights();
+    lightingDialog->activateLights(true);
+
+    // Surface
+    lightingDialog->diffuse       = (int)(_manager->GetDiffuseLighting() * 100 + 0.5);
+    lightingDialog->ambient       = (int)(_manager->GetAmbientLighting() * 100 + 0.5);
+    lightingDialog->specular      = (int)(_manager->GetSpecularLighting() * 100 + 0.5);
+    lightingDialog->specularPower = (int)(_manager->GetSpecularPower() + 0.5);
+    lightingDialog->updateDataSurface(false);
+    lightingDialog->updateLabelsSurface();
+    lightingDialog->activateSurface(true);
+
+    // Background
+    lightingDialog->customBackground = (gui->customBackground != 0);
+    lightingDialog->red              = (int)(gui->background[0] * 100 + 0.5);
+    lightingDialog->green            = (int)(gui->background[1] * 100 + 0.5);
+    lightingDialog->blue             = (int)(gui->background[2] * 100 + 0.5);
+    lightingDialog->updateDataBackground(false);
+    lightingDialog->updateLabelsBackground();
+    lightingDialog->activateBackground(true);
+
+    lightingDialog->setCurrentIndex(0);
+    lightingDialog->setDefaultEnabled(true);
+}
+
+void MvDoc::setDiffuseLighting(double diffuse)
+{
+    _manager->SetDiffuseLighting(diffuse);
+    updateAllViews(nullptr);
+    setModified(true);
+}
+
+void MvDoc::setAmbientLighting(double ambient)
+{
+    _manager->SetAmbientLighting(ambient);
+    updateAllViews(nullptr);
+    setModified(true);
+}
+
+void MvDoc::setSpecularLighting(double specular)
+{
+    _manager->SetSpecularLighting(specular);
+    updateAllViews(nullptr);
+    setModified(true);
+}
+
+void MvDoc::setSpecularPower(double specularPower)
+{
+    _manager->SetSpecularPower(specularPower);
+    updateAllViews(nullptr);
+    setModified(true);
+}
+
+void MvDoc::switchOnHeadlight(bool switchOn)
+{
+    for (auto view : _views)
+    {
+        view->switchOnHeadlight(switchOn);
+    }
+    updateAllViews(nullptr);
+    setModified(true);
+}
+
+void MvDoc::setHeadlightIntensity(double intensity)
+{
+    for (auto view : _views)
+    {
+        view->setHeadlightIntensity(intensity);
+    }
+    updateAllViews(nullptr);
+    setModified(true);
+}
+
+
+void MvDoc::switchOnAuxiliaryLight(bool switchOn)
+{
+    for (auto view : _views)
+    {
+        view->switchOnAuxiliaryLight(switchOn);
+    }
+    updateAllViews(nullptr);
+    setModified(true);
+}
+
+void MvDoc::setAuxiliaryLightIntensity(double intensity)
+{
+    for (auto view : _views)
+    {
+        view->setAuxiliaryLightIntensity(intensity);
+    }
+    updateAllViews(nullptr);
+    setModified(true);
+}
+
+void MvDoc::setAuxiliaryLightPosition(double x, double y, double z)
+{
+    for (auto view : _views)
+    {
+        view->setAuxiliaryLightPosition(x, y, z);
+    }
+    updateAllViews(nullptr);
+    setModified(true);
+}
+
+void MvDoc::setBackgroundColor(double red, double green, double blue)
+{
+    for (auto view : _views)
+    {
+        view->setBackgroundColor(red, green, blue);
+    }
+    updateAllViews(nullptr);
+    setModified(true);
+}
+
+/////////////////////////////////////////////////////////////////////////////
 // Toolbox->???
 
 
@@ -1743,12 +1901,6 @@ void MvDoc::updateIsosurfaceDialog()
 {
     // @todo
     assert(isosurfaceDialog);
-}
-
-void MvDoc::updateLightingDialog(mvGUISettings* gui)
-{
-    // @todo
-    assert(lightingDialog);
 }
 
 void MvDoc::updateGridDialog()

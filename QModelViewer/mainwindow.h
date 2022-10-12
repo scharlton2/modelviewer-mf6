@@ -192,6 +192,7 @@ private:
     QAction *            dataAction;
     QAction *            colorBarAction;
     QAction *            geometryAction;
+    QAction *            lightingAction;
 };
 
 #endif // MAINWINDOW_H

@@ -242,3 +242,8 @@ void QAbstractView::discardSavedViewpoint()
     ////doResetViewpoint = false; @todo check
     viewpointSaved = false;
 }
+
+void QAbstractView::setBackgroundColor(double red, double green, double blue)
+{
+    renderer->SetBackground(red, green, blue);
+}
