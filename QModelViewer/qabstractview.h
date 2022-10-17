@@ -57,6 +57,8 @@ public:
     void         resetCameraClippingRange();
     void         discardSavedViewpoint();
 
+    void         setBackgroundColor(double red, double green, double blue);
+
 signals:
 
 protected:

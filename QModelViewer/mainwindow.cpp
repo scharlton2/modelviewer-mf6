@@ -354,6 +354,13 @@ void MainWindow::createActions()
     connect(colorBarAction, &QAction::triggered, doc, &MvDoc::onToolboxColorBar);
 
 
+    // Toolbox->Lighting
+    lightingAction = new QAction(tr("&Lighting"), this);
+    lightingAction->setCheckable(true);
+    lightingAction->setStatusTip(tr("Show or hide the Lighting Toolbox"));
+    connect(lightingAction, &QAction::triggered, doc, &MvDoc::onToolboxLighting);
+
+
     // Toolbox->Geometry
     geometryAction = new QAction(tr("Geo&metry"), this);
     geometryAction->setCheckable(true);
@@ -715,6 +722,9 @@ void MainWindow::createMenus()
 
     // Toolbox->Color Bar
     toolboxMenu->addAction(colorBarAction);
+
+    // Toolbox->Lighting
+    toolboxMenu->addAction(lightingAction);
 
     // -----------------------------
     toolboxMenu->addSeparator();

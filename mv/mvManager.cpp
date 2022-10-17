@@ -5706,6 +5706,10 @@ void mvManager::Deserialize(const char *fileName, mvGUISettings *gui, std::strin
 
     // Surface lighting
     SetDiffuseLighting(1.0); // diffuse lighting is hard wired
+    // if (hashTable->GetHashTableValue("Lighting diffuse", fvalue))
+    // {
+    //     SetDiffuseLighting(fvalue);
+    // }
     if (hashTable->GetHashTableValue("Lighting ambient", fvalue))
     {
         SetAmbientLighting(fvalue);
