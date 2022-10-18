@@ -22,12 +22,6 @@ GridDialog::GridDialog(QWidget * parent, MvDoc * doc)
     resize(minimumSizeHint());
 
     // Lines
- 
-    // handled in reinitialize
-    //positionX = 0;
-    //positionY = 0;
-    //positionZ = 0;
-
     vtkNew<vtkNamedColors> colors;
     vtkColor3d             Black = colors->GetColor3d("Black");
     vtkColor3d             Gray  = colors->GetColor3d("Gray");
@@ -41,9 +35,6 @@ GridDialog::GridDialog(QWidget * parent, MvDoc * doc)
     connect(ui->checkBoxActivateZ, QOverload<int>::of(&QCheckBox::stateChanged), this, &GridDialog::onActivateZ);
 
     // Size
-    //ui->spinBoxPositionX->setMaximum(std::numeric_limits<int>::max());
-    //ui->spinBoxPositionY->setMaximum(std::numeric_limits<int>::max());
-    //ui->spinBoxPositionZ->setMaximum(std::numeric_limits<int>::max());
     connect(ui->spinBoxPositionX, QOverload<int>::of(&QSpinBox::valueChanged),
             [=](int val) {
                 assert(structuredGrid);
@@ -141,7 +132,6 @@ GridDialog::GridDialog(QWidget * parent, MvDoc * doc)
             });
 
     // buttons
-    //connect(ui->pushButtonApply, &QAbstractButton::clicked, this, &LightingDialog::onApply);
     ui->pushButtonApply->setVisible(false);
     connect(ui->pushButtonDone, &QAbstractButton::clicked, [=]() { hide(); });
 }
@@ -228,28 +218,10 @@ bool GridDialog::updateDataSubgrid(bool saveAndValidate)
 {
     if (saveAndValidate)
     {
-        //isSubgridActivated = ui->checkBoxSubgrid->isChecked();
         assert(isSubgridActivated == ui->checkBoxSubgrid->isChecked());
 
         if (doc->gridType() == GridType::MV_STRUCTURED_GRID)
         {
-            //col_min = ui->spinBoxLowI->value();
-            //col_max = ui->spinBoxHighI->value();
-            //if (col_max < col_min)
-            //{
-            //    QMessageBox::warning(this, "", tr("Please ensure that \"Max\" value is greater than or equal to \"Min\" value."));
-            //    ui->spinBoxHighI->setFocus();
-            //    return false;
-            //}
-
-            //row_min = ui->spinBoxLowJ->value();
-            //row_max = ui->spinBoxHighJ->value();
-            //if (row_max < row_min)
-            //{
-            //    QMessageBox::warning(this, "", tr("Please ensure that \"Max\" value is greater than or equal to \"Min\" value."));
-            //    ui->spinBoxHighJ->setFocus();
-            //    return false;
-            //}
             assert(col_min == ui->spinBoxLowI->value());
             assert(col_max == ui->spinBoxHighI->value());
             assert(row_min == ui->spinBoxLowJ->value());
@@ -257,14 +229,6 @@ bool GridDialog::updateDataSubgrid(bool saveAndValidate)
         }
         if (doc->gridType() == GridType::MV_STRUCTURED_GRID || doc->gridType() == GridType::MV_LAYERED_GRID)
         {
-            //lay_min = ui->spinBoxLowK->value();
-            //lay_max = ui->spinBoxHighK->value();
-            //if (lay_max < lay_min)
-            //{
-            //    QMessageBox::warning(this, "", tr("Please ensure that \"Max\" value is greater than or equal to \"Min\" value."));
-            //    ui->spinBoxHighK->setFocus();
-            //    return false;
-            //}
             assert(lay_min == ui->spinBoxLowK->value());
             assert(lay_max == ui->spinBoxHighK->value());
         }
@@ -462,7 +426,6 @@ void GridDialog::onCheckBoxSubgrid()
     {
         doc->subgridOff();
     }
-    //isSubgridActivated = ui->checkBoxSubgrid->isChecked();
 }
 
 void GridDialog::updateLabelsShell()

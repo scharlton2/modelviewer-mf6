@@ -66,7 +66,7 @@ public:
     bool     updateDataSubgrid(bool saveAndValidate);
 
     GridType gridType;
-    bool isSubgridActivated;       // was m_ActivateSubgrid
+    bool isSubgridActivated;
     int  col_min;
     int  col_max;
     int  row_min;
