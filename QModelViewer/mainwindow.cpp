@@ -361,6 +361,13 @@ void MainWindow::createActions()
     connect(lightingAction, &QAction::triggered, doc, &MvDoc::onToolboxLighting);
 
 
+    // Toolbox->Grid
+    gridAction = new QAction(tr("&Grid"), this);
+    gridAction->setCheckable(true);
+    gridAction->setStatusTip(tr("Show or hide the Grid Toolbox"));
+    connect(gridAction, &QAction::triggered, doc, &MvDoc::onToolboxGrid);
+
+
     // Toolbox->Geometry
     geometryAction = new QAction(tr("Geo&metry"), this);
     geometryAction->setCheckable(true);
@@ -534,6 +541,9 @@ void MainWindow::updateToolboxActions()
 
     // Toolbox->Geometry
     doc->onUpdateToolboxGeometry(geometryAction);
+
+    // Toolbox->Grid
+    doc->onUpdateToolboxGrid(gridAction);
 }
 
 bool MainWindow::isAnimating() const
@@ -728,6 +738,9 @@ void MainWindow::createMenus()
 
     // -----------------------------
     toolboxMenu->addSeparator();
+
+    // Toolbox->Grid
+    toolboxMenu->addAction(gridAction);
 
     // Toolbox->Geometry
     toolboxMenu->addAction(geometryAction);

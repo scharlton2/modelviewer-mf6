@@ -272,6 +272,21 @@ bool ColorBarDialog::updateDataLabels(bool saveAndValidate)
     }
     else
     {
+        switch (colorOption)
+        {
+        case 0:
+            ui->radioButtonBlack->setChecked(true);
+            break;
+        case 1:
+            ui->radioButtonGray->setChecked(true);
+            break;
+        case 2:
+            ui->radioButtonWhite->setChecked(true);
+            break;
+        default:
+            assert(false);
+        }
+
         ui->spinBoxFontSize->setValue(fontSize);
         ui->spinBoxNumLabels->setValue(numLabels);
         ui->spinBoxPrecision->setValue(precision);
