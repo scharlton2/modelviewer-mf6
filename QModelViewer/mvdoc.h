@@ -43,6 +43,7 @@ class vtkPropCollection;
 
 // enum forward declarations
 enum class MouseMode;
+enum class GridType;
 
 enum class ProjectionType {
     ptPerspective,
@@ -79,7 +80,8 @@ public:
     //void                               GetVectorMagnitudeRange(double* range);
     //char*                              GetModelName();
     //char*                              GetDataName();
-    //GridType                           GetGridType();
+    GridType                           gridType();
+
 
 
     QStringList                        dataTypeLabels();
@@ -175,6 +177,22 @@ public:
     void                               setSpecularLighting(double specular);
     void                               setSpecularPower(double specularPower);
     void                               setBackgroundColor(double red, double green, double blue);
+
+
+    // Toolbox->Grid
+    void                               onToolboxGrid();
+    void                               onUpdateToolboxGrid(QAction* action);
+    void                               setGridLineColor(double red, double green, double blue);
+    void                               setGridLineColor(vtkColor3d color3d);
+    void                               activateGridLines(int slice, bool b);
+    void                               setGridLinePositions(int col, int row, int lay);
+    void                               setGridLayerPosition(int layerNumber);
+    void                               setGridShellColor(double red, double green, double blue);
+    void                               setGridShellOpacity(double opacity);
+    void                               applySubgrid(int col_min, int col_max, int row_min, int row_max, int lay_min, int lay_max);
+    void                               subgridOff();
+
+
 
     // Toolbox->Geometry
     void                               onToolboxGeometry();

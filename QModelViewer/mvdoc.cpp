@@ -29,6 +29,7 @@
 #include "colorbardialog.h"
 #include "datadialog.h"
 #include "geometrydialog.h"
+#include "griddialog.h"
 #include "lightingdialog.h"
 
 #include "preferencesdialog.h"
@@ -77,9 +78,6 @@ MvDoc::MvDoc(QMainWindow* parent)
 #if TODO
     // Set modeless dialog boxes to null. These cannot be created
     // until after the main frame window is created.
-    m_ColorBarDlg      = NULL;
-    m_LightingDlg      = NULL;
-    m_GridDlg          = NULL;
     m_GeometryDlg      = NULL;
     m_DataDlg          = NULL;
     m_SolidDlg         = NULL;
@@ -99,6 +97,8 @@ MvDoc::MvDoc(QMainWindow* parent)
     ///colorBarDialog->reinitialize();
 
     lightingDialog = new LightingDialog(parent, this);
+
+    gridDialog     = new GridDialog(parent, this);
 
     geometryDialog = new GeometryDialog(parent, this);
     ///geometryDialog->reinitialize();
@@ -257,7 +257,7 @@ void MvDoc::reinitializeToolDialogs()
     dataDialog->reinitialize();
     colorBarDialog->reinitialize();
     //m_LightingDlg->Reinitialize();
-    //m_GridDlg->Reinitialize();
+    gridDialog->reinitialize();
     geometryDialog->reinitialize();
     //m_SolidDlg->Reinitialize();
     //m_IsosurfaceDlg->Reinitialize();
@@ -801,6 +801,7 @@ void MvDoc::updateAllViews(QAbstractView* sender, QObject* hint)
 
 void MvDoc::onShowNone()
 {
+    // @todo
     /*
     m_Manager->HideScalarData();
     m_IsosurfaceDlg->Activate(FALSE);
@@ -820,6 +821,7 @@ void MvDoc::onShowNone()
 
 void MvDoc::onShowSolid()
 {
+    // @todo
     /*
     m_Manager->ShowScalarDataAsSolid();
     m_IsosurfaceDlg->Activate(FALSE);
@@ -839,6 +841,7 @@ void MvDoc::onShowSolid()
 
 void MvDoc::onShowIsosurfaces()
 {
+    // @todo
     /*
     m_Manager->ShowScalarDataAsIsosurfaces();
     m_IsosurfaceDlg->Activate(TRUE);
@@ -1013,30 +1016,15 @@ QDir MvDoc::defaultDir() const
 
 void MvDoc::onShowAxes()
 {
-    /*
-    if (m_Manager->AreAxesVisible())
-    {
-        m_Manager->HideAxes();
-        m_GeometryDlg->m_AxesPage->Activate(FALSE);
-    }
-    else
-    {
-        m_Manager->ShowAxes();
-        m_GeometryDlg->m_AxesPage->Activate(TRUE);
-    }
-    UpdateAllViews(NULL);
-    setModified(TRUE);
-    */
-
     if (_manager->AreAxesVisible())
     {
         _manager->HideAxes();
-        //m_GeometryDlg->m_AxesPage->Activate(FALSE);
+        geometryDialog->activateAxes(false);
     }
     else
     {
         _manager->ShowAxes();
-        //m_GeometryDlg->m_AxesPage->Activate(TRUE);
+        geometryDialog->activateAxes(true);
     }
     updateAllViews(nullptr);
     setModified(true);
@@ -1044,56 +1032,20 @@ void MvDoc::onShowAxes()
 
 void MvDoc::onShowGridLines()
 {
-    /*
-    if (m_Manager->GetGridType() == GridType::MV_STRUCTURED_GRID)
-    {
-        if (m_Manager->AreActivatedGridLinesVisible())
-        {
-            m_Manager->HideGridLines();
-            m_GridDlg->m_GridLinesPage->Activate(FALSE);
-            m_GridDlg->m_ApplyButton.EnableWindow(FALSE);
-        }
-        else
-        {
-            m_Manager->ShowActivatedGridLines();
-            m_GridDlg->m_GridLinesPage->Activate(TRUE);
-            m_GridDlg->m_ApplyButton.EnableWindow(
-                m_GridDlg->m_PropertySheet->GetActiveIndex() == 0);
-        }
-    }
-    else if (m_Manager->GetGridType() == GridType::MV_LAYERED_GRID)
-    {
-        if (m_Manager->IsGridLayerVisible())
-        {
-            m_Manager->HideGridLayer();
-            m_GridDlg->m_GridLinesPage->Activate(FALSE);
-            m_GridDlg->m_ApplyButton.EnableWindow(FALSE);
-        }
-        else
-        {
-            m_Manager->ShowGridLayer();
-            m_GridDlg->m_GridLinesPage->Activate(TRUE);
-            m_GridDlg->m_ApplyButton.EnableWindow(TRUE);
-        }
-    }
-    UpdateAllViews(NULL);
-    setModified(TRUE);
-    */
-
     if (_manager->GetGridType() == GridType::MV_STRUCTURED_GRID)
     {
         if (_manager->AreActivatedGridLinesVisible())
         {
             _manager->HideGridLines();
-            //m_GridDlg->m_GridLinesPage->Activate(FALSE);
             //m_GridDlg->m_ApplyButton.EnableWindow(FALSE);
+            gridDialog->activateLines(false);
         }
         else
         {
             _manager->ShowActivatedGridLines();
-            //m_GridDlg->m_GridLinesPage->Activate(TRUE);
             //m_GridDlg->m_ApplyButton.EnableWindow(
             //m_GridDlg->m_PropertySheet->GetActiveIndex() == 0);
+            gridDialog->activateLines(true);
         }
     }
     else if (_manager->GetGridType() == GridType::MV_LAYERED_GRID)
@@ -1101,14 +1053,14 @@ void MvDoc::onShowGridLines()
         if (_manager->IsGridLayerVisible())
         {
             _manager->HideGridLayer();
-            //m_GridDlg->m_GridLinesPage->Activate(FALSE);
             //m_GridDlg->m_ApplyButton.EnableWindow(FALSE);
+            gridDialog->activateLines(false);
         }
         else
         {
             _manager->ShowGridLayer();
-            //m_GridDlg->m_GridLinesPage->Activate(TRUE);
             //m_GridDlg->m_ApplyButton.EnableWindow(TRUE);
+            gridDialog->activateLines(true);
         }
     }
     updateAllViews(nullptr);
@@ -1117,30 +1069,15 @@ void MvDoc::onShowGridLines()
 
 void MvDoc::onShowGridShell()
 {
-    /*
-    if (m_Manager->IsGridShellVisible())
-    {
-        m_Manager->HideGridShell();
-        m_GridDlg->m_GridShellPage->Activate(FALSE);
-    }
-    else
-    {
-        m_Manager->ShowGridShell();
-        m_GridDlg->m_GridShellPage->Activate(TRUE);
-    }
-    UpdateAllViews(NULL);
-    setModified(TRUE);
-    */
-
     if (_manager->IsGridShellVisible())
     {
         _manager->HideGridShell();
-        //m_GridDlg->m_GridShellPage->Activate(FALSE);
+        gridDialog->activateShell(false);
     }
     else
     {
         _manager->ShowGridShell();
-        //m_GridDlg->m_GridShellPage->Activate(TRUE);
+        gridDialog->activateShell(true);
     }
     updateAllViews(nullptr);
     setModified(true);
@@ -1148,30 +1085,15 @@ void MvDoc::onShowGridShell()
 
 void MvDoc::onShowBoundingBox()
 {
-    /*
-    if (m_Manager->IsBoundingBoxVisible())
-    {
-        m_Manager->HideBoundingBox();
-        m_GeometryDlg->m_BoundingBoxPage->Activate(FALSE);
-    }
-    else
-    {
-        m_Manager->ShowBoundingBox();
-        m_GeometryDlg->m_BoundingBoxPage->Activate(TRUE);
-    }
-    UpdateAllViews(NULL);
-    setModified(TRUE);
-    */
-
     if (_manager->IsBoundingBoxVisible())
     {
         _manager->HideBoundingBox();
-        //m_GeometryDlg->m_BoundingBoxPage->Activate(FALSE);
+        geometryDialog->activateBoundingBox(false);
     }
     else
     {
         _manager->ShowBoundingBox();
-        //m_GeometryDlg->m_BoundingBoxPage->Activate(TRUE);
+        geometryDialog->activateBoundingBox(true);
     }
     updateAllViews(nullptr);
     setModified(true);
@@ -1179,21 +1101,7 @@ void MvDoc::onShowBoundingBox()
 
 void MvDoc::onShowOverlay()
 {
-    /*
-    if (m_Manager->IsOverlayVisible())
-    {
-        m_Manager->HideOverlay();
-    }
-    else
-    {
-        m_Manager->ShowOverlay();
-    }
-    UpdateAllViews(NULL);
-    setModified(TRUE);
-    */
-
     assert(_manager->HasOverlay());
-
     if (_manager->IsOverlayVisible())
     {
         _manager->HideOverlay();
@@ -1208,19 +1116,6 @@ void MvDoc::onShowOverlay()
 
 void MvDoc::onShowTime()
 {
-    /*
-    if (m_Manager->IsTimeLabelVisible())
-    {
-        m_Manager->HideTimeLabel();
-    }
-    else
-    {
-        m_Manager->ShowTimeLabel();
-    }
-    UpdateAllViews(NULL);
-    setModified(TRUE);
-    */
-
     if (_manager->IsTimeLabelVisible())
     {
         _manager->HideTimeLabel();
@@ -1235,19 +1130,6 @@ void MvDoc::onShowTime()
 
 void MvDoc::onShowColorBar()
 {
-    /*
-    if (m_Manager->IsColorBarVisible())
-    {
-        m_Manager->HideColorBar();
-    }
-    else
-    {
-        m_Manager->ShowColorBar();
-    }
-    UpdateAllViews(NULL);
-    setModified(TRUE);
-    */
-
     if (_manager->IsColorBarVisible())
     {
         _manager->HideColorBar();
@@ -1266,12 +1148,6 @@ void MvDoc::onShowColorBar()
 void MvDoc::onPerspectiveProjection()
 {
     projectionMode   = ProjectionType::ptPerspective;
-    
-    //POSITION pos     = GetFirstViewPosition();
-    //CMvView* pView   = (CMvView*)GetNextView(pos);
-    //pView->SetProjectionToPerspective();
-    //UpdateAllViews(NULL);
-
     for (auto view : _views)
     {
         view->setProjectionToPerspective();
@@ -1548,7 +1424,7 @@ void MvDoc::updateGeometryDialog()
 
     // bounding box
     const double* rgb = _manager->GetBoundingBoxColor();
-    geometryDialog->boundingBoxColor = (int)(rgb[0] * 2 + 0.1);
+    geometryDialog->boundingBoxColor = (int)(rgb[0] * 2 + 0.1);                     // black = 0, gray = 1, white = 2
     geometryDialog->updateDataBoundingBox(false);
     geometryDialog->activateBoundingBox(_manager->IsBoundingBoxVisible());
 
@@ -1711,7 +1587,7 @@ void MvDoc::updateColorBarDialog()
     colorBarDialog->numLabels   = _manager->GetColorBarNumberOfLabels();
     colorBarDialog->precision   = _manager->GetColorBarLabelPrecision();
     const double* rgb           = _manager->GetColorBarTextColor();
-    colorBarDialog->colorOption = (int)(rgb[0] * 2 + 0.1);
+    colorBarDialog->colorOption = (int)(rgb[0] * 2 + 0.1);                          // black = 0, gray = 1, white = 2
     colorBarDialog->updateDataLabels(false);
 
 
@@ -1877,6 +1753,334 @@ void MvDoc::setBackgroundColor(double red, double green, double blue)
     setModified(true);
 }
 
+
+/////////////////////////////////////////////////////////////////////////////
+// Toolbox->Grid
+
+void MvDoc::onUpdateToolboxGrid(QAction* action)
+{
+    assert(gridDialog);
+    action->setChecked(gridDialog->isVisible());
+}
+
+void MvDoc::onToolboxGrid()
+{
+    assert(gridDialog);
+    if (gridDialog->isVisible())
+    {
+        gridDialog->hide();
+    }
+    else
+    {
+        gridDialog->show();
+    }
+}
+
+void MvDoc::updateGridDialog()
+{
+    assert(gridDialog);
+
+    // Using row-col-lay convention of Modflow
+    const int* sdim = _manager->GetScalarGridDimensions(); // recall these are dimensions of vtk points
+
+    // Lines
+    if (_manager->IsScalarSubgridOn())
+    {
+        // if subgrid is on, then limit the extent of the grid gridDialog
+        const int* voi = _manager->GetScalarSubgridExtent();
+        gridDialog->XMin  = voi[0];
+        gridDialog->XMax  = voi[1];
+        gridDialog->YMin  = voi[2];
+        gridDialog->YMax  = voi[3];
+        gridDialog->ZMin  = voi[4];
+        gridDialog->ZMax  = voi[5];
+    }
+    else
+    {
+        if (_manager->GetGridType() == GridType::MV_STRUCTURED_GRID)
+        {
+            gridDialog->XMin = 0;
+            gridDialog->XMax = sdim[0] - 1;
+            gridDialog->YMin = 0;
+            gridDialog->YMax = sdim[1] - 1;
+            gridDialog->ZMin = 0;
+            gridDialog->ZMax = sdim[2] - 1;
+        }
+        else
+        {
+            gridDialog->ZMin = 0;
+            gridDialog->ZMax = _manager->GetNumberOfLayersInUnstructuredGrid();
+        }
+    }
+    if (_manager->GetGridType() == GridType::MV_STRUCTURED_GRID)
+    {
+        int p[3];
+        _manager->GetGridLinePositions(p);
+        gridDialog->positionX = p[0];
+        gridDialog->positionY = sdim[1] - p[1] - 1;
+        gridDialog->positionZ = sdim[2] - p[2] - 1;
+
+        gridDialog->isActiveX   = _manager->AreGridLinesActive(0);
+        gridDialog->isActiveY   = _manager->AreGridLinesActive(1);
+        gridDialog->isActiveZ   = _manager->AreGridLinesActive(2);
+
+        const double* rgb    = _manager->GetGridLineColor();
+        gridDialog->colorOption = (int)(rgb[0] * 2 + 0.1);                              // black = 0, gray = 1, white = 2
+        gridDialog->updateDataLines(false);
+        bool activate = _manager->AreActivatedGridLinesVisible();
+
+        gridDialog->activateLines(activate);
+    }
+    else
+    {
+        gridDialog->positionZ = _manager->GetGridLayerPosition();
+        gridDialog->isActiveX = false;
+        gridDialog->isActiveY = false;
+        gridDialog->isActiveZ = true;
+        assert(gridDialog->isActiveX == (_manager->AreGridLinesActive(0) != 0));
+        assert(gridDialog->isActiveY == (_manager->AreGridLinesActive(1) != 0));
+        assert(gridDialog->isActiveZ == (_manager->AreGridLinesActive(2) != 0));
+        const double* rgb       = _manager->GetGridLineColor();
+        gridDialog->colorOption = (int)(rgb[0] * 2 + 0.1);                              // black = 0, gray = 1, white = 2
+        gridDialog->updateDataLines(false);
+        gridDialog->activateLines(_manager->IsGridLayerVisible());
+    }
+
+    // Shell
+    const double* rgb   = _manager->GetGridShellColor();
+    gridDialog->red     = (int)(rgb[0] * 100 + 0.5);
+    gridDialog->green   = (int)(rgb[1] * 100 + 0.5);
+    gridDialog->blue    = (int)(rgb[2] * 100 + 0.5);
+    gridDialog->opacity = (int)(_manager->GetGridShellOpacity() * 100 + 0.5);
+    gridDialog->updateDataShell(false);
+    gridDialog->updateLabelsShell();
+    gridDialog->activateShell(_manager->IsGridShellVisible());
+
+
+    // Subgrid
+    // Subgrid page
+    const int* voi = _manager->GetScalarSubgridExtent();
+    if (_manager->GetGridType() == GridType::MV_STRUCTURED_GRID)
+    {
+        // structured grid
+        gridDialog->col_min            = voi[0] + 1;
+        gridDialog->col_max            = voi[1];
+        gridDialog->row_min            = sdim[1] - voi[3];
+        gridDialog->row_max            = sdim[1] - voi[2] - 1;
+        gridDialog->lay_min            = sdim[2] - voi[5];
+        gridDialog->lay_max            = sdim[2] - voi[4] - 1;
+        gridDialog->col_upper_limit    = sdim[0] - 1;
+        gridDialog->row_upper_limit    = sdim[1] - 1;
+        gridDialog->lay_upper_limit    = sdim[2] - 1;
+        gridDialog->isSubgridActivated = (_manager->IsScalarSubgridOn() != 0);
+    }
+    else if (_manager->GetGridType() == GridType::MV_LAYERED_GRID)
+    {
+        gridDialog->col_min            = 0;
+        gridDialog->col_max            = 0;
+        gridDialog->row_min            = 0;
+        gridDialog->row_max            = 0;
+        // TO DO: get layer limits from m_Manager
+        gridDialog->lay_min            = 1;
+        gridDialog->lay_max            = _manager->GetNumberOfLayersInUnstructuredGrid();
+        gridDialog->col_upper_limit    = 0;
+        gridDialog->row_upper_limit    = 0;
+        gridDialog->lay_upper_limit    = _manager->GetNumberOfLayersInUnstructuredGrid();
+        gridDialog->isSubgridActivated = false;
+    }
+    else if (_manager->GetGridType() == GridType::MV_UNSTRUCTURED_GRID)
+    {
+        gridDialog->col_min            = 0;
+        gridDialog->col_max            = 0;
+        gridDialog->row_min            = 0;
+        gridDialog->row_max            = 0;
+        gridDialog->lay_min            = 0;
+        gridDialog->lay_max            = 0;
+        gridDialog->col_upper_limit    = 0;
+        gridDialog->row_upper_limit    = 0;
+        gridDialog->lay_upper_limit    = 0;
+        gridDialog->isSubgridActivated = false;
+    }
+    gridDialog->updateDataSubgrid(false);
+    gridDialog->activateSubgrid(true);
+
+}
+
+void MvDoc::setGridLineColor(double red, double green, double blue)
+{
+    _manager->SetGridLineColor(red, green, blue);
+    updateAllViews(nullptr);
+    setModified(true);
+}
+
+void MvDoc::setGridLineColor(vtkColor3d color3d)
+{
+    setGridLineColor(color3d.GetRed(), color3d.GetGreen(), color3d.GetBlue());
+}
+
+void MvDoc::activateGridLines(int slice, bool b)
+{
+    if (b)
+    {
+        _manager->ActivateGridLines(slice);
+    }
+    else
+    {
+        _manager->DeactivateGridLines(slice);
+    }
+    updateAllViews(nullptr);
+    setModified(true);
+}
+
+void MvDoc::setGridLinePositions(int col, int row, int lay)
+{
+    const int* sdim = _manager->GetScalarGridDimensions(); // returns point dimensions
+    int        posX = col;
+    int        posY = (sdim[1] - 1) - row;
+    int        posZ = (sdim[2] - 1) - lay;
+    _manager->SetGridLinePositions(posX, posY, posZ);
+    updateAllViews(nullptr);
+    setModified(true);
+}
+
+void MvDoc::setGridLayerPosition(int layerNumber)
+{
+    _manager->SetGridLayerPosition(layerNumber);
+    updateAllViews(nullptr);
+    setModified(true);
+}
+
+void MvDoc::setGridShellColor(double red, double green, double blue)
+{
+    _manager->SetGridShellColor(red, green, blue);
+    updateAllViews(nullptr);
+    setModified(true);
+}
+
+void MvDoc::setGridShellOpacity(double opacity)
+{
+    _manager->SetGridShellOpacity(opacity);
+    updateAllViews(nullptr);
+    setModified(true);
+}
+
+void MvDoc::applySubgrid(int col_min, int col_max, int row_min, int row_max, int lay_min, int lay_max)
+{
+    int imin, imax, jmin, jmax, kmin, kmax;
+    // convert to vtk indexing and compute extents for points
+    if (_manager->GetGridType() == GridType::MV_STRUCTURED_GRID)
+    {
+        const int* sdim = _manager->GetScalarGridDimensions();
+        // note that imin, imax, jmin, etc refer to point dimensions
+        imin            = col_min - 1;
+        imax            = col_max;
+        jmin            = sdim[1] - row_max - 1;
+        jmax            = sdim[1] - row_min;
+        kmin            = sdim[2] - lay_max - 1;
+        kmax            = sdim[2] - lay_min;
+    }
+    else if (_manager->GetGridType() == GridType::MV_LAYERED_GRID)
+    {
+        imin = 0;
+        imax = 0;
+        jmin = 0;
+        jmax = 0;
+        // note that kmin and kmax here refer to cell dimension
+        // kmin = m_Manager->GetNumberOfLayersInUnstructuredGrid() - lay_max;
+        // kmax = m_Manager->GetNumberOfLayersInUnstructuredGrid() - lay_min-1;
+        kmin = lay_min - 1; // top layer in subgrid
+        kmax = lay_max - 1; // bottom layer in subgrid
+    }
+
+    _manager->SetScalarSubgridExtent(imin, imax, jmin, jmax, kmin, kmax);
+    _manager->ScalarSubgridOn();
+    /*
+        // update the grid lines dlg box
+        int p[3];
+        m_Manager->GetGridLinePositions(p);
+        m_GridDlg->m_GridLinesPage->m_XMin = imin;
+        m_GridDlg->m_GridLinesPage->m_XMax = imax;
+        m_GridDlg->m_GridLinesPage->m_YMin = sdim[1]-jmax-1;
+        m_GridDlg->m_GridLinesPage->m_YMax = sdim[1]-jmin-1;
+        m_GridDlg->m_GridLinesPage->m_ZMin = sdim[2]-kmax-1;
+        m_GridDlg->m_GridLinesPage->m_ZMax = sdim[2]-kmin-1;
+        m_GridDlg->m_GridLinesPage->m_PositionX = p[0];
+        m_GridDlg->m_GridLinesPage->m_PositionY = sdim[1] - p[1] - 1;
+        m_GridDlg->m_GridLinesPage->m_PositionZ = sdim[2] - p[2] - 1;
+        m_GridDlg->m_GridLinesPage->CustomUpdateData(FALSE);
+
+        // Update the vector dialog box
+        if (m_Manager->HasVectorData())
+        {
+            if(m_VectorDlg->m_ControlsPage->m_col_min < col_min)
+             m_VectorDlg->m_ControlsPage->m_col_min = col_min;
+            if(m_VectorDlg->m_ControlsPage->m_col_max > col_max)
+               m_VectorDlg->m_ControlsPage->m_col_max = col_max;
+            if(m_VectorDlg->m_ControlsPage->m_row_min < row_min)
+               m_VectorDlg->m_ControlsPage->m_row_min = row_min;
+            if(m_VectorDlg->m_ControlsPage->m_row_max > row_max)
+               m_VectorDlg->m_ControlsPage->m_row_max = row_max;
+            if(m_VectorDlg->m_ControlsPage->m_lay_min < lay_min)
+               m_VectorDlg->m_ControlsPage->m_lay_min = lay_min;
+            if(m_VectorDlg->m_ControlsPage->m_lay_max > lay_max)
+               m_VectorDlg->m_ControlsPage->m_lay_max = lay_max;
+
+          m_VectorDlg->m_ControlsPage->m_col_lower_limit = col_min;
+            m_VectorDlg->m_ControlsPage->m_col_upper_limit = col_max;
+            m_VectorDlg->m_ControlsPage->m_row_lower_limit = row_min;
+            m_VectorDlg->m_ControlsPage->m_row_upper_limit = row_max;
+            m_VectorDlg->m_ControlsPage->m_lay_lower_limit = lay_min;
+            m_VectorDlg->m_ControlsPage->m_lay_upper_limit = lay_max;
+            m_VectorDlg->m_ControlsPage->CustomUpdateData(FALSE);
+
+          m_VectorDlg->m_ControlsPage->Apply();
+        }
+    */
+
+    updateAllViews(nullptr);
+    setModified(true);
+}
+
+void MvDoc::subgridOff()
+{
+    _manager->ScalarSubgridOff();
+
+    // update the grid lines dlg box
+    const int* sdim  = _manager->GetScalarGridDimensions(); // keep in mind these are dimensions of points
+    gridDialog->XMin = 0;
+    gridDialog->XMax = sdim[0] - 1;
+    gridDialog->YMin = 0;
+    gridDialog->YMax = sdim[1] - 1;
+    gridDialog->ZMin = 0;
+    gridDialog->ZMax = sdim[2] - 1;
+
+    // Update the vector dlg box
+    if (_manager->HasVectorData())
+    {
+        const int* vdim = _manager->GetVectorGridDimensions();
+        /*
+          const int *voi = m_Manager->GetVectorSubsampleExtents();
+          m_VectorDlg->m_ControlsPage->m_col_min = voi[0] + 1;
+          m_VectorDlg->m_ControlsPage->m_col_max = voi[1] + 1;
+          m_VectorDlg->m_ControlsPage->m_row_min = voi[2] + 1;
+          m_VectorDlg->m_ControlsPage->m_row_max = voi[3] + 1;
+          m_VectorDlg->m_ControlsPage->m_lay_min = voi[4] + 1;
+          m_VectorDlg->m_ControlsPage->m_lay_max = voi[5] + 1;
+        */
+        // @todo below
+        //m_VectorDlg->m_ControlsPage->m_col_lower_limit = 1;
+        //m_VectorDlg->m_ControlsPage->m_col_upper_limit = vdim[0];
+        //m_VectorDlg->m_ControlsPage->m_row_lower_limit = 1;
+        //m_VectorDlg->m_ControlsPage->m_row_upper_limit = vdim[1];
+        //m_VectorDlg->m_ControlsPage->m_lay_lower_limit = 1;
+        //m_VectorDlg->m_ControlsPage->m_lay_upper_limit = vdim[2];
+        //m_VectorDlg->m_ControlsPage->CustomUpdateData(FALSE);
+    }
+
+    updateAllViews(nullptr);
+    setModified(true);
+}
+
 /////////////////////////////////////////////////////////////////////////////
 // Toolbox->???
 
@@ -1901,12 +2105,6 @@ void MvDoc::updateIsosurfaceDialog()
 {
     // @todo
     assert(isosurfaceDialog);
-}
-
-void MvDoc::updateGridDialog()
-{
-    // @todo
-    assert(gridDialog);
 }
 
 void MvDoc::updateAnimationDialog(mvGUISettings* gui)
@@ -1943,4 +2141,9 @@ void MvDoc::updateOverlayDialog()
 {
     // @todo
     assert(overlayDialog);
+}
+
+GridType MvDoc::gridType()
+{
+    return _manager->GetGridType();
 }
