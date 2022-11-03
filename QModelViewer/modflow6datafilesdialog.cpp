@@ -21,8 +21,8 @@ Modflow6DataFilesDialog::Modflow6DataFilesDialog(QWidget *parent)
     ui->radioButtonSpecifyModflow6NameFile->setChecked(true);
     onSpecifyModflow6NameFile();
 
-    connect(ui->radioButtonSpecifyModflow6DataFiles, &QAbstractButton::pressed, this, &Modflow6DataFilesDialog::onSpecifyModflow6DataFiles);
-    connect(ui->radioButtonSpecifyModflow6NameFile, &QAbstractButton::pressed, this, &Modflow6DataFilesDialog::onSpecifyModflow6NameFile);
+    connect(ui->radioButtonSpecifyModflow6DataFiles, &QAbstractButton::clicked, this, &Modflow6DataFilesDialog::onSpecifyModflow6DataFiles);
+    connect(ui->radioButtonSpecifyModflow6NameFile, &QAbstractButton::clicked, this, &Modflow6DataFilesDialog::onSpecifyModflow6NameFile);
 
     connect(ui->pushButtonBrowseModelNameFile, &QAbstractButton::clicked, this, &Modflow6DataFilesDialog::onBrowseModelNameFile);
     connect(ui->pushButtonBrowseModelGridFile, &QAbstractButton::clicked, this, &Modflow6DataFilesDialog::onBrowseModelGridFile);

@@ -12,12 +12,12 @@ BitmapResolutionDialog::BitmapResolutionDialog(QWidget *parent) :
 
     connect(ui->buttonBox, &QDialogButtonBox::accepted, this, &QDialog::accept);
     connect(ui->buttonBox, &QDialogButtonBox::rejected, this, &QDialog::reject);
-    connect(ui->radioButtonScreen, &QAbstractButton::pressed, this, &BitmapResolutionDialog::onResolutionScreen);
-    connect(ui->radioButton150ppi, &QAbstractButton::pressed, this, &BitmapResolutionDialog::onResolution150);
-    connect(ui->radioButton300ppi, &QAbstractButton::pressed, this, &BitmapResolutionDialog::onResolution300);
+    connect(ui->radioButtonScreen, &QAbstractButton::clicked, this, &BitmapResolutionDialog::onResolutionScreen);
+    connect(ui->radioButton150ppi, &QAbstractButton::clicked, this, &BitmapResolutionDialog::onResolution150);
+    connect(ui->radioButton300ppi, &QAbstractButton::clicked, this, &BitmapResolutionDialog::onResolution300);
 
-    connect(ui->radioButtonWidth, &QAbstractButton::pressed, this, &BitmapResolutionDialog::onWidthOption);
-    connect(ui->radioButtonHeight, &QAbstractButton::pressed, this, &BitmapResolutionDialog::onHeightOption);
+    connect(ui->radioButtonWidth, &QAbstractButton::clicked, this, &BitmapResolutionDialog::onWidthOption);
+    connect(ui->radioButtonHeight, &QAbstractButton::clicked, this, &BitmapResolutionDialog::onHeightOption);
 
 
     //enableSize(resolutionOption != ResolutionType::rtScreen);

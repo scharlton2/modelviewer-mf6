@@ -22,13 +22,13 @@ PreferencesDialog::PreferencesDialog(MouseMode mouseMode, QWidget *parent)
 
     // lamda lamda lamda
 
-    connect(ui->radioButtonTrackball, &QAbstractButton::pressed,
+    connect(ui->radioButtonTrackball, &QAbstractButton::clicked,
             [=]() {
             interactorStyle = MouseMode::mmTrackball;
         }
     );
 
-    connect(ui->radioButtonJoystick, &QAbstractButton::pressed,
+    connect(ui->radioButtonJoystick, &QAbstractButton::clicked,
             [=]() {
             interactorStyle = MouseMode::mmJoystick;
             }

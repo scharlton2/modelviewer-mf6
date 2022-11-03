@@ -27,8 +27,8 @@ GeometryDialog::GeometryDialog(QWidget *parent, MvDoc *doc)
     ui->setupUi(this);
 
     // axes
-    connect(ui->radioButtonLine, &QAbstractButton::pressed, this, &GeometryDialog::onRadioButtonLine);
-    connect(ui->radioButtonTube, &QAbstractButton::pressed, this, &GeometryDialog::onRadioButtonTube);
+    connect(ui->radioButtonLine, &QAbstractButton::clicked, this, &GeometryDialog::onRadioButtonLine);
+    connect(ui->radioButtonTube, &QAbstractButton::clicked, this, &GeometryDialog::onRadioButtonTube);
 
     // bounding box
     // https://htmlpreview.github.io/?https://github.com/Kitware/vtk-examples/blob/gh-pages/VTKNamedColorPatches.html#VTKColorNames
@@ -38,9 +38,9 @@ GeometryDialog::GeometryDialog(QWidget *parent, MvDoc *doc)
     vtkColor3d             White = colors->GetColor3d("White");
 
     // how does this work? seems that the vtkColor3d vars go out of scope  -- note that colors can't be used in the lamdas
-    connect(ui->radioButtonBlack, &QAbstractButton::pressed, [=]() { doc->setBoundingBoxColor(Black); });
-    connect(ui->radioButtonGray, &QAbstractButton::pressed, [=]() { doc->setBoundingBoxColor(Gray); });
-    connect(ui->radioButtonWhite, &QAbstractButton::pressed, [=]() { doc->setBoundingBoxColor(White); });
+    connect(ui->radioButtonBlack, &QAbstractButton::clicked, [=]() { doc->setBoundingBoxColor(Black); });
+    connect(ui->radioButtonGray, &QAbstractButton::clicked, [=]() { doc->setBoundingBoxColor(Gray); });
+    connect(ui->radioButtonWhite, &QAbstractButton::clicked, [=]() { doc->setBoundingBoxColor(White); });
 
     // tab
     connect(ui->tabWidget, QOverload<int>::of(&QTabWidget::currentChanged), this, QOverload<int>::of(&GeometryDialog::onTabChanged));

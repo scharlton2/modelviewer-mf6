@@ -58,15 +58,15 @@ ColorBarDialog::ColorBarDialog(QWidget *parent, MvDoc *doc)
     ui->spinBoxFontSize->setMaximum(VTK_INT_MAX);
     ui->spinBoxNumLabels->setMaximum(std::numeric_limits<int>::max());
     ui->spinBoxPrecision->setMaximum(std::numeric_limits<double>::digits10); // DBL_DIG
-    connect(ui->radioButtonBlack, &QAbstractButton::pressed,
+    connect(ui->radioButtonBlack, &QAbstractButton::clicked,
             [=]() {
                 doc->SetColorBarTextColor(0, 0, 0);
             });
-    connect(ui->radioButtonGray, &QAbstractButton::pressed,
+    connect(ui->radioButtonGray, &QAbstractButton::clicked,
             [=]() {
                 doc->SetColorBarTextColor(0.5f, 0.5f, 0.5f);
             });
-    connect(ui->radioButtonWhite, &QAbstractButton::pressed,
+    connect(ui->radioButtonWhite, &QAbstractButton::clicked,
             [=]() {
                 doc->SetColorBarTextColor(1, 1, 1);
             });
