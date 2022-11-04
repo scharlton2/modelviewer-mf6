@@ -194,6 +194,7 @@ private:
     QAction *            geometryAction;
     QAction *            lightingAction;
     QAction *            gridAction;
+    QAction *            overlayAction;
 };
 
 #endif // MAINWINDOW_H

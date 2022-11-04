@@ -74,6 +74,10 @@ MainWindow::MainWindow(QWidget *parent)
     std::string            s = mvSaveCurrentDirectory::GetFullPath(".\\New folder\\Greenport_Domain.shp", "D:\\Issues\\modflow\\model viewer for mf6\\issue-51");
     assert(s.compare("D:\\Issues\\modflow\\model viewer for mf6\\issue-51\\New folder\\Greenport_Domain.shp") == 0);
     //}}
+
+    // Disables the window ghosting feature for the calling GUI process
+    // (Don't display '(Not Responding)' in window caption)
+    DisableProcessWindowsGhosting();
 #endif
 
     vtkNew<vtkNamedColors> colors;
@@ -373,6 +377,13 @@ void MainWindow::createActions()
     geometryAction->setCheckable(true);
     geometryAction->setStatusTip(tr("Show or hide the Geometry Toolbox"));
     connect(geometryAction, &QAction::triggered, doc, &MvDoc::onToolboxGeometry);
+
+
+    // Toolbox->Overlay
+    overlayAction = new QAction(tr("Ov&erlay"), this);
+    overlayAction->setCheckable(true);
+    overlayAction->setStatusTip(tr("Show or hide the Overlay Toolbox"));
+    connect(overlayAction, &QAction::triggered, doc, &MvDoc::onToolboxOverlay);
 }
 
 void MainWindow::updateFileActions()
@@ -544,6 +555,9 @@ void MainWindow::updateToolboxActions()
 
     // Toolbox->Grid
     doc->onUpdateToolboxGrid(gridAction);
+
+    // Toolbox->Overlay
+    doc->onUpdateToolboxOverlay(overlayAction);
 }
 
 bool MainWindow::isAnimating() const
@@ -744,6 +758,9 @@ void MainWindow::createMenus()
 
     // Toolbox->Geometry
     toolboxMenu->addAction(geometryAction);
+
+    // Toolbox->Overlay
+    toolboxMenu->addAction(overlayAction);
 }
 
 void MainWindow::createStatusBar()

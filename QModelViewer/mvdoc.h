@@ -154,17 +154,23 @@ public:
 
     QDir                               defaultDir() const;
 
+    /////////////////////////////////////////////////////////////////////////////
     // Toolbox->Data
+    /////////////////////////////////////////////////////////////////////////////
     void                               onToolboxData();
     void                               onUpdateToolboxData(QAction* action);
     void                               setScalarDataTypeTo(int index);
 
+    /////////////////////////////////////////////////////////////////////////////
     // Toolbox->Color Bar
+    /////////////////////////////////////////////////////////////////////////////
     void                               onToolboxColorBar();
     void                               onUpdateToolboxColorBar(QAction* action);
     //void                               setScalarDataTypeTo(int index);
 
+    /////////////////////////////////////////////////////////////////////////////
     // Toolbar->Lighting
+    /////////////////////////////////////////////////////////////////////////////
     void                               onToolboxLighting();
     void                               onUpdateToolboxLighting(QAction* action);
     void                               switchOnHeadlight(bool switchOn);
@@ -179,7 +185,9 @@ public:
     void                               setBackgroundColor(double red, double green, double blue);
 
 
+    /////////////////////////////////////////////////////////////////////////////
     // Toolbox->Grid
+    /////////////////////////////////////////////////////////////////////////////
     void                               onToolboxGrid();
     void                               onUpdateToolboxGrid(QAction* action);
     void                               setGridLineColor(double red, double green, double blue);
@@ -194,7 +202,9 @@ public:
 
 
 
+    /////////////////////////////////////////////////////////////////////////////
     // Toolbox->Geometry
+    /////////////////////////////////////////////////////////////////////////////
     void                               onToolboxGeometry();
     void                               onUpdateToolboxGeometry(QAction* action);
 
@@ -208,6 +218,17 @@ public:
     void                               setBoundingBoxColor(vtkColor3d color3d);
     //void                               ApplySubgrid(int col_min, int col_max, int row_min, int row_max, int lay_min, int lay_max);
     //void                               SubgridOff();
+
+    /////////////////////////////////////////////////////////////////////////////
+    // Toolbox->Overlay
+    /////////////////////////////////////////////////////////////////////////////
+    void                               onUpdateToolboxOverlay(QAction* action);
+    void                               onToolboxOverlay();
+    bool                               hasOverlay();
+    void                               applyOverlayControl(const char* filename, int overlayType, double xorig, double yorig,
+                                                           double scale, double angle, int drape, int trim, int crop, double elev, double drapeGap);
+    void                               removeOverlay();
+
 
 
     // Pathlines

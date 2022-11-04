@@ -31,6 +31,7 @@
 #include "geometrydialog.h"
 #include "griddialog.h"
 #include "lightingdialog.h"
+#include "overlaydialog.h"
 
 #include "preferencesdialog.h"
 
@@ -78,7 +79,6 @@ MvDoc::MvDoc(QMainWindow* parent)
 #if TODO
     // Set modeless dialog boxes to null. These cannot be created
     // until after the main frame window is created.
-    m_GeometryDlg      = NULL;
     m_DataDlg          = NULL;
     m_SolidDlg         = NULL;
     m_IsosurfaceDlg    = NULL;
@@ -87,7 +87,6 @@ MvDoc::MvDoc(QMainWindow* parent)
     m_ModelFeaturesDlg = NULL;
     m_CropDlg          = NULL;
     m_AnimationDlg     = NULL;
-    m_OverlayDlg       = NULL;
 #endif
 
     dataDialog     = new DataDialog(parent, this);
@@ -102,6 +101,9 @@ MvDoc::MvDoc(QMainWindow* parent)
 
     geometryDialog = new GeometryDialog(parent, this);
     ///geometryDialog->reinitialize();
+
+    overlayDialog  = new OverlayDialog(parent, this);
+
 
     reinitializeToolDialogs();
 
@@ -267,7 +269,7 @@ void MvDoc::reinitializeToolDialogs()
     //m_PathlinesDlg->ShowWindow(SW_HIDE);
     //m_ModelFeaturesDlg->Reinitialize();
     //m_ModelFeaturesDlg->ShowWindow(SW_HIDE);
-    //m_OverlayDlg->Reinitialize();
+    overlayDialog->reinitialize();
     //m_CropDlg->Reinitialize();
     //m_AnimationDlg->Reinitialize();
 }
@@ -320,6 +322,16 @@ void MvDoc::onFileNew()
 
     // Apply default settings and then turn on bounding box
     _manager->ApplyDefaultSettings();
+
+    if (const Modflow6DataSource* modflow6 = dynamic_cast<const Modflow6DataSource*>(_manager->GetDataSource()))
+    {
+        defaultXOrigin = modflow6->GetXOrigin();
+        defaultYOrigin = modflow6->GetYOrigin();
+        defaultAngRot  = modflow6->GetAngRot();
+
+        _manager->SetOverlayCoordinatesAtGridOrigin(modflow6->GetXOrigin(), modflow6->GetYOrigin());
+        _manager->SetOverlayAngle(modflow6->GetAngRot());
+    }
 
     // If there are more than one time points, turn on the
     // time label
@@ -2083,6 +2095,142 @@ void MvDoc::subgridOff()
 }
 
 /////////////////////////////////////////////////////////////////////////////
+// Toolbox->Overlay
+
+void MvDoc::onUpdateToolboxOverlay(QAction* action)
+{
+    assert(overlayDialog);
+    action->setChecked(overlayDialog->isVisible());
+}
+
+void MvDoc::onToolboxOverlay()
+{
+    assert(overlayDialog);
+    if (overlayDialog->isVisible())
+    {
+        overlayDialog->hide();
+    }
+    else
+    {
+        overlayDialog->show();
+    }
+}
+
+void MvDoc::updateOverlayDialog()
+{
+    // @todo
+    assert(overlayDialog);
+
+    // Controls
+    double x, y;
+    _manager->GetOverlayCoordinatesAtGridOrigin(x, y);
+    overlayDialog->xOrig          = x;
+    overlayDialog->yOrig          = y;
+    overlayDialog->scale          = _manager->GetOverlayToGridScale();
+    overlayDialog->angle          = _manager->GetOverlayAngle();
+    overlayDialog->drape          = _manager->GetOverlayDrape() != 0;
+    overlayDialog->trim           = _manager->GetOverlayTrim() != 0;
+    overlayDialog->crop           = _manager->GetOverlayCrop() != 0;
+    overlayDialog->elev           = _manager->GetOverlayElevation();
+    overlayDialog->drapeGap       = _manager->GetOverlayDrapeGap();
+    overlayDialog->structuredGrid = _manager->GetIsStructuredGrid();
+    overlayDialog->updateDataControls(false);
+    overlayDialog->activateControls(_manager->GetDataFileList() != nullptr);
+
+    if (_manager->HasOverlay() != 0)
+    {
+        // File
+        overlayDialog->filename    = _manager->GetOverlayFileName();
+        overlayDialog->overlayType = static_cast<OverlayType>(_manager->GetOverlayType() - 1);
+        overlayDialog->updateDataFile(false);
+
+        // Bounds
+        double xmin, xmax, ymin, ymax;
+        _manager->GetOverlayBounds(xmin, xmax, ymin, ymax);
+        overlayDialog->setBounds(xmin, xmax, ymin, ymax);
+
+        overlayDialog->setCurrentIndex(0);
+        overlayDialog->enableRemoveButton(true);
+    }
+    else
+    {
+        // Controls
+        overlayDialog->xOrig = defaultXOrigin;
+        overlayDialog->yOrig = defaultYOrigin;
+        overlayDialog->angle = defaultAngRot;
+        overlayDialog->updateDataControls(false);
+
+        // File
+        overlayDialog->reinitializeFile();
+
+        // Bounds
+        overlayDialog->reinitializeBounds();
+        overlayDialog->setCurrentIndex(1);
+        overlayDialog->enableRemoveButton(false);
+    }
+    overlayDialog->activateFile(_manager->GetDataFileList() != nullptr);
+    overlayDialog->enableApplyButton(true);
+}
+
+bool MvDoc::hasOverlay()
+{
+    return (_manager->HasOverlay() != 0);
+}
+
+void MvDoc::removeOverlay()
+{
+    _manager->RemoveOverlay();
+    updateOverlayDialog();
+    updateAllViews(nullptr);
+    setModified(true);
+}
+
+void MvDoc::applyOverlayControl(const char* filename, int overlayType, double xorig, double yorig,
+                                double scale, double angle, int drape, int trim, int crop, double elev, double drapeGap)
+{
+    _manager->SetOverlayFileName(filename);
+    _manager->SetOverlayType(overlayType);
+    _manager->SetOverlayCoordinatesAtGridOrigin(xorig, yorig);
+    _manager->SetOverlayToGridScale(scale);
+    _manager->SetOverlayAngle(angle);
+    _manager->SetOverlayDrape(drape);
+    _manager->SetOverlayTrim(trim);
+    _manager->SetOverlayCrop(crop);
+    _manager->SetOverlayElevation(elev);
+    _manager->SetOverlayDrapeGap(drapeGap);
+    char* errMsg = 0;
+    if (!_manager->UpdateOverlay(errMsg))
+    {
+        MainWindow* mainWindow = dynamic_cast<MainWindow*>(parent());
+        assert(mainWindow);
+
+        QMessageBox::critical(mainWindow, "", errMsg);
+        _manager->HideOverlay();
+        overlayDialog->enableRemoveButton(false);
+
+        //overlayDialog->m_BoundsPage->Reinitialize();
+        overlayDialog->reinitialize();
+        return;
+    }
+    else
+    {
+        double xmin, xmax, ymin, ymax;
+        _manager->GetOverlayBounds(xmin, xmax, ymin, ymax);
+        overlayDialog->setBounds(xmin, xmax, ymin, ymax);
+    }
+    if (!_manager->IsOverlayVisible())
+    {
+        _manager->ShowOverlay();
+    }
+    //overlayDialog->m_RemoveButton.EnableWindow(TRUE);
+    overlayDialog->enableRemoveButton(true);
+
+    updateAllViews(nullptr);
+    setModified(true);
+}
+
+
+/////////////////////////////////////////////////////////////////////////////
 // Toolbox->???
 
 
@@ -2136,12 +2284,6 @@ void MvDoc::updateModelFeaturesDialog()
 {
     // @todo
     assert(modelFeaturesDialog);
-}
-
-void MvDoc::updateOverlayDialog()
-{
-    // @todo
-    assert(overlayDialog);
 }
 
 GridType MvDoc::gridType()
