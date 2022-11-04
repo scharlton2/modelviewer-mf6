@@ -21,16 +21,16 @@ public:
     void    hideEvent(QHideEvent *event) override;
     void    showEvent(QShowEvent *e) override;
 
-    void    enableApplyButton(bool enable);
-    void    enableRemoveButton(bool enable);
-    void    reinitialize();
-    void    setCurrentIndex(int index);
-    void    activate(bool saveAndValidate);
+    void        enableApplyButton(bool enable);
+    void        enableRemoveButton(bool enable);
+    void        reinitialize();
+    void        setCurrentIndex(int index);
+    void        activate(bool activate);
 
     // Controls
-    void        activateControls(bool saveAndValidate);
+    void        activateControls(bool activate);
     void        reinitializeControls();
-    bool        updateDataControls(bool activate);
+    bool        updateDataControls(bool saveAndValidate);
 
     double      xOrig;
     double      yOrig;
@@ -44,9 +44,9 @@ public:
     bool        structuredGrid;
 
     // File
-    void        activateFile(bool saveAndValidate);
+    void        activateFile(bool activate);
     void        reinitializeFile();
-    bool        updateDataFile(bool activate);
+    bool        updateDataFile(bool saveAndValidate);
 
     QString     filename;
     OverlayType overlayType;
