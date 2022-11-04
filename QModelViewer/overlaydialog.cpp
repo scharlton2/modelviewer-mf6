@@ -66,6 +66,7 @@ OverlayDialog::OverlayDialog(QWidget* parent, MvDoc* doc)
 OverlayDialog::~OverlayDialog()
 {
     delete ui;
+    delete _geometry;
 }
 
 void OverlayDialog::hideEvent(QHideEvent* e)

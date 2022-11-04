@@ -139,6 +139,7 @@ GridDialog::GridDialog(QWidget * parent, MvDoc * doc)
 GridDialog::~GridDialog()
 {
     delete ui;
+    delete _geometry;
 }
 
 void GridDialog::hideEvent(QHideEvent *e)

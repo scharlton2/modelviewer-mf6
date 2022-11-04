@@ -150,6 +150,7 @@ LightingDialog::LightingDialog(QWidget *parent, MvDoc *doc)
 LightingDialog::~LightingDialog()
 {
     delete ui;
+    delete _geometry;
 }
 
 void LightingDialog::hideEvent(QHideEvent *e)
