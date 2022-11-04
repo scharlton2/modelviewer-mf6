@@ -384,6 +384,12 @@ void MainWindow::createActions()
     overlayAction->setCheckable(true);
     overlayAction->setStatusTip(tr("Show or hide the Overlay Toolbox"));
     connect(overlayAction, &QAction::triggered, doc, &MvDoc::onToolboxOverlay);
+
+    // Toolbox->Solid
+    solidAction = new QAction(tr("&Solid"), this);
+    solidAction->setCheckable(true);
+    solidAction->setStatusTip(tr("Show or hide the Solid Toolbox"));
+    connect(solidAction, &QAction::triggered, doc, &MvDoc::onToolboxSolid);
 }
 
 void MainWindow::updateFileActions()
@@ -558,6 +564,9 @@ void MainWindow::updateToolboxActions()
 
     // Toolbox->Overlay
     doc->onUpdateToolboxOverlay(overlayAction);
+
+    // Toolbox->Solid
+    doc->onUpdateToolboxSolid(solidAction);
 }
 
 bool MainWindow::isAnimating() const
@@ -761,6 +770,12 @@ void MainWindow::createMenus()
 
     // Toolbox->Overlay
     toolboxMenu->addAction(overlayAction);
+
+    // -----------------------------
+    toolboxMenu->addSeparator();
+
+    // Toolbox->Solid
+    toolboxMenu->addAction(solidAction);
 }
 
 void MainWindow::createStatusBar()

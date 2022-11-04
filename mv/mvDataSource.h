@@ -29,7 +29,7 @@ public:
      * are values interpolated to points (cell corners). This is needed
      * for drawing isosurfaces. Point scalars do not have a secondary dataset.
      */
-    virtual int         GetPrimaryScalarMode()                 = MV_CELL_SCALARS;
+    virtual ScalarMode  GetPrimaryScalarMode()                 = 0;
 
     /**
      * Returns the type of grid. The possibilities are: 1) vtkStructuredPoints

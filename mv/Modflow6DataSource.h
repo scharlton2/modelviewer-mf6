@@ -14,7 +14,7 @@ public:
 
     static const char *GetNameStatic() { return "Modflow 6"; }
     const char        *GetName() override { return GetNameStatic(); }
-    int                GetPrimaryScalarMode() override { return MV_CELL_SCALARS; }
+    ScalarMode         GetPrimaryScalarMode() override { return ScalarMode::MV_CELL_SCALARS; }
     GridType           GetGridType() override { return m_GridType; }
     //   virtual int AreAllCellsActive() { return 0; }
     const char *LoadData(char *dataFileList) override;

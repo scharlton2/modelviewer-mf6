@@ -230,6 +230,18 @@ public:
     void                               removeOverlay();
 
 
+    /////////////////////////////////////////////////////////////////////////////
+    // Toolbox->Solid
+    /////////////////////////////////////////////////////////////////////////////
+    void                               onUpdateToolboxSolid(QAction* action);
+    void                               onToolboxSolid();
+    void                               applySolidControl(bool threshold, double minValue, double maxValue, int numberOfColorBands);
+    void                               setSolidDisplayToBlocky();
+    void                               setSolidDisplayToSmooth();
+    void                               setSolidDisplayToBanded();
+
+
+
 
     // Pathlines
     //void                               SetPathlineRepresentationToLine();
@@ -318,7 +330,7 @@ private:
     GeometryDialog*           geometryDialog;       // ID_GEOMETRY_TOOL
     OverlayDialog*            overlayDialog;        // ID_OVERLAY_TOOL
     // SEPARATOR
-    SolidDialog*              solidDialog;          // ID_SOLID_TOOL
+    SolidDialog*              solidDialog;          // IDD_SOLID
     IsosurfaceDialog*         isosurfaceDialog;     // ID_ISOSURFACE_TOOL
     VectorDialog*             vectorDialog;         // ID_VECTOR_TOOL
     PathlinesDialog*          pathlinesDialog;      // ID_PATHLINES_TOOL

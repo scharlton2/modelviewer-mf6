@@ -923,7 +923,7 @@ const char *mvManager::LoadData(char *modelName, char *dataFileList)
     m_PointScalars->Modified();
 
     // Set Cell data
-    if (m_DataSource->GetPrimaryScalarMode() == MV_CELL_SCALARS)
+    if (m_DataSource->GetPrimaryScalarMode() == ScalarMode::MV_CELL_SCALARS)
     {
         m_CellScalars->SetArray(m_DataSource->GetScalarArray() + numVTKPoints, numVTKCells, 1);
         m_CellScalars->Modified();
@@ -1548,7 +1548,7 @@ const char *mvManager::GetActiveScalarDataName() const
     }
 }
 
-int mvManager::GetPrimaryScalarMode() const
+ScalarMode mvManager::GetPrimaryScalarMode() const
 {
     if (m_DataSource)
     {
@@ -1556,7 +1556,7 @@ int mvManager::GetPrimaryScalarMode() const
     }
     else
     {
-        return 0;
+        return ScalarMode::MV_CELL_SCALARS;
     }
 }
 
@@ -2986,7 +2986,7 @@ void mvManager::OnDataModified()
     {
         m_ScalarUnstructuredGrid->Modified();
     }
-    if (m_DataSource->GetPrimaryScalarMode() == MV_CELL_SCALARS)
+    if (m_DataSource->GetPrimaryScalarMode() == ScalarMode::MV_CELL_SCALARS)
     {
         m_CellScalars->Modified();
     }
@@ -3140,7 +3140,7 @@ void mvManager::SetScalarDataTypeTo(int dataTypeIndex)
     m_PointScalars->SetArray(m_DataSource->GetScalarArray(), numPoints, 1);
     m_PointScalars->Modified();
 
-    if (m_DataSource->GetPrimaryScalarMode() == MV_CELL_SCALARS)
+    if (m_DataSource->GetPrimaryScalarMode() == ScalarMode::MV_CELL_SCALARS)
     {
         // Set Cell data
         m_CellScalars->SetArray(m_DataSource->GetScalarArray() + numPoints, numCells, 1);

@@ -32,6 +32,7 @@
 #include "griddialog.h"
 #include "lightingdialog.h"
 #include "overlaydialog.h"
+#include "soliddialog.h"
 
 #include "preferencesdialog.h"
 
@@ -80,7 +81,6 @@ MvDoc::MvDoc(QMainWindow* parent)
     // Set modeless dialog boxes to null. These cannot be created
     // until after the main frame window is created.
     m_DataDlg          = NULL;
-    m_SolidDlg         = NULL;
     m_IsosurfaceDlg    = NULL;
     m_VectorDlg        = NULL;
     m_PathlinesDlg     = NULL;
@@ -104,6 +104,7 @@ MvDoc::MvDoc(QMainWindow* parent)
 
     overlayDialog  = new OverlayDialog(parent, this);
 
+    solidDialog    = new SolidDialog(parent, this);
 
     reinitializeToolDialogs();
 
@@ -261,7 +262,7 @@ void MvDoc::reinitializeToolDialogs()
     //m_LightingDlg->Reinitialize();
     gridDialog->reinitialize();
     geometryDialog->reinitialize();
-    //m_SolidDlg->Reinitialize();
+    solidDialog->reinitialize();
     //m_IsosurfaceDlg->Reinitialize();
     //m_VectorDlg->Reinitialize();
     //m_VectorDlg->ShowWindow(SW_HIDE);
@@ -2229,6 +2230,86 @@ void MvDoc::applyOverlayControl(const char* filename, int overlayType, double xo
     setModified(true);
 }
 
+/////////////////////////////////////////////////////////////////////////////
+// Toolbox->Solid
+
+void MvDoc::onUpdateToolboxSolid(QAction* action)
+{
+    assert(solidDialog);
+    action->setChecked(solidDialog->isVisible());
+}
+
+void MvDoc::onToolboxSolid()
+{
+    assert(solidDialog);
+    if (solidDialog->isVisible())
+    {
+        solidDialog->hide();
+    }
+    else
+    {
+        solidDialog->show();
+    }
+}
+
+void MvDoc::updateSolidDialog()
+{
+    double limits[2];
+    _manager->GetSolidThresholdLimits(limits);
+    solidDialog->mSolidThresholdMin  = limits[0];
+    solidDialog->mSolidThresholdMax  = limits[1];
+    solidDialog->mPrimaryScalarMode  = _manager->GetPrimaryScalarMode();
+    solidDialog->mApplyThreshold     = _manager->IsSolidThresholdOn();
+    solidDialog->mSolidDisplayMode   = _manager->GetSolidDisplayMode();
+    solidDialog->mNumberOfColorBands = _manager->GetNumberOfColorBands();
+    if (_manager->GetPrimaryScalarMode() == ScalarMode::MV_CELL_SCALARS)
+    {
+        solidDialog->setRadioButtonBlockyVisible(true);
+    }
+    else
+    {
+        solidDialog->setRadioButtonBlockyVisible(false);
+    }
+    solidDialog->updateData(false);
+    solidDialog->activate(_manager->IsSolidVisible());
+}
+
+void MvDoc::setSolidDisplayToBlocky()
+{
+    _manager->SetSolidDisplayToBlocky();
+    updateAllViews(nullptr);
+    setModified(true);
+}
+
+void MvDoc::setSolidDisplayToSmooth()
+{
+    _manager->SetSolidDisplayToSmooth();
+    updateAllViews(nullptr);
+    setModified(true);
+}
+
+void MvDoc::setSolidDisplayToBanded()
+{
+    _manager->SetSolidDisplayToBanded();
+    updateAllViews(nullptr);
+    setModified(true);
+}
+
+void MvDoc::applySolidControl(bool threshold, double minValue, double maxValue, int numberOfColorBands)
+{
+    _manager->SetSolidThresholdLimits(minValue, maxValue);
+    _manager->SetNumberOfColorBands(numberOfColorBands);
+    if (threshold)
+    {
+        _manager->SolidThresholdOn();
+    }
+    else
+    {
+        _manager->SolidThresholdOff();
+    }
+    updateAllViews(nullptr);
+    setModified(true);
+}
 
 /////////////////////////////////////////////////////////////////////////////
 // Toolbox->???
@@ -2244,12 +2325,6 @@ void MvDoc::getScalarDataRange(double* range)
     _manager->GetScalarDataRange(range);
 }
 
-
-void MvDoc::updateSolidDialog()
-{
-    // @todo
-    assert(solidDialog);
-}
 void MvDoc::updateIsosurfaceDialog()
 {
     // @todo
