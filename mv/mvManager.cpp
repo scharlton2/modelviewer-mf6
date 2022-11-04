@@ -1214,6 +1214,11 @@ const char *mvManager::LoadData(char *modelName, char *dataFileList)
     return nullptr;
 }
 
+const mvDataSource *mvManager::GetDataSource() const
+{
+    return m_DataSource;
+}
+
 void mvManager::ApplyDefaultSettings()
 {
     // Hide Everything

@@ -74,6 +74,7 @@ set(UI_FILES
   lightingdialog.ui
   mainwindow.ui
   modflow6datafilesdialog.ui
+  overlaydialog.ui
   preferencesdialog.ui
 )
 
@@ -91,6 +92,7 @@ set(HXX_FILES
   mvdoc.h
   mvview.h
   modflow6datafilesdialog.h
+  overlaydialog.h
   preferencesdialog.h
   qabstractview.h
   resource.h
@@ -111,6 +113,7 @@ set(CXX_FILES
   modflow6datafilesdialog.cpp
   mvdoc.cpp
   mvview.cpp
+  overlaydialog.cpp
   preferencesdialog.cpp
   qabstractview.cpp
 )

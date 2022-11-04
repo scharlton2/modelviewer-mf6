@@ -69,6 +69,7 @@ public:
 
     // Data set and animation control
     // void ClearData();
+    const mvDataSource *               GetDataSource() const;
     const char *                       LoadData(char *modelType, char *dataFileList);
     char                              *GetDataFileList() const;
     int                                HasVectorData() const;

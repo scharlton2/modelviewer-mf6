@@ -26,6 +26,11 @@ enum class GridType {
     MV_UNSTRUCTURED_GRID = 6  // DISU6
 };
 
+enum class OverlayType {
+    otShapeFile = 0,            // MV_ESRI_SHAPEFILE_OVERLAY
+    otDXFFile   = 1             // MV_DXF_ASCII_OVERLAY
+};
+
 #define MV_INITIAL_DISPLAY_BOUNDING_BOX 0
 #define MV_INITIAL_DISPLAY_GRID_OUTLINE 1
 

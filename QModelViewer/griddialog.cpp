@@ -26,9 +26,9 @@ GridDialog::GridDialog(QWidget * parent, MvDoc * doc)
     vtkColor3d             Black = colors->GetColor3d("Black");
     vtkColor3d             Gray  = colors->GetColor3d("Gray");
     vtkColor3d             White = colors->GetColor3d("White");
-    connect(ui->radioButtonBlack, &QAbstractButton::pressed, [=]() { doc->setGridLineColor(Black); });
-    connect(ui->radioButtonGray,  &QAbstractButton::pressed, [=]() { doc->setGridLineColor(Gray); });
-    connect(ui->radioButtonWhite, &QAbstractButton::pressed, [=]() { doc->setGridLineColor(White); });
+    connect(ui->radioButtonBlack, &QAbstractButton::clicked, [=]() { doc->setGridLineColor(Black); });
+    connect(ui->radioButtonGray,  &QAbstractButton::clicked, [=]() { doc->setGridLineColor(Gray); });
+    connect(ui->radioButtonWhite, &QAbstractButton::clicked, [=]() { doc->setGridLineColor(White); });
 
     connect(ui->checkBoxActivateX, QOverload<int>::of(&QCheckBox::stateChanged), this, &GridDialog::onActivateX);
     connect(ui->checkBoxActivateY, QOverload<int>::of(&QCheckBox::stateChanged), this, &GridDialog::onActivateY);
