@@ -94,7 +94,7 @@ public:
     void                               SetScalarDataTypeTo(int dataTypeIndex);
     int                                GetActiveScalarDataType() const { return m_ActiveDataType; }
     const char *                       GetActiveScalarDataName() const;
-    int                                GetPrimaryScalarMode() const;
+    ScalarMode                         GetPrimaryScalarMode() const;
     const char *                       GetModelName() const;
     int                                GetTimeLabelOption() const;
     void                               SetTimePointTo(int timePointIndex);

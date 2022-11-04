@@ -102,7 +102,7 @@ bool mvDataSource::ParseDataFileList(char *&pList, char *fileName)
 
 int mvDataSource::GetDataSetToUseForRange()
 {
-    if (GetPrimaryScalarMode() == MV_CELL_SCALARS)
+    if (GetPrimaryScalarMode() == ScalarMode::MV_CELL_SCALARS)
     {
         return MV_USE_CELL_DATA_FOR_RANGE;
     }

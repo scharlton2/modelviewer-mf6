@@ -16,8 +16,10 @@ enum class SolidDisplayType {
 #define MV_PATHLINE_TUBE     0
 #define MV_PATHLINE_LINE     1
 
-#define MV_CELL_SCALARS      0
-#define MV_POINT_SCALARS     1
+enum class ScalarMode {
+    MV_CELL_SCALARS  = 0,
+    MV_POINT_SCALARS = 1
+};
 
 enum class GridType {
     MV_GRID_NOT_DEFINED  = 0,

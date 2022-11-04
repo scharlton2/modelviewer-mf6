@@ -76,6 +76,7 @@ set(UI_FILES
   modflow6datafilesdialog.ui
   overlaydialog.ui
   preferencesdialog.ui
+  soliddialog.ui
 )
 
 set(HXX_FILES
@@ -96,6 +97,7 @@ set(HXX_FILES
   preferencesdialog.h
   qabstractview.h
   resource.h
+  soliddialog.h
 )
 
 set(CXX_FILES
@@ -116,6 +118,7 @@ set(CXX_FILES
   overlaydialog.cpp
   preferencesdialog.cpp
   qabstractview.cpp
+  soliddialog.cpp
 )
 
 set(QRC_FILES
