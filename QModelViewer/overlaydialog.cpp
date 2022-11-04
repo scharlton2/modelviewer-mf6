@@ -8,6 +8,7 @@
 #include <QFileDialog>
 #include <QMessageBox>
 
+#include <limits>
 
 OverlayDialog::OverlayDialog(QWidget* parent, MvDoc* doc)
     : QDialog(parent, Qt::WindowCloseButtonHint)
@@ -249,8 +250,8 @@ bool OverlayDialog::updateDataControls(bool saveAndValidate)
         {
             ui->radioButtonFlat->setChecked(true);
         }
-        ui->lineEditXOrig->setText(QString("%1").number(xOrig, 'g', DBL_DIG));
-        ui->lineEditYOrig->setText(QString("%1").number(yOrig, 'g', DBL_DIG));
+        ui->lineEditXOrig->setText(QString("%1").number(xOrig, 'g', std::numeric_limits<double>::digits10));
+        ui->lineEditYOrig->setText(QString("%1").number(yOrig, 'g', std::numeric_limits<double>::digits10));
         ui->lineEditScale->setText(QString("%1").arg(scale));
         ui->lineEditElev->setText(QString("%1").arg(elev));
         ui->lineEditDrapeGap->setText(QString("%1").arg(drapeGap));
