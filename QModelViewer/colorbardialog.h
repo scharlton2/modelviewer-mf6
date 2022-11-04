@@ -70,7 +70,7 @@ public Q_SLOTS:
     void onLowerColor();
     void onUpperColor();
 
-    void onLogScale();
+    void onLogScale(int state);
     void onReverse();
 
 private:

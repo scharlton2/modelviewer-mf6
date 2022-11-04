@@ -583,7 +583,7 @@ void ColorBarDialog::onReverse()
     }
 }
 
-void ColorBarDialog::onLogScale()
+void ColorBarDialog::onLogScale(int state)
 {
     if (updateDataLimits(true))
     {
@@ -592,10 +592,12 @@ void ColorBarDialog::onLogScale()
         {
             if (isColorBarLinear)
             {
+                assert(state == Qt::Unchecked);
                 doc->UseLinearColorBar();
             }
             else
             {
+                assert(state == Qt::Checked);
                 doc->UseLogColorBar();
             }
         }
