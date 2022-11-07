@@ -128,6 +128,7 @@ bool SolidDialog::updateData(bool saveAndValidate)
             break;
         default:
             assert(false);
+            break;
         }
 
         ui->spinBoxColorBands->setValue(mNumberOfColorBands);

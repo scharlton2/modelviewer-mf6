@@ -191,6 +191,7 @@ bool GridDialog::updateDataLines(bool saveAndValidate)
             break;
         default:
             assert(false);
+            break;
         }
     }
     return true;

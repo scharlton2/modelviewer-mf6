@@ -261,6 +261,7 @@ bool GeometryDialog::updateDataBoundingBox(bool saveAndValidate)
             break;
         default:
             assert(false);
+            break;
         }
     }
     return true;
@@ -299,6 +300,7 @@ void GeometryDialog::onApply()
             break;
         default:
             assert(false);
+            break;
         }
     }
 }
@@ -359,6 +361,7 @@ void GeometryDialog::onTabChanged(int index)
         break;
     default:
         assert(false);
+        break;
     }
 }
 

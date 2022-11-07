@@ -285,6 +285,7 @@ bool ColorBarDialog::updateDataLabels(bool saveAndValidate)
             break;
         default:
             assert(false);
+            break;
         }
 
         ui->spinBoxFontSize->setValue(fontSize);
