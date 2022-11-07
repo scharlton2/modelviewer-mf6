@@ -71,6 +71,7 @@ set(UI_FILES
   exportanimationdialog.ui
   geometrydialog.ui
   griddialog.ui
+  isosurfacedialog.ui
   lightingdialog.ui
   mainwindow.ui
   modflow6datafilesdialog.ui
@@ -88,6 +89,7 @@ set(HXX_FILES
   exportanimationdialog.h
   geometrydialog.h
   griddialog.h
+  isosurfacedialog.h
   lightingdialog.h
   mainwindow.h
   mvdoc.h
@@ -109,6 +111,7 @@ set(CXX_FILES
   exportanimationdialog.cpp
   geometrydialog.cpp
   griddialog.cpp
+  isosurfacedialog.cpp
   lightingdialog.cpp
   main.cpp
   mainwindow.cpp

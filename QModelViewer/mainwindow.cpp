@@ -390,6 +390,12 @@ void MainWindow::createActions()
     solidAction->setCheckable(true);
     solidAction->setStatusTip(tr("Show or hide the Solid Toolbox"));
     connect(solidAction, &QAction::triggered, doc, &MvDoc::onToolboxSolid);
+
+    // Toolbox->Isosurface
+    isosurfaceAction = new QAction(tr("&Isosurface"), this);
+    isosurfaceAction->setCheckable(true);
+    isosurfaceAction->setStatusTip(tr("Show or hide the Isosurface Toolbox"));
+    connect(isosurfaceAction, &QAction::triggered, doc, &MvDoc::onToolboxIsosurface);
 }
 
 void MainWindow::updateFileActions()
@@ -776,6 +782,9 @@ void MainWindow::createMenus()
 
     // Toolbox->Solid
     toolboxMenu->addAction(solidAction);
+
+    // Toolbox->Isosurface
+    toolboxMenu->addAction(isosurfaceAction);    
 }
 
 void MainWindow::createStatusBar()

@@ -241,6 +241,14 @@ public:
     void                               setSolidDisplayToBanded();
 
 
+    /////////////////////////////////////////////////////////////////////////////
+    // Toolbox->Isosurface
+    /////////////////////////////////////////////////////////////////////////////
+    void                               onUpdateToolboxIsosurface(QAction* action);
+    void                               onToolboxIsosurface();
+    void                               setCustomIsosurfaces(std::vector<double> values);
+    void                               setRegularIsosurfaces(int count, double valueMin, double valueMax);
+
 
 
     // Pathlines
