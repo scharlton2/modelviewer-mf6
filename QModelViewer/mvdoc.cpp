@@ -2354,8 +2354,7 @@ void MvDoc::updateIsosurfaceDialog()
 {
     assert(isosurfaceDialog);
 
-    // Regular Isosurface Page
-    //CRegularIsosurfacePage* reg = m_IsosurfaceDlg->m_RegularIsosurfacePage;
+    // Regular
     double                  range[2];
     _manager->GetRegularIsosurfaceRange(range);
     isosurfaceDialog->mIsosurfaceCount = _manager->GetNumberOfRegularIsosurfaces();
@@ -2363,20 +2362,13 @@ void MvDoc::updateIsosurfaceDialog()
     isosurfaceDialog->mValueMax        = range[1];
     isosurfaceDialog->updateDataRegular(false);
 
-    // Custom Isosurface Page
-    //CCustomIsosurfacePage* custom = m_IsosurfaceDlg->m_CustomIsosurfacePage;
+    // Custom
     const double*          values = _manager->GetCustomIsosurfaceValues();
-    //CListBox*              list   = &(custom->m_IsosurfaceList);
-    //list->ResetContent();
-    //char text[16];
     for (int i = 0; i < _manager->GetNumberOfCustomIsosurfaces(); i++)
     {
-        //sprintf(text, "%g", values[i]);
-        //list->AddString(text);
         isosurfaceDialog->mCustomIsosurfaces.push_back(values[i]);
 
     }
-    //custom->GetDlgItem(IDC_VALUE)->SetWindowText("");
     isosurfaceDialog->updateDataCustom(false);
 
     // Isosurface Dlg
