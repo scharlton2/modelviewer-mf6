@@ -33,6 +33,8 @@
 #include "lightingdialog.h"
 #include "overlaydialog.h"
 #include "soliddialog.h"
+#include "isosurfacedialog.h"
+
 
 #include "preferencesdialog.h"
 
@@ -89,22 +91,25 @@ MvDoc::MvDoc(QMainWindow* parent)
     m_AnimationDlg     = NULL;
 #endif
 
-    dataDialog     = new DataDialog(parent, this);
+    dataDialog       = new DataDialog(parent, this);
     ///dataDialog->reinitialize();
 
-    colorBarDialog = new ColorBarDialog(parent, this);
+    colorBarDialog   = new ColorBarDialog(parent, this);
     ///colorBarDialog->reinitialize();
 
-    lightingDialog = new LightingDialog(parent, this);
+    lightingDialog   = new LightingDialog(parent, this);
 
-    gridDialog     = new GridDialog(parent, this);
+    gridDialog       = new GridDialog(parent, this);
 
-    geometryDialog = new GeometryDialog(parent, this);
+    geometryDialog   = new GeometryDialog(parent, this);
     ///geometryDialog->reinitialize();
 
-    overlayDialog  = new OverlayDialog(parent, this);
+    overlayDialog    = new OverlayDialog(parent, this);
 
-    solidDialog    = new SolidDialog(parent, this);
+    solidDialog      = new SolidDialog(parent, this);
+
+    isosurfaceDialog = new IsosurfaceDialog(parent, this);
+
 
     reinitializeToolDialogs();
 
@@ -873,16 +878,16 @@ void MvDoc::onShowIsosurfaces()
     */
 
     _manager->ShowScalarDataAsIsosurfaces();
-    //m_IsosurfaceDlg->Activate(TRUE);
+    isosurfaceDialog->activate(true);
     if (_manager->UsingRegularIsosurfaces())
     {
-        //m_IsosurfaceDlg->m_PropertySheet->SetActivePage(0);
+        isosurfaceDialog->setCurrentTabIndex(0);
     }
     else
     {
-        //m_IsosurfaceDlg->m_PropertySheet->SetActivePage(1);
+        isosurfaceDialog->setCurrentTabIndex(1);
     }
-    //m_SolidDlg->Activate(FALSE);
+    solidDialog->activate(false);
     //m_CropDlg->Activate(TRUE);
     updateAllViews(nullptr);
     setModified(true);
@@ -1328,6 +1333,7 @@ void MvDoc::updateToolDialogs(mvGUISettings* gui)
 
 /////////////////////////////////////////////////////////////////////////////
 // Scale
+/////////////////////////////////////////////////////////////////////////////
 
 void MvDoc::setScale(double xScale, double yScale, double zScale)
 {
@@ -1348,6 +1354,7 @@ void MvDoc::setScale(double xScale, double yScale, double zScale)
 
 /////////////////////////////////////////////////////////////////////////////
 // Axes
+/////////////////////////////////////////////////////////////////////////////
 
 void MvDoc::setAxesRepresentationToLine()
 {
@@ -1376,6 +1383,8 @@ void MvDoc::setAxesProperties(double xPos, double yPos, double zPos,
 
 /////////////////////////////////////////////////////////////////////////////
 // Bounding Box
+/////////////////////////////////////////////////////////////////////////////
+
 void MvDoc::setBoundingBoxColor(double red, double green, double blue)
 {
     _manager->SetBoundingBoxColor(red, green, blue);
@@ -1392,6 +1401,7 @@ void MvDoc::setBoundingBoxColor(vtkColor3d color3d)
 
 /////////////////////////////////////////////////////////////////////////////
 // Toolbox->Geometry
+/////////////////////////////////////////////////////////////////////////////
 
 void MvDoc::onToolboxGeometry()
 {
@@ -1447,6 +1457,7 @@ void MvDoc::updateGeometryDialog()
 
 /////////////////////////////////////////////////////////////////////////////
 // Toolbox->Data
+/////////////////////////////////////////////////////////////////////////////
 
 void MvDoc::onToolboxData()
 {
@@ -1526,6 +1537,7 @@ bool MvDoc::hasPathlineData() const
 
 /////////////////////////////////////////////////////////////////////////////
 // Toolbox->Color Bar
+/////////////////////////////////////////////////////////////////////////////
 
 // afx_msg void OnUpdateColorBarTool(CCmdUI* pCmdUI);
 void MvDoc::onUpdateToolboxColorBar(QAction* action)
@@ -1619,6 +1631,7 @@ void MvDoc::updateColorBarDialog()
 
 /////////////////////////////////////////////////////////////////////////////
 // Toolbox->Lighting
+/////////////////////////////////////////////////////////////////////////////
 
 void MvDoc::onUpdateToolboxLighting(QAction* action)
 {
@@ -1769,6 +1782,7 @@ void MvDoc::setBackgroundColor(double red, double green, double blue)
 
 /////////////////////////////////////////////////////////////////////////////
 // Toolbox->Grid
+/////////////////////////////////////////////////////////////////////////////
 
 void MvDoc::onUpdateToolboxGrid(QAction* action)
 {
@@ -2097,6 +2111,7 @@ void MvDoc::subgridOff()
 
 /////////////////////////////////////////////////////////////////////////////
 // Toolbox->Overlay
+/////////////////////////////////////////////////////////////////////////////
 
 void MvDoc::onUpdateToolboxOverlay(QAction* action)
 {
@@ -2232,6 +2247,7 @@ void MvDoc::applyOverlayControl(const char* filename, int overlayType, double xo
 
 /////////////////////////////////////////////////////////////////////////////
 // Toolbox->Solid
+/////////////////////////////////////////////////////////////////////////////
 
 void MvDoc::onUpdateToolboxSolid(QAction* action)
 {
@@ -2312,6 +2328,85 @@ void MvDoc::applySolidControl(bool threshold, double minValue, double maxValue, 
 }
 
 /////////////////////////////////////////////////////////////////////////////
+// Toolbox->Isosurface
+/////////////////////////////////////////////////////////////////////////////
+
+void MvDoc::onUpdateToolboxIsosurface(QAction* action)
+{
+    assert(isosurfaceDialog);
+    action->setChecked(isosurfaceDialog->isVisible());
+}
+
+void MvDoc::onToolboxIsosurface()
+{
+    assert(isosurfaceDialog);
+    if (isosurfaceDialog->isVisible())
+    {
+        isosurfaceDialog->hide();
+    }
+    else
+    {
+        isosurfaceDialog->show();
+    }
+}
+
+void MvDoc::updateIsosurfaceDialog()
+{
+    assert(isosurfaceDialog);
+
+    // Regular Isosurface Page
+    //CRegularIsosurfacePage* reg = m_IsosurfaceDlg->m_RegularIsosurfacePage;
+    double                  range[2];
+    _manager->GetRegularIsosurfaceRange(range);
+    isosurfaceDialog->mIsosurfaceCount = _manager->GetNumberOfRegularIsosurfaces();
+    isosurfaceDialog->mValueMin        = range[0];
+    isosurfaceDialog->mValueMax        = range[1];
+    isosurfaceDialog->updateDataRegular(false);
+
+    // Custom Isosurface Page
+    //CCustomIsosurfacePage* custom = m_IsosurfaceDlg->m_CustomIsosurfacePage;
+    const double*          values = _manager->GetCustomIsosurfaceValues();
+    //CListBox*              list   = &(custom->m_IsosurfaceList);
+    //list->ResetContent();
+    //char text[16];
+    for (int i = 0; i < _manager->GetNumberOfCustomIsosurfaces(); i++)
+    {
+        //sprintf(text, "%g", values[i]);
+        //list->AddString(text);
+        isosurfaceDialog->mCustomIsosurfaces.push_back(values[i]);
+
+    }
+    //custom->GetDlgItem(IDC_VALUE)->SetWindowText("");
+    isosurfaceDialog->updateDataCustom(false);
+
+    // Isosurface Dlg
+    if (_manager->UsingRegularIsosurfaces())
+    {
+        isosurfaceDialog->setCurrentTabIndex(0);
+    }
+    else
+    {
+        isosurfaceDialog->setCurrentTabIndex(1);
+    }
+    isosurfaceDialog->activate(_manager->AreIsosurfacesVisible());
+}
+
+
+void MvDoc::setRegularIsosurfaces(int count, double valueMin, double valueMax)
+{
+    _manager->SetRegularIsosurfaces(count, valueMin, valueMax);
+    updateAllViews(nullptr);
+    setModified(true);
+}
+
+void MvDoc::setCustomIsosurfaces(std::vector<double> values)
+{
+    _manager->SetCustomIsosurfaces(values.size(), values.data());
+    updateAllViews(nullptr);
+    setModified(true);
+}
+
+/////////////////////////////////////////////////////////////////////////////
 // Toolbox->???
 
 
@@ -2323,12 +2418,6 @@ void MvDoc::getPathlineTimeRange(double* range)
 void MvDoc::getScalarDataRange(double* range)
 {
     _manager->GetScalarDataRange(range);
-}
-
-void MvDoc::updateIsosurfaceDialog()
-{
-    // @todo
-    assert(isosurfaceDialog);
 }
 
 void MvDoc::updateAnimationDialog(mvGUISettings* gui)

@@ -637,6 +637,7 @@ void MvView::onViewFromNextDirection()
         return;
     default:
         assert(false);
+        break;
     }
 }
 
