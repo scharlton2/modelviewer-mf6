@@ -249,8 +249,8 @@ bool LightingDialog::updateDataBackground(bool saveAndValidate)
 {
     if (saveAndValidate)
     {
-        assert(customBackground == ui->radioButtonWhite->isChecked());
-        assert(!customBackground == ui->radioButtonCustom->isChecked());
+        assert(customBackground == ui->radioButtonCustom->isChecked());
+        assert(!customBackground == ui->radioButtonWhite->isChecked());
         assert(red   == ui->sliderRed->value());
         assert(green == ui->sliderGreen->value());
         assert(blue  == ui->sliderBlue->value());
