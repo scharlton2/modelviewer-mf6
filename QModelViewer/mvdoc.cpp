@@ -34,6 +34,7 @@
 #include "overlaydialog.h"
 #include "soliddialog.h"
 #include "isosurfacedialog.h"
+#include "vectordialog.h"
 
 
 #include "preferencesdialog.h"
@@ -41,11 +42,11 @@
 
 MvDoc::MvDoc(QMainWindow* parent)
     : QObject{parent}
-    , _gui{nullptr}
-    , _isAnimating{false}
     , _modified{false}
     , _interactorStyle{MouseMode::mmTrackball}
     , numberOfModels{1}
+    , _isAnimating{false}
+    , _gui{0}
 {
     // Initialize variables
     startup        = true;
@@ -110,6 +111,7 @@ MvDoc::MvDoc(QMainWindow* parent)
 
     isosurfaceDialog = new IsosurfaceDialog(parent, this);
 
+    vectorDialog     = new VectorDialog(parent, this);
 
     reinitializeToolDialogs();
 
@@ -268,9 +270,9 @@ void MvDoc::reinitializeToolDialogs()
     gridDialog->reinitialize();
     geometryDialog->reinitialize();
     solidDialog->reinitialize();
-    //m_IsosurfaceDlg->Reinitialize();
-    //m_VectorDlg->Reinitialize();
-    //m_VectorDlg->ShowWindow(SW_HIDE);
+    isosurfaceDialog->reinitialize();
+    vectorDialog->reinitialize();
+    vectorDialog->hide();
     //m_PathlinesDlg->Reinitialize();
     //m_PathlinesDlg->ShowWindow(SW_HIDE);
     //m_ModelFeaturesDlg->Reinitialize();
@@ -314,7 +316,7 @@ void MvDoc::onFileNew()
     delete[] dataFileList;
 
     // Check for error in reading data files
-    if (errorMsg != 0)
+    if (errorMsg)
     {
         QApplication::restoreOverrideCursor();
         QMessageBox::critical(mainWindow, "", errorMsg);
@@ -504,7 +506,7 @@ bool MvDoc::saveFile(const QString& fileName)
     // with the gui settings
     ///char *errorMsg = this->doc->_manager->Serialize(lpszPathName, &settings);
     char *errorMsg = _manager->Serialize(fileName.toLocal8Bit().data(), &settings);
-    if (errorMsg != 0)
+    if (errorMsg)
     {
         QWidget* widget = dynamic_cast<QWidget*>(parent());
         assert(widget);
@@ -1270,14 +1272,14 @@ void MvDoc::updateAnimationPosition()
     //pView->RotateCamera(m_AnimationDlg->m_OptionsPage->m_Rotate);
     //pView->ElevateCamera(m_AnimationDlg->m_OptionsPage->m_Elevate);
 
-    for(auto view : this->_views)
-    {
-        //pView->RotateCamera(m_AnimationDlg->m_OptionsPage->m_Rotate);
-        //pView->ElevateCamera(m_AnimationDlg->m_OptionsPage->m_Elevate);
+    //for(auto view : this->_views)
+    //{
+    //    pView->RotateCamera(m_AnimationDlg->m_OptionsPage->m_Rotate);
+    //    pView->ElevateCamera(m_AnimationDlg->m_OptionsPage->m_Elevate);
 
-        //view->rotateCamera();
-        //view->elevateCamera();
-    }
+    //    view->rotateCamera();
+    //    view->elevateCamera();
+    //}
     updateAnimation();
 }
 
@@ -1512,7 +1514,7 @@ void MvDoc::setScalarDataTypeTo(int index)
 {
     assert(index >= 0);
     int n = _manager->GetNumberOfScalarDataTypes();
-    assert(index < _manager->GetNumberOfScalarDataTypes());
+    assert(index < n);
 
     _manager->SetScalarDataTypeTo(index);
 
@@ -2019,6 +2021,15 @@ void MvDoc::applySubgrid(int col_min, int col_max, int row_min, int row_max, int
         kmin = lay_min - 1; // top layer in subgrid
         kmax = lay_max - 1; // bottom layer in subgrid
     }
+    else
+    {
+        imin = 0;
+        imax = 0;
+        jmin = 0;
+        jmax = 0;
+        kmin = 0;
+        kmax = 0;
+    }
 
     _manager->SetScalarSubgridExtent(imin, imax, jmin, jmax, kmin, kmax);
     _manager->ScalarSubgridOn();
@@ -2086,23 +2097,13 @@ void MvDoc::subgridOff()
     if (_manager->HasVectorData())
     {
         const int* vdim = _manager->GetVectorGridDimensions();
-        /*
-          const int *voi = m_Manager->GetVectorSubsampleExtents();
-          m_VectorDlg->m_ControlsPage->m_col_min = voi[0] + 1;
-          m_VectorDlg->m_ControlsPage->m_col_max = voi[1] + 1;
-          m_VectorDlg->m_ControlsPage->m_row_min = voi[2] + 1;
-          m_VectorDlg->m_ControlsPage->m_row_max = voi[3] + 1;
-          m_VectorDlg->m_ControlsPage->m_lay_min = voi[4] + 1;
-          m_VectorDlg->m_ControlsPage->m_lay_max = voi[5] + 1;
-        */
-        // @todo below
-        //m_VectorDlg->m_ControlsPage->m_col_lower_limit = 1;
-        //m_VectorDlg->m_ControlsPage->m_col_upper_limit = vdim[0];
-        //m_VectorDlg->m_ControlsPage->m_row_lower_limit = 1;
-        //m_VectorDlg->m_ControlsPage->m_row_upper_limit = vdim[1];
-        //m_VectorDlg->m_ControlsPage->m_lay_lower_limit = 1;
-        //m_VectorDlg->m_ControlsPage->m_lay_upper_limit = vdim[2];
-        //m_VectorDlg->m_ControlsPage->CustomUpdateData(FALSE);
+        vectorDialog->mColLowerLimit = 1;
+        vectorDialog->mColUpperLimit = vdim[0];
+        vectorDialog->mRowLowerLimit = 1;
+        vectorDialog->mRowUpperLimit = vdim[1];
+        vectorDialog->mLayLowerLimit = 1;
+        vectorDialog->mLayUpperLimit = vdim[2];
+        vectorDialog->updateDataSubsample(false);
     }
 
     updateAllViews(nullptr);
@@ -2214,7 +2215,7 @@ void MvDoc::applyOverlayControl(const char* filename, int overlayType, double xo
     _manager->SetOverlayCrop(crop);
     _manager->SetOverlayElevation(elev);
     _manager->SetOverlayDrapeGap(drapeGap);
-    char* errMsg = 0;
+    char* errMsg = nullptr;
     if (!_manager->UpdateOverlay(errMsg))
     {
         MainWindow* mainWindow = dynamic_cast<MainWindow*>(parent());
@@ -2399,6 +2400,259 @@ void MvDoc::setCustomIsosurfaces(std::vector<double> values)
 }
 
 /////////////////////////////////////////////////////////////////////////////
+// Toolbox->Vector
+/////////////////////////////////////////////////////////////////////////////
+
+void MvDoc::onUpdateToolboxVector(QAction* action)
+{
+    assert(vectorDialog);
+    action->setChecked(vectorDialog->isVisible());
+    action->setEnabled(_manager->HasVectorData());
+}
+
+void MvDoc::onToolboxVector()
+{
+    assert(vectorDialog);
+    if (vectorDialog->isVisible())
+    {
+        vectorDialog->hide();
+    }
+    else
+    {
+        vectorDialog->show();
+    }
+}
+
+void MvDoc::updateVectorDialog()
+{
+    assert(vectorDialog);
+
+    if (_manager->HasVectorData())
+    {
+        // Subsample (CVectorControlsPage)
+        const int* vdim = _manager->GetVectorGridDimensions();
+        if (_manager->GetGridType() == GridType::MV_STRUCTURED_GRID)
+        {
+            int extent[6];
+            int rate[3];
+            _manager->GetVectorSubsampleExtentAndRate(extent, rate);
+
+            vectorDialog->mColMin = extent[0] + 1;
+            vectorDialog->mColMax = extent[1] + 1;
+            vectorDialog->mColRate = rate[0];
+            vectorDialog->mRowMin  = vdim[1] - extent[3];
+            vectorDialog->mRowMax  = vdim[1] - extent[2];
+            vectorDialog->mRowRate = rate[1];
+            vectorDialog->mLayMin  = vdim[2] - extent[5];
+            vectorDialog->mLayMax  = vdim[2] - extent[4];
+            vectorDialog->mLayRate = rate[2];
+            vectorDialog->mStructuredGrid = true;
+            if (_manager->IsScalarSubgridOn())
+            {
+            }
+            else
+            {
+                vectorDialog->setColRange(1, vdim[0]);
+                vectorDialog->setRowRange(1, vdim[1]);
+                vectorDialog->setLayRange(1, vdim[2]);
+            }
+            vectorDialog->updateDataSubsample(false);
+        }
+        else
+        {
+            vectorDialog->mStructuredGrid = false;
+        }
+
+        // Appearance (CVectorOptionsPage)
+        const double* rgb           = _manager->GetVectorColor();
+        vectorDialog->mScaleFactor  = _manager->GetVectorScaleFactor();
+        vectorDialog->mShowGlyph    = _manager->IsVectorGlyphActivated();
+        vectorDialog->mColorOption  = static_cast<int>(rgb[0] * 2 + 0.1);       // black = 0, gray = 1, white = 2
+        vectorDialog->mLogTransform = _manager->GetLogTransformVector();
+        vectorDialog->mLineWidth    = _manager->GetVectorLineWidth();
+        vectorDialog->updateDataAppearance(false);
+
+        // Threshold (CVectorThresholdPage)
+        double limits[2];
+        _manager->GetVectorThresholdLimits(limits);
+        vectorDialog->mVectorMin      = limits[0];
+        vectorDialog->mVectorMax      = limits[1];
+        vectorDialog->mApplyThreshold = _manager->IsVectorThresholdOn();
+        vectorDialog->updateDataThreshold(false);
+
+        // Crop (CCropVectorsPage)
+        vectorDialog->mCropAngle  = _manager->GetVectorCroppingAngle();
+        const double* CropBounds  = _manager->GetVectorCropBounds();
+        vectorDialog->mXMin       = CropBounds[0];
+        vectorDialog->mXMax       = CropBounds[1];
+        vectorDialog->mYMin       = CropBounds[2];
+        vectorDialog->mYMax       = CropBounds[3];
+        vectorDialog->mZMin       = CropBounds[4];
+        vectorDialog->mZMax       = CropBounds[5];
+        vectorDialog->updateDataCrop(false);
+
+        // Vector dialog
+        vectorDialog->setCurrentTabIndex(0);
+        vectorDialog->activate(_manager->AreVectorsVisible());
+    }
+    else
+    {
+        vectorDialog->reinitialize();
+        vectorDialog->hide();
+    }
+}
+
+void MvDoc::subsampleVectors(int col_min, int col_max, int col_rate, int row_min, int row_max, int row_rate,
+                              int lay_min, int lay_max, int lay_rate)
+{
+    // convert to indexing starting from zero, and reverse row and layer indexing
+    const int* vdim = _manager->GetVectorGridDimensions();
+    int        imin = col_min - 1;
+    int        imax = col_max - 1;
+    int        jmin = vdim[1] - row_max;
+    int        jmax = vdim[1] - row_min;
+    int        kmin = vdim[2] - lay_max;
+    int        kmax = vdim[2] - lay_min;
+    _manager->SubsampleVectors(imin, imax, col_rate, jmin, jmax, row_rate, kmin, kmax, lay_rate);
+    updateAllViews(nullptr);
+    setModified(true);
+}
+
+void MvDoc::setVectorColor(vtkColor3d color3d)
+{
+    _manager->SetVectorColor(color3d.GetRed(), color3d.GetGreen(), color3d.GetBlue());
+    updateAllViews(nullptr);
+    setModified(true);
+}
+
+void MvDoc::setLogTransformVector(bool b)
+{
+    _manager->SetLogTransformVector(b ? 1 : 0);
+    updateAllViews(nullptr);
+    setModified(true);
+}
+
+void MvDoc::activateVectorGlyph(bool b)
+{
+    _manager->ActivateVectorGlyph(b);
+    updateAllViews(nullptr);
+    setModified(true);
+}
+
+void MvDoc::setVectorScaleFactor(double scaleFactor)
+{
+    _manager->SetVectorScaleFactor(scaleFactor);
+    updateAllViews(nullptr);
+    setModified(true);
+}
+
+double MvDoc::vectorScaleFactor()
+{
+    return _manager->GetVectorScaleFactor();
+}
+
+void MvDoc::setVectorLineWidth(double width)
+{
+    _manager->SetVectorLineWidth(width);
+    updateAllViews(nullptr);
+    setModified(true);
+}
+
+void MvDoc::enlargeVectorGlyph()
+{
+    _manager->EnlargeVectorGlyph();
+    updateAllViews(nullptr);
+    setModified(true);
+}
+
+void MvDoc::shrinkVectorGlyph()
+{
+    _manager->ShrinkVectorGlyph();
+    updateAllViews(nullptr);
+    setModified(true);
+}
+
+void MvDoc::applyVectorThreshold(double minValue, double maxValue)
+{
+    _manager->SetVectorThresholdLimits(minValue, maxValue);
+    _manager->VectorThresholdOn();
+    updateAllViews(nullptr);
+    setModified(true);
+}
+
+void MvDoc::vectorThresholdOff()
+{
+    _manager->VectorThresholdOff();
+    updateAllViews(nullptr);
+    setModified(true);
+}
+
+void MvDoc::cropVectors(double xmin, double xmax, double ymin, double ymax, double zmin, double zmax, int cropangle)
+{
+    _manager->CropVectors(xmin, xmax, ymin, ymax, zmin, zmax, cropangle);
+    updateAllViews(nullptr);
+    setModified(true);
+}
+
+void MvDoc::vectorMagnitudeRange(double* range)
+{
+    _manager->GetVectorMagnitudeRange(range);
+}
+
+
+/////////////////////////////////////////////////////////////////////////////
+// Toolbox->Pathlines
+/////////////////////////////////////////////////////////////////////////////
+
+void MvDoc::onToolboxPathlines()
+{
+    //if (m_PathlinesDlg->IsWindowVisible())
+    //{
+    //    m_PathlinesDlg->ShowWindow(SW_HIDE);
+    //}
+    //else
+    //{
+    //    m_PathlinesDlg->ShowWindow(SW_SHOW);
+    //}
+}
+
+void MvDoc::onUpdateToolboxPathlines(QAction* action)
+{
+    // @todo
+    action->setEnabled(false);
+    //pCmdUI->SetCheck(m_PathlinesDlg->IsWindowVisible());
+    //pCmdUI->Enable(m_Manager->HasPathlineData());
+}
+
+/////////////////////////////////////////////////////////////////////////////
+// Toolbox->Model Features
+/////////////////////////////////////////////////////////////////////////////
+void MvDoc::onUpdateToolboxModelFeatures(QAction* action)
+{
+    // @todo
+    action->setEnabled(false);
+}
+
+/////////////////////////////////////////////////////////////////////////////
+// Toolbox->Crop
+/////////////////////////////////////////////////////////////////////////////
+void MvDoc::onUpdateToolboxCrop(QAction* action)
+{
+    // @todo
+    action->setEnabled(false);
+}
+
+/////////////////////////////////////////////////////////////////////////////
+// Toolbox->Animation
+/////////////////////////////////////////////////////////////////////////////
+void MvDoc::onUpdateToolboxAnimation(QAction* action)
+{
+    // @todo
+    action->setEnabled(false);
+}
+
+
+/////////////////////////////////////////////////////////////////////////////
 // Toolbox->???
 
 
@@ -2416,12 +2670,6 @@ void MvDoc::updateAnimationDialog(mvGUISettings* gui)
 {
     // @todo
     assert(animationDialog);
-}
-
-void MvDoc::updateVectorDialog()
-{
-    // @todo
-    assert(vectorDialog);
 }
 
 void MvDoc::updateCropDialog(mvGUISettings* gui)

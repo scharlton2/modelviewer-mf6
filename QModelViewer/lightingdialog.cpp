@@ -110,6 +110,7 @@ LightingDialog::LightingDialog(QWidget *parent, MvDoc *doc)
 
     connect(ui->radioButtonWhite, &QAbstractButton::clicked,
             [=]() {
+                customBackground = false;
                 ui->sliderRed->setEnabled(false);
                 ui->sliderGreen->setEnabled(false);
                 ui->sliderBlue->setEnabled(false);
@@ -117,6 +118,7 @@ LightingDialog::LightingDialog(QWidget *parent, MvDoc *doc)
             });
     connect(ui->radioButtonCustom, &QAbstractButton::clicked,
             [=]() {
+                customBackground = true;
                 ui->sliderRed->setEnabled(true);
                 ui->sliderGreen->setEnabled(true);
                 ui->sliderBlue->setEnabled(true);

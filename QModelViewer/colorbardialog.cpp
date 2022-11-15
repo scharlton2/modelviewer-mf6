@@ -314,7 +314,7 @@ void ColorBarDialog::onApply()
     {
         int n = this->ui->tabWidget->currentIndex();
 
-    switch (n)
+        switch (n)
         {
         case 0: // source
             applyDataSource();

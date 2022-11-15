@@ -78,6 +78,7 @@ set(UI_FILES
   overlaydialog.ui
   preferencesdialog.ui
   soliddialog.ui
+  vectordialog.ui
 )
 
 set(HXX_FILES
@@ -100,6 +101,7 @@ set(HXX_FILES
   qabstractview.h
   resource.h
   soliddialog.h
+  vectordialog.h
 )
 
 set(CXX_FILES
@@ -122,6 +124,7 @@ set(CXX_FILES
   preferencesdialog.cpp
   qabstractview.cpp
   soliddialog.cpp
+  vectordialog.cpp
 )
 
 set(QRC_FILES

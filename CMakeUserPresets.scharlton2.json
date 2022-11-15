@@ -21,6 +21,22 @@
       "vendor": {}
     },
     {
+      "name": "default-clang-tidy",
+      "displayName": "default qt-vtk clang-tidy build",
+      "description": "TODO desc",
+      "generator": "Visual Studio 16 2019",
+      "toolset": "ClangCl",
+      "binaryDir": "${sourceDir}/_${presetName}",
+      "cacheVariables": {
+        "CMAKE_INSTALL_PREFIX": "${sourceDir}/_${presetName}/INSTALL",
+        "VTK_DIR": "C:/QT-VTK-9.1.0-leaks-vs2019-x64/lib/cmake/vtk-9.1",
+        "Qt5_DIR": "C:/qt/5.15.2/msvc2019_64/lib/cmake/Qt5",
+        "CMAKE_CXX_CLANG_TIDY": "clang-tidy;--checks=-*,modernize-use-nullptr"
+      },
+      "environment": {},
+      "vendor": {}
+    },
+    {
       "name": "default-apple",
       "displayName": "macOS Ninja Multi-Config qt-vtk build",
       "description": "macOS build using Ninja Multi-Config",
