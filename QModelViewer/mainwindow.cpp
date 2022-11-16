@@ -396,6 +396,36 @@ void MainWindow::createActions()
     isosurfaceAction->setCheckable(true);
     isosurfaceAction->setStatusTip(tr("Show or hide the Isosurface Toolbox"));
     connect(isosurfaceAction, &QAction::triggered, doc, &MvDoc::onToolboxIsosurface);
+
+    // Toolbox->Vector
+    vectorAction = new QAction(tr("&Vector"), this);
+    vectorAction->setCheckable(true);
+    vectorAction->setStatusTip(tr("Show or hide the Vector Toolbox"));
+    connect(vectorAction, &QAction::triggered, doc, &MvDoc::onToolboxVector);
+
+    // Toolbox->Pathlines
+    pathlinesAction = new QAction(tr("&Pathlines"), this);
+    pathlinesAction->setCheckable(true);
+    pathlinesAction->setStatusTip(tr("Show or hide the Pathlines Toolbox"));
+    // connect(pathlinesAction, &QAction::triggered, doc, &MvDoc::onToolboxVector);  // @todo
+
+    // Toolbox->Model Features
+    modelFeaturesAction = new QAction(tr("Model &Features"), this);
+    modelFeaturesAction->setCheckable(true);
+    modelFeaturesAction->setStatusTip(tr("Show or hide the Model Feature Toolbox"));
+    // connect(modelFeaturesAction, &QAction::triggered, doc, &MvDoc::onToolboxVector);  // @todo
+
+    // Toolbox->Crop
+    cropAction = new QAction(tr("C&rop"), this);
+    cropAction->setCheckable(true);
+    cropAction->setStatusTip(tr("Show or hide the Crop Toolbox"));
+    // connect(cropAction, &QAction::triggered, doc, &MvDoc::onToolboxVector);  // @todo
+
+    // Toolbox->Animation
+    animationAction = new QAction(tr("&Animation"), this);
+    animationAction->setCheckable(true);
+    animationAction->setStatusTip(tr("Show or hide the Animtion Toolbox"));
+    // connect(animationAction, &QAction::triggered, doc, &MvDoc::onToolboxVector);  // @todo
 }
 
 void MainWindow::updateFileActions()
@@ -573,6 +603,24 @@ void MainWindow::updateToolboxActions()
 
     // Toolbox->Solid
     doc->onUpdateToolboxSolid(solidAction);
+
+    // Toolbox->Isosurface
+    doc->onUpdateToolboxIsosurface(isosurfaceAction);
+
+    // Toolbox->Vector
+    doc->onUpdateToolboxVector(vectorAction);
+
+    // Toolbox->Pathlines
+    doc->onUpdateToolboxPathlines(pathlinesAction);
+    
+    // Toolbox->Model Features
+    doc->onUpdateToolboxModelFeatures(modelFeaturesAction);
+
+    // Toolbox->Crop
+    doc->onUpdateToolboxCrop(cropAction);
+
+    // Toolbox->Animation
+    doc->onUpdateToolboxAnimation(animationAction);
 }
 
 bool MainWindow::isAnimating() const
@@ -784,7 +832,25 @@ void MainWindow::createMenus()
     toolboxMenu->addAction(solidAction);
 
     // Toolbox->Isosurface
-    toolboxMenu->addAction(isosurfaceAction);    
+    toolboxMenu->addAction(isosurfaceAction);
+
+    // Toolbox->Vector
+    toolboxMenu->addAction(vectorAction);
+
+    //// Toolbox->Pathlines
+    //toolboxMenu->addAction(pathlinesAction);
+
+    //// Toolbox->Model Features
+    //toolboxMenu->addAction(modelFeaturesAction);
+
+    //// -----------------------------
+    //toolboxMenu->addSeparator();
+
+    //// Toolbox->Crop
+    //toolboxMenu->addAction(cropAction);
+
+    //// Toolbox->Animation
+    //toolboxMenu->addAction(animationAction);
 }
 
 void MainWindow::createStatusBar()

@@ -197,6 +197,13 @@ private:
     QAction *            overlayAction;
     QAction *            solidAction;
     QAction *            isosurfaceAction;
+    QAction *            vectorAction;
+
+    // @todo
+    QAction *            pathlinesAction;
+    QAction *            modelFeaturesAction;
+    QAction *            cropAction;
+    QAction *            animationAction;
 };
 
 #endif // MAINWINDOW_H

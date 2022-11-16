@@ -7,6 +7,7 @@
 #include <QListWidgetItem>
 #include <QMessageBox>
 #include <QDoubleValidator>
+#include <QSignalBlocker>
 
 
 IsosurfaceDialog::IsosurfaceDialog(QWidget* parent, MvDoc* doc)
@@ -183,6 +184,7 @@ void IsosurfaceDialog::reinitializeRegular()
 {
     ui->lineEditMin->setText("");
     ui->lineEditMax->setText("");
+    QSignalBlocker blocker(ui->spinBoxSurfaces);
     ui->spinBoxSurfaces->setValue(5);
     activateRegular(false);
 }

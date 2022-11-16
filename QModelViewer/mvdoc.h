@@ -250,6 +250,51 @@ public:
     void                               setRegularIsosurfaces(int count, double valueMin, double valueMax);
 
 
+    /////////////////////////////////////////////////////////////////////////////
+    // Toolbox->Vector
+    /////////////////////////////////////////////////////////////////////////////
+    void                               onUpdateToolboxVector(QAction* action);
+    void                               onToolboxVector();
+    void                               subsampleVectors(int col_min, int col_max, int col_rate, int row_min, int row_max, int row_rate,
+                                                        int lay_min, int lay_max, int lay_rate);
+    void                               setVectorColor(vtkColor3d color3d);
+    void                               activateVectorGlyph(bool b);
+    void                               setVectorScaleFactor(double scaleFactor);
+    void                               setVectorLineWidth(double width);
+    void                               enlargeVectorGlyph();
+    void                               shrinkVectorGlyph();
+
+    void                               applyVectorThreshold(double minValue, double maxValue);
+    void                               vectorThresholdOff();
+    void                               cropVectors(double xmin, double xmax, double ymin, double ymax, double zmin, double zmax, int cropangle);
+    void                               setLogTransformVector(bool b);
+    double                             vectorScaleFactor();
+    void                               vectorMagnitudeRange(double* range);
+
+
+
+    /////////////////////////////////////////////////////////////////////////////
+    // Toolbox->Pathlines
+    /////////////////////////////////////////////////////////////////////////////
+    void                               onUpdateToolboxPathlines(QAction* action);       // OnUpdatePathlinesTool(CCmdUI *pCmdUI)
+    void                               onToolboxPathlines();                            // OnPathlinesTool
+
+    /////////////////////////////////////////////////////////////////////////////
+    // Toolbox->Model Features
+    /////////////////////////////////////////////////////////////////////////////
+    void                               onUpdateToolboxModelFeatures(QAction* action);
+
+    /////////////////////////////////////////////////////////////////////////////
+    // Toolbox->Crop
+    /////////////////////////////////////////////////////////////////////////////
+    void                               onUpdateToolboxCrop(QAction* action);
+
+    /////////////////////////////////////////////////////////////////////////////
+    // Toolbox->Animation
+    /////////////////////////////////////////////////////////////////////////////
+    void                               onUpdateToolboxAnimation(QAction* action);
+
+
 
     // Pathlines
     //void                               SetPathlineRepresentationToLine();
