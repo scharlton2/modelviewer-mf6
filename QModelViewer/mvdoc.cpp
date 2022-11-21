@@ -35,7 +35,7 @@
 #include "soliddialog.h"
 #include "isosurfacedialog.h"
 #include "vectordialog.h"
-
+#include "modelfeaturesdialog.h"
 
 #include "preferencesdialog.h"
 
@@ -87,31 +87,32 @@ MvDoc::MvDoc(QMainWindow* parent)
     m_IsosurfaceDlg    = NULL;
     m_VectorDlg        = NULL;
     m_PathlinesDlg     = NULL;
-    m_ModelFeaturesDlg = NULL;
     m_CropDlg          = NULL;
     m_AnimationDlg     = NULL;
 #endif
 
-    dataDialog       = new DataDialog(parent, this);
+    dataDialog          = new DataDialog(parent, this);
     ///dataDialog->reinitialize();
 
-    colorBarDialog   = new ColorBarDialog(parent, this);
+    colorBarDialog      = new ColorBarDialog(parent, this);
     ///colorBarDialog->reinitialize();
 
-    lightingDialog   = new LightingDialog(parent, this);
+    lightingDialog      = new LightingDialog(parent, this);
 
-    gridDialog       = new GridDialog(parent, this);
+    gridDialog          = new GridDialog(parent, this);
 
-    geometryDialog   = new GeometryDialog(parent, this);
+    geometryDialog      = new GeometryDialog(parent, this);
     ///geometryDialog->reinitialize();
 
-    overlayDialog    = new OverlayDialog(parent, this);
+    overlayDialog       = new OverlayDialog(parent, this);
 
-    solidDialog      = new SolidDialog(parent, this);
+    solidDialog         = new SolidDialog(parent, this);
 
-    isosurfaceDialog = new IsosurfaceDialog(parent, this);
+    isosurfaceDialog    = new IsosurfaceDialog(parent, this);
 
-    vectorDialog     = new VectorDialog(parent, this);
+    vectorDialog        = new VectorDialog(parent, this);
+
+    modelFeaturesDialog = new ModelFeaturesDialog(parent, this);
 
     reinitializeToolDialogs();
 
@@ -275,8 +276,8 @@ void MvDoc::reinitializeToolDialogs()
     vectorDialog->hide();
     //m_PathlinesDlg->Reinitialize();
     //m_PathlinesDlg->ShowWindow(SW_HIDE);
-    //m_ModelFeaturesDlg->Reinitialize();
-    //m_ModelFeaturesDlg->ShowWindow(SW_HIDE);
+    modelFeaturesDialog->reinitialize();
+    modelFeaturesDialog->hide();
     overlayDialog->reinitialize();
     //m_CropDlg->Reinitialize();
     //m_AnimationDlg->Reinitialize();
@@ -967,20 +968,20 @@ void MvDoc::onShowPathlines()
 
 void MvDoc::onModelFeatures()
 {
-    if (this->_manager->AreModelFeaturesVisible())
+    if (_manager->AreModelFeaturesVisible())
     {
-        this->_manager->HideModelFeatures();
-        ///m_ModelFeaturesDlg->Activate(FALSE);
+        _manager->HideModelFeatures();
+        modelFeaturesDialog->activate(false);
     }
     else
     {
-        this->_manager->ShowModelFeatures();
-        //m_ModelFeaturesDlg->Activate(TRUE);
-        //if ((!m_ModelFeaturesDlg->IsWindowVisible()) &&
-        //    (m_ModelFeaturesDlg->m_ShowListBox.GetCount() == 0))
-        //{
-        //    m_ModelFeaturesDlg->ShowWindow(SW_SHOW);
-        //}
+        _manager->ShowModelFeatures();
+        modelFeaturesDialog->activate(true);
+        if ((!modelFeaturesDialog->isVisible()) &&
+            (modelFeaturesDialog->showFeaturesCount() == 0))
+        {
+            modelFeaturesDialog->show();
+        }
     }
     updateAllViews(nullptr);
     setModified(true);
@@ -2627,11 +2628,175 @@ void MvDoc::onUpdateToolboxPathlines(QAction* action)
 /////////////////////////////////////////////////////////////////////////////
 // Toolbox->Model Features
 /////////////////////////////////////////////////////////////////////////////
+
 void MvDoc::onUpdateToolboxModelFeatures(QAction* action)
 {
-    // @todo
-    action->setEnabled(false);
+    assert(modelFeaturesDialog);
+    action->setChecked(modelFeaturesDialog->isVisible());
+    action->setEnabled(_manager->HasModelFeatures());
 }
+
+void MvDoc::onToolboxModelFeatures()
+{
+    assert(modelFeaturesDialog);
+    if (modelFeaturesDialog->isVisible())
+    {
+        modelFeaturesDialog->hide();
+    }
+    else
+    {
+        modelFeaturesDialog->show();
+    }
+}
+
+/*
+    //char**      features = new char*[numFeatureTypes];
+    //const char* fstring  = m_Manager->GetModelFeatureLabels();
+    //for (i = 0; i < numFeatureTypes; i++)
+    //{
+    //    features[i] = new char[41];
+    //    strncpy(features[i], fstring + (i * 40), 40);
+    //    features[i][40] = '\0';
+    //}
+*/
+
+std::vector<std::string> MvDoc::modelFeatureLabels()
+{
+    std::vector<std::string> labels;
+    int                      numFeatureTypes = _manager->GetNumberOfModelFeatureTypes();
+    const char*              features        = _manager->GetModelFeatureLabels();
+
+    char                     feature[41];
+    for (size_t i = 0; i < numFeatureTypes; ++i)
+    {
+        strncpy(feature, features + (i * 40), 40);
+        feature[40] = '\0';
+        labels.push_back(feature);
+    }
+    return labels;
+}
+
+void MvDoc::updateModelFeaturesDialog()
+{
+    // @todo
+    assert(modelFeaturesDialog);
+    //int i;
+    //int numFeatureTypes = m_Manager->GetNumberOfModelFeatureTypes();
+    //m_ModelFeaturesDlg->SetNumberOfModelFeatureTypes(numFeatureTypes);
+    //int* displayOrder = m_Manager->GetModelFeatureDisplayOrder();
+    //m_ModelFeaturesDlg->SetDisplayOrder(displayOrder);
+    //char**      features = new char*[numFeatureTypes];
+    //const char* fstring  = m_Manager->GetModelFeatureLabels();
+    //for (i = 0; i < numFeatureTypes; i++)
+    //{
+    //    features[i] = new char[41];
+    //    strncpy(features[i], fstring + (i * 40), 40);
+    //    features[i][40] = '\0';
+    //}
+    int              numFeatureTypes = _manager->GetNumberOfModelFeatureTypes();
+
+    //modelFeaturesDialog->SetNumberOfModelFeatureTypes(numFeatureTypes);
+    int* displayOrder = _manager->GetModelFeatureDisplayOrder();
+    //modelFeaturesDialog->SetDisplayOrder(displayOrder);
+
+    std::vector<int> order;
+    for (int i = 0; i < numFeatureTypes; ++i)
+    {
+        order.push_back(displayOrder[i]);
+    }
+    modelFeaturesDialog->setDisplayOrder(order);
+
+
+    //m_ModelFeaturesDlg->m_HideListBox.ResetContent();
+    //m_ModelFeaturesDlg->m_ShowListBox.ResetContent();
+    //int* temp = new int[numFeatureTypes];
+    //for (i = 0; i < numFeatureTypes; i++)
+    //{
+    //    temp[i] = -1;
+    //}
+    //for (i = 0; i < numFeatureTypes; i++)
+    //{
+    //    if (displayOrder[i] == -1)
+    //    {
+    //        m_ModelFeaturesDlg->m_HideListBox.AddString(features[i]);
+    //    }
+    //    else if (displayOrder[i] > -1 && displayOrder[i] < numFeatureTypes)
+    //    {
+    //        temp[displayOrder[i]] = i;
+    //    }
+    //}
+    //for (i = 0; i < numFeatureTypes; i++)
+    //{
+    //    if (temp[i] > -1)
+    //    {
+    //        m_ModelFeaturesDlg->m_ShowListBox.AddString(features[temp[i]]);
+    //    }
+    //}
+    //delete[] temp;
+
+
+
+
+
+    //m_ModelFeaturesDlg->Activate(m_Manager->AreModelFeaturesVisible());
+    //if (!m_Manager->HasModelFeatures())
+    //{
+    //    m_ModelFeaturesDlg->ShowWindow(SW_HIDE);
+    //}
+    //for (i = 0; i < numFeatureTypes; i++)
+    //{
+    //    delete[] features[i];
+    //}
+    //delete[] features;
+
+    //m_ModelFeaturesDlg->ShowGlyphSizeControl(m_Manager->GetModelFeatureDisplayMode() ==
+    //                                         MV_DISPLAY_MODEL_FEATURES_AS_GLYPHS);
+
+    // Modflow6DataSource is always MV_DISPLAY_MODEL_FEATURES_AS_CELLS
+
+    modelFeaturesDialog->activate(_manager->AreModelFeaturesVisible());
+}
+
+void MvDoc::setModelFeatureDisplayOrder(std::vector<int> displayOrder)
+{
+    setModelFeatureDisplayOrder(displayOrder.data());
+}
+
+void MvDoc::setModelFeatureDisplayOrder(int* displayOrder)
+{
+    _manager->SetModelFeatureDisplayOrder(displayOrder);
+    updateAllViews(nullptr);
+    setModified(true);
+}
+
+void MvDoc::enlargeModelFeatureGlyphs()
+{
+    assert(false);
+    _manager->EnlargeModelFeatureGlyphs();
+    updateAllViews(nullptr);
+    setModified(true);
+}
+
+void MvDoc::shrinkModelFeatureGlyphs()
+{
+    assert(false);
+    _manager->ShrinkModelFeatureGlyphs();
+    updateAllViews(nullptr);
+    setModified(true);
+}
+
+void MvDoc::setModelFeatureColor(const char* modelFeatureName, double* rgba)
+{
+    _manager->SetModelFeatureColor(modelFeatureName, rgba);
+    updateAllViews(nullptr);
+    setModified(true);
+}
+
+void MvDoc::modelFeatureColor(const char* modelFeatureName, double* rgb)
+{
+    _manager->GetModelFeatureColor(modelFeatureName, rgb);
+}
+
 
 /////////////////////////////////////////////////////////////////////////////
 // Toolbox->Crop
@@ -2682,12 +2847,6 @@ void MvDoc::updatePathlinesDialog()
 {
     // @todo
     //assert(pathlinesDialog);
-}
-
-void MvDoc::updateModelFeaturesDialog()
-{
-    // @todo
-    assert(modelFeaturesDialog);
 }
 
 GridType MvDoc::gridType()

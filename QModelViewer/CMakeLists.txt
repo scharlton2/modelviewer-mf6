@@ -74,6 +74,7 @@ set(UI_FILES
   isosurfacedialog.ui
   lightingdialog.ui
   mainwindow.ui
+  modelfeaturesdialog.ui
   modflow6datafilesdialog.ui
   overlaydialog.ui
   preferencesdialog.ui
@@ -95,6 +96,7 @@ set(HXX_FILES
   mainwindow.h
   mvdoc.h
   mvview.h
+  modelfeaturesdialog.h
   modflow6datafilesdialog.h
   overlaydialog.h
   preferencesdialog.h
@@ -117,6 +119,7 @@ set(CXX_FILES
   lightingdialog.cpp
   main.cpp
   mainwindow.cpp
+  modelfeaturesdialog.cpp
   modflow6datafilesdialog.cpp
   mvdoc.cpp
   mvview.cpp
