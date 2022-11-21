@@ -187,8 +187,8 @@ public:
     void                               EnlargeModelFeatureGlyphs();
     void                               ShrinkModelFeatureGlyphs();
     int                                GetModelFeatureDisplayMode() const;
-    void                               SetModelFeatureColor(char *modelFeatureName, double *rgba);
-    void                               GetModelFeatureColor(char *modelFeatureName, double *rgba);
+    void                               SetModelFeatureColor(const char *modelFeatureName, double *rgba);
+    void                               GetModelFeatureColor(const char *modelFeatureName, double *rgba);
 
     // Overlay
     int                                HasOverlay();

@@ -413,7 +413,7 @@ void MainWindow::createActions()
     modelFeaturesAction = new QAction(tr("Model &Features"), this);
     modelFeaturesAction->setCheckable(true);
     modelFeaturesAction->setStatusTip(tr("Show or hide the Model Feature Toolbox"));
-    // connect(modelFeaturesAction, &QAction::triggered, doc, &MvDoc::onToolboxVector);  // @todo
+    connect(modelFeaturesAction, &QAction::triggered, doc, &MvDoc::onToolboxModelFeatures);
 
     // Toolbox->Crop
     cropAction = new QAction(tr("C&rop"), this);
@@ -840,8 +840,8 @@ void MainWindow::createMenus()
     //// Toolbox->Pathlines
     //toolboxMenu->addAction(pathlinesAction);
 
-    //// Toolbox->Model Features
-    //toolboxMenu->addAction(modelFeaturesAction);
+    // Toolbox->Model Features
+    toolboxMenu->addAction(modelFeaturesAction);
 
     //// -----------------------------
     //toolboxMenu->addSeparator();

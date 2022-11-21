@@ -282,7 +282,16 @@ public:
     /////////////////////////////////////////////////////////////////////////////
     // Toolbox->Model Features
     /////////////////////////////////////////////////////////////////////////////
+    void                               onToolboxModelFeatures();
     void                               onUpdateToolboxModelFeatures(QAction* action);
+    void                               setModelFeatureDisplayOrder(int* displayOrder);
+    void                               setModelFeatureDisplayOrder(std::vector<int> displayOrder);
+    void                               enlargeModelFeatureGlyphs();
+    void                               shrinkModelFeatureGlyphs();
+    void                               setModelFeatureColor(const char* modelFeatureName, double* rgba);
+    void                               modelFeatureColor(const char* modelFeatureName, double* rgb);
+    std::vector<std::string>           modelFeatureLabels();
+
 
     /////////////////////////////////////////////////////////////////////////////
     // Toolbox->Crop

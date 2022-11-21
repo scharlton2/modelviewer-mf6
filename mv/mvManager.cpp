@@ -2500,12 +2500,20 @@ int mvManager::HasModelFeatures() const
 
 int mvManager::GetNumberOfModelFeatureTypes() const
 {
-    return m_DataSource->GetNumberOfModelFeatureTypes();
+    if (m_DataSource)
+    {
+        return m_DataSource->GetNumberOfModelFeatureTypes();
+    }
+    return 0;
 }
 
 const char *mvManager::GetModelFeatureLabels() const
 {
-    return m_DataSource->GetModelFeatureLabels();
+    if (m_DataSource)
+    {
+        return m_DataSource->GetModelFeatureLabels();
+    }
+    return nullptr;
 }
 
 int *mvManager::GetModelFeatureDisplayOrder()
@@ -2528,7 +2536,7 @@ int mvManager::GetModelFeatureDisplayMode() const
     return m_DataSource->GetModelFeatureDisplayMode();
 }
 
-void mvManager::SetModelFeatureColor(char *modelFeatureName, double *rgba)
+void mvManager::SetModelFeatureColor(const char *modelFeatureName, double *rgba)
 {
     char *names = m_DataSource->GetModelFeatureLabels();
     for (int i = 0; i < m_DataSource->GetNumberOfModelFeatureTypes(); i++)
@@ -2541,7 +2549,7 @@ void mvManager::SetModelFeatureColor(char *modelFeatureName, double *rgba)
     }
 }
 
-void mvManager::GetModelFeatureColor(char *modelFeatureName, double *rgba)
+void mvManager::GetModelFeatureColor(const char *modelFeatureName, double *rgba)
 {
     char *names = m_DataSource->GetModelFeatureLabels();
     for (int i = 0; i < m_DataSource->GetNumberOfModelFeatureTypes(); i++)
