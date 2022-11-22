@@ -296,7 +296,14 @@ public:
     /////////////////////////////////////////////////////////////////////////////
     // Toolbox->Crop
     /////////////////////////////////////////////////////////////////////////////
+    void                               onToolboxCrop();
     void                               onUpdateToolboxCrop(QAction* action);
+    void                               crop(double xMin, double xMax, double yMin, double yMax,
+                                            double zMin, double zMax, double cropAngle);
+    void                               setCroppedAwayPiecesColor(double red, double green, double blue);
+    void                               setCroppedAwayPiecesOpacity(double opacity);
+    void                               showCroppedAwayPieces();
+    void                               hideCroppedAwayPieces();
 
     /////////////////////////////////////////////////////////////////////////////
     // Toolbox->Animation
