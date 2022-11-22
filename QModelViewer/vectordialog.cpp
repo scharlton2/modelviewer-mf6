@@ -199,6 +199,7 @@ VectorDialog::VectorDialog(QWidget* parent, MvDoc* doc)
 VectorDialog::~VectorDialog()
 {
     delete ui;
+    delete _geometry;
 }
 
 void VectorDialog::hideEvent(QHideEvent* e)

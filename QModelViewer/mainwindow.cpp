@@ -419,7 +419,7 @@ void MainWindow::createActions()
     cropAction = new QAction(tr("C&rop"), this);
     cropAction->setCheckable(true);
     cropAction->setStatusTip(tr("Show or hide the Crop Toolbox"));
-    // connect(cropAction, &QAction::triggered, doc, &MvDoc::onToolboxVector);  // @todo
+    connect(cropAction, &QAction::triggered, doc, &MvDoc::onToolboxCrop);
 
     // Toolbox->Animation
     animationAction = new QAction(tr("&Animation"), this);
@@ -843,11 +843,11 @@ void MainWindow::createMenus()
     // Toolbox->Model Features
     toolboxMenu->addAction(modelFeaturesAction);
 
-    //// -----------------------------
-    //toolboxMenu->addSeparator();
+    // -----------------------------
+    toolboxMenu->addSeparator();
 
-    //// Toolbox->Crop
-    //toolboxMenu->addAction(cropAction);
+    // Toolbox->Crop
+    toolboxMenu->addAction(cropAction);
 
     //// Toolbox->Animation
     //toolboxMenu->addAction(animationAction);

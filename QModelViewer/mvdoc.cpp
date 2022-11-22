@@ -36,6 +36,8 @@
 #include "isosurfacedialog.h"
 #include "vectordialog.h"
 #include "modelfeaturesdialog.h"
+#include "cropdialog.h"
+
 
 #include "preferencesdialog.h"
 
@@ -113,6 +115,8 @@ MvDoc::MvDoc(QMainWindow* parent)
     vectorDialog        = new VectorDialog(parent, this);
 
     modelFeaturesDialog = new ModelFeaturesDialog(parent, this);
+
+    cropDialog          = new CropDialog(parent, this);
 
     reinitializeToolDialogs();
 
@@ -279,7 +283,7 @@ void MvDoc::reinitializeToolDialogs()
     modelFeaturesDialog->reinitialize();
     modelFeaturesDialog->hide();
     overlayDialog->reinitialize();
-    //m_CropDlg->Reinitialize();
+    cropDialog->reinitialize();
     //m_AnimationDlg->Reinitialize();
 }
 
@@ -491,7 +495,11 @@ bool MvDoc::saveFile(const QString& fileName)
     assert(_gui);
     mvGUISettings settings(*_gui);
 
-    // @todo replace this with m_CropDlg
+    cropDialog->updateDataControls(true);
+    settings.cropBoundsXDelta = cropDialog->mXDelta;
+    settings.cropBoundsYDelta = cropDialog->mYDelta;
+    settings.cropBoundsZDelta = cropDialog->mZDelta;
+
     // @todo replace this with m_AnimationDlg->m_OptionsPage
     lightingDialog->updateDataLights(true);
     settings.headlightOn             = lightingDialog->headlightOn ? 1 : 0;
@@ -822,64 +830,26 @@ void MvDoc::updateAllViews(QAbstractView* sender, QObject* hint)
 
 void MvDoc::onShowNone()
 {
-    // @todo
-    /*
-    m_Manager->HideScalarData();
-    m_IsosurfaceDlg->Activate(FALSE);
-    m_SolidDlg->Activate(FALSE);
-    m_CropDlg->Activate(FALSE);
-    UpdateAllViews(NULL);
-    setModified(TRUE);
-    */
-
     _manager->HideScalarData();
-    //m_IsosurfaceDlg->Activate(FALSE);
-    //m_SolidDlg->Activate(FALSE);
-    //m_CropDlg->Activate(FALSE);
+    isosurfaceDialog->activate(false);
+    solidDialog->activate(false);
+    cropDialog->activate(false);
     updateAllViews(nullptr);
     setModified(true);
 }
 
 void MvDoc::onShowSolid()
 {
-    // @todo
-    /*
-    m_Manager->ShowScalarDataAsSolid();
-    m_IsosurfaceDlg->Activate(FALSE);
-    m_SolidDlg->Activate(TRUE);
-    m_CropDlg->Activate(TRUE);
-    UpdateAllViews(NULL);
-    setModified(TRUE);
-    */
-
     _manager->ShowScalarDataAsSolid();
-    //m_IsosurfaceDlg->Activate(FALSE);
-    //m_SolidDlg->Activate(TRUE);
-    //m_CropDlg->Activate(TRUE);
+    isosurfaceDialog->activate(false);
+    solidDialog->activate(true);
+    cropDialog->activate(true);
     updateAllViews(nullptr);
     setModified(true);
 }
 
 void MvDoc::onShowIsosurfaces()
 {
-    // @todo
-    /*
-    m_Manager->ShowScalarDataAsIsosurfaces();
-    m_IsosurfaceDlg->Activate(TRUE);
-    if (m_Manager->UsingRegularIsosurfaces())
-    {
-        m_IsosurfaceDlg->m_PropertySheet->SetActivePage(0);
-    }
-    else
-    {
-        m_IsosurfaceDlg->m_PropertySheet->SetActivePage(1);
-    }
-    m_SolidDlg->Activate(FALSE);
-    m_CropDlg->Activate(TRUE);
-    UpdateAllViews(NULL);
-    setModified(TRUE);
-    */
-
     _manager->ShowScalarDataAsIsosurfaces();
     isosurfaceDialog->activate(true);
     if (_manager->UsingRegularIsosurfaces())
@@ -891,36 +861,17 @@ void MvDoc::onShowIsosurfaces()
         isosurfaceDialog->setCurrentTabIndex(1);
     }
     solidDialog->activate(false);
-    //m_CropDlg->Activate(TRUE);
+    cropDialog->activate(true);
     updateAllViews(nullptr);
     setModified(true);
 }
 
 void MvDoc::onShowVectors(QWidget* parent)
 {
-    /*
-    if (m_Manager->AreVectorsVisible())
-    {
-        m_Manager->HideVectors();
-        m_VectorDlg->Activate(FALSE);
-    }
-    else
-    {
-        if (m_Manager->GetVectorScaleFactor() == 0)
-        {
-            AfxMessageBox("Warning--Vector scale factor is currently set to zero!");
-        }
-        m_Manager->ShowVectors();
-        m_VectorDlg->Activate(TRUE);
-    }
-    UpdateAllViews(NULL);
-    setModified(TRUE);
-    */
-
     if (_manager->AreVectorsVisible())
     {
         _manager->HideVectors();
-        //m_VectorDlg->Activate(FALSE);
+        vectorDialog->activate(false);
     }
     else
     {
@@ -929,7 +880,7 @@ void MvDoc::onShowVectors(QWidget* parent)
             QMessageBox::warning(parent, tr("Warning"), tr("Vector scale factor is currently set to zero!"));
         }
         _manager->ShowVectors();
-        //m_VectorDlg->Activate(TRUE);
+        vectorDialog->activate(true);
     }
     updateAllViews(nullptr);
     setModified(true);
@@ -2801,10 +2752,95 @@ void MvDoc::modelFeatureColor(const char* modelFeatureName, double* rgb)
 /////////////////////////////////////////////////////////////////////////////
 // Toolbox->Crop
 /////////////////////////////////////////////////////////////////////////////
+
+void MvDoc::onToolboxCrop()
+{
+    assert(cropDialog);
+    if (cropDialog->isVisible())
+    {
+        cropDialog->hide();
+    }
+    else
+    {
+        cropDialog->show();
+    }
+}
+
 void MvDoc::onUpdateToolboxCrop(QAction* action)
 {
-    // @todo
-    action->setEnabled(false);
+    assert(cropDialog);
+    action->setChecked(cropDialog->isVisible());
+}
+
+void MvDoc::updateCropDialog(mvGUISettings* gui)
+{
+    assert(cropDialog);
+
+    // Controls tab
+    const double* cropBounds = _manager->GetCropBounds();
+    cropDialog->mXMin        = cropBounds[0];
+    cropDialog->mXMax        = cropBounds[1];
+    cropDialog->mYMin        = cropBounds[2];
+    cropDialog->mYMax        = cropBounds[3];
+    cropDialog->mZMin        = cropBounds[4];
+    cropDialog->mZMax        = cropBounds[5];
+    cropDialog->mXDelta      = gui->cropBoundsXDelta;
+    cropDialog->mYDelta      = gui->cropBoundsYDelta;
+    cropDialog->mZDelta      = gui->cropBoundsZDelta;
+    cropDialog->mXSync       = (cropBounds[0] == cropBounds[1]);
+    cropDialog->mYSync       = (cropBounds[2] == cropBounds[3]);
+    cropDialog->mZSync       = (cropBounds[4] == cropBounds[5]);
+    cropDialog->mCropAngle   = (int)(_manager->GetHorizontalCropAngle() + 0.5);
+    cropDialog->updateDataControls(false);
+
+    // Pieces tab
+    const double* rgb                 = _manager->GetCroppedAwayPiecesColor();
+    cropDialog->showCroppedAwayPieces = _manager->AreCroppedAwayPiecesShown();
+    cropDialog->red                   = (int)(rgb[0] * 100 + 0.5);
+    cropDialog->green                 = (int)(rgb[1] * 100 + 0.5);
+    cropDialog->blue                  = (int)(rgb[2] * 100 + 0.5);
+    cropDialog->opacity               = (int)(_manager->GetCroppedAwayPiecesOpacity() * 100 + 0.5);
+    cropDialog->updateDataPieces(false);
+
+    // Dialog
+    cropDialog->setCurrentTabIndex(0);
+    cropDialog->activate(_manager->IsSolidVisible() || _manager->AreIsosurfacesVisible());
+}
+
+void MvDoc::crop(double xMin, double xMax, double yMin, double yMax,
+                 double zMin, double zMax, double cropAngle)
+{
+    _manager->Crop(xMin, xMax, yMin, yMax, zMin, zMax, cropAngle);
+    updateAllViews(nullptr);
+    setModified(true);
+}
+
+void MvDoc::showCroppedAwayPieces()
+{
+    _manager->ShowCroppedAwayPieces();
+    updateAllViews(nullptr);
+    setModified(true);
+}
+
+void MvDoc::hideCroppedAwayPieces()
+{
+    _manager->HideCroppedAwayPieces();
+    updateAllViews(nullptr);
+    setModified(true);
+}
+
+void MvDoc::setCroppedAwayPiecesColor(double red, double green, double blue)
+{
+    _manager->SetCroppedAwayPiecesColor(red, green, blue);
+    updateAllViews(nullptr);
+    setModified(true);
+}
+
+void MvDoc::setCroppedAwayPiecesOpacity(double opacity)
+{
+    _manager->SetCroppedAwayPiecesOpacity(opacity);
+    updateAllViews(nullptr);
+    setModified(true);
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -2835,12 +2871,6 @@ void MvDoc::updateAnimationDialog(mvGUISettings* gui)
 {
     // @todo
     assert(animationDialog);
-}
-
-void MvDoc::updateCropDialog(mvGUISettings* gui)
-{
-    // @todo
-    assert(cropDialog);
 }
 
 void MvDoc::updatePathlinesDialog()
