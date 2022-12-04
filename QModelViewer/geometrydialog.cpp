@@ -305,6 +305,18 @@ void GeometryDialog::onApply()
     }
 }
 
+void GeometryDialog::activate(bool b)
+{
+    // scale tab
+    activateScale(b);
+
+    // axes symbol tab
+    activateAxes(b);
+
+    // bounding box tab
+    activateBoundingBox(b);
+}
+
 void GeometryDialog::activateScale(bool b)
 {
     // scale tab

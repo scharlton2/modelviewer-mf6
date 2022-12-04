@@ -59,6 +59,9 @@ public:
 
     void         setBackgroundColor(double red, double green, double blue);
 
+    void         rotateCamera(double angle);
+    void         elevateCamera(double angle);
+
 signals:
 
 protected:

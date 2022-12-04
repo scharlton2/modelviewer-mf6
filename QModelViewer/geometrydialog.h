@@ -17,6 +17,8 @@ public:
     explicit GeometryDialog(QWidget *parent, MvDoc *doc);
     ~GeometryDialog();
 
+    void activate(bool b);
+
     void activateScale(bool b);
     void activateAxes(bool b);
     void activateBoundingBox(bool b);

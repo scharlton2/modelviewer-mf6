@@ -277,26 +277,6 @@ void MvView::resetExportImageParameters()
 /////////////////////////////////////////////////////////////////////////////
 // Protected methods
 
-//void MvView::PlaceHeadlightWithCamera()
-//{
-//    /*
-//    vtkCamera*          camera = m_Renderer->GetActiveCamera();
-//    vtkLightCollection* lights = m_Renderer->GetLights();
-//    lights->InitTraversal();
-//    vtkLight* light = lights->GetNextItem();
-//    light->SetPosition(camera->GetPosition());
-//    light->SetFocalPoint(camera->GetFocalPoint());
-//    */
-//
-//    vtkCamera*          camera = this->renderer->GetActiveCamera();
-//    vtkLightCollection* lights = this->renderer->GetLights();
-//    lights->InitTraversal();
-//    vtkLight* light = lights->GetNextItem();
-//    assert(light == this->headlight);
-//    light->SetPosition(camera->GetPosition());
-//    light->SetFocalPoint(camera->GetFocalPoint());
-//}
-
 void MvView::WriteBmp(const char* filename, bool useScreenResolution)
 {
     this->widget->renderWindow()->SetUseOffScreenBuffers(true);
@@ -556,9 +536,9 @@ void MvView::onFileExportAnimation(QWidget* parent)
 
     //int fileNumber = atoi((char*)((LPCTSTR)m_FileStartNumber));
     int  fileNumber = atoi(fileStartNumber.toLocal8Bit().data());
-    int len        = fileStartNumber.length();
-    int i          = StartIndex;
-    int fill;
+    int  len        = fileStartNumber.length();
+    int  i          = StartIndex;
+    int  fill;
 
     char b1[10];
     char b2[10];

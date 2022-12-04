@@ -8,11 +8,14 @@
 
 #include <QAction>
 #include <QApplication>
+#include <QDebug>
 #include <QDir>
 #include <QFileDialog>
 #include <QMainWindow>
 #include <QMessageBox>
 #include <QSettings>
+#include <QThread>
+
 
 #include <vtkPropCollection.h>
 
@@ -37,6 +40,7 @@
 #include "vectordialog.h"
 #include "modelfeaturesdialog.h"
 #include "cropdialog.h"
+#include "animationdialog.h"
 
 
 #include "preferencesdialog.h"
@@ -51,15 +55,15 @@ MvDoc::MvDoc(QMainWindow* parent)
     , _gui{0}
 {
     // Initialize variables
-    startup        = true;
-    projectionMode = ProjectionType::ptPerspective;
-    readyToClose   = false;
-    animationType  = AnimationType::atTime;
-    animationSteps = 10;
+    startup         = true;
+    projectionMode  = ProjectionType::ptPerspective;
+    readyToClose    = false;
+    _animationType  = AnimationType::atTime;
+    _animationSteps = 10;
 
-    defaultXOrigin = 0.;
-    defaultYOrigin = 0.;
-    defaultAngRot  = 0.;
+    defaultXOrigin  = 0.;
+    defaultYOrigin  = 0.;
+    defaultAngRot   = 0.;
 
     QSettings settings;
     _interactorStyle = static_cast<enum MouseMode>(settings.value("interactorStyle", (int)MouseMode::mmTrackball).toInt());
@@ -76,47 +80,23 @@ MvDoc::MvDoc(QMainWindow* parent)
 
     // Load presistent app settings from Windows registry
     LoadPreviousAppSettings();
-
 #endif
 
     // Create the visualization pipeline manager
     _manager = new mvManager;
 
-#if TODO
-    // Set modeless dialog boxes to null. These cannot be created
-    // until after the main frame window is created.
-    m_DataDlg          = NULL;
-    m_IsosurfaceDlg    = NULL;
-    m_VectorDlg        = NULL;
-    m_PathlinesDlg     = NULL;
-    m_CropDlg          = NULL;
-    m_AnimationDlg     = NULL;
-#endif
-
     dataDialog          = new DataDialog(parent, this);
-    ///dataDialog->reinitialize();
-
     colorBarDialog      = new ColorBarDialog(parent, this);
-    ///colorBarDialog->reinitialize();
-
     lightingDialog      = new LightingDialog(parent, this);
-
     gridDialog          = new GridDialog(parent, this);
-
     geometryDialog      = new GeometryDialog(parent, this);
-    ///geometryDialog->reinitialize();
-
     overlayDialog       = new OverlayDialog(parent, this);
-
     solidDialog         = new SolidDialog(parent, this);
-
     isosurfaceDialog    = new IsosurfaceDialog(parent, this);
-
     vectorDialog        = new VectorDialog(parent, this);
-
     modelFeaturesDialog = new ModelFeaturesDialog(parent, this);
-
     cropDialog          = new CropDialog(parent, this);
+    animationDialog     = new AnimationDialog(parent, this);
 
     reinitializeToolDialogs();
 
@@ -140,6 +120,13 @@ MvDoc::~MvDoc()
     delete[] m_ModelNames;
 ***/
     // Note that modeless dialog boxes delete themselves.
+
+#if defined(USE_THREAD_FOR_ANIMATION)
+    qDebug() << "thread dtor start";
+    animationThread.quit();
+    animationThread.wait();
+    qDebug() << "thread dtor finish";
+#endif
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -271,7 +258,7 @@ void MvDoc::reinitializeToolDialogs()
 {
     dataDialog->reinitialize();
     colorBarDialog->reinitialize();
-    //m_LightingDlg->Reinitialize();
+    lightingDialog->reinitialize();
     gridDialog->reinitialize();
     geometryDialog->reinitialize();
     solidDialog->reinitialize();
@@ -284,7 +271,7 @@ void MvDoc::reinitializeToolDialogs()
     modelFeaturesDialog->hide();
     overlayDialog->reinitialize();
     cropDialog->reinitialize();
-    //m_AnimationDlg->Reinitialize();
+    animationDialog->reinitialize();
 }
 
 void MvDoc::onFileNew()
@@ -295,9 +282,6 @@ void MvDoc::onFileNew()
     delete _manager;
     _manager = new mvManager;
 
-    //dataDialog->reinitialize();
-    //colorBarDialog->reinitialize();
-    //geometryDialog->reinitialize();
     reinitializeToolDialogs();
 
     char selectedModel[20];
@@ -495,12 +479,19 @@ bool MvDoc::saveFile(const QString& fileName)
     assert(_gui);
     mvGUISettings settings(*_gui);
 
+    // crop settings
     cropDialog->updateDataControls(true);
     settings.cropBoundsXDelta = cropDialog->mXDelta;
     settings.cropBoundsYDelta = cropDialog->mYDelta;
     settings.cropBoundsZDelta = cropDialog->mZDelta;
 
-    // @todo replace this with m_AnimationDlg->m_OptionsPage
+    // animation settings
+    animationDialog->updateDataOptions(true);
+    settings.animationRotate  = animationDialog->rotate;
+    settings.animationElevate = animationDialog->elevate;
+    settings.animationDelay   = animationDialog->delay;
+
+    // lighting settings
     lightingDialog->updateDataLights(true);
     settings.headlightOn             = lightingDialog->headlightOn ? 1 : 0;
     settings.auxiliaryLightOn        = lightingDialog->auxiliaryLightOn ? 1 : 0;
@@ -513,13 +504,12 @@ bool MvDoc::saveFile(const QString& fileName)
 
     // The visualization pipeline doc->_manager will serialize everything along
     // with the gui settings
-    ///char *errorMsg = this->doc->_manager->Serialize(lpszPathName, &settings);
     char *errorMsg = _manager->Serialize(fileName.toLocal8Bit().data(), &settings);
     if (errorMsg)
     {
         QWidget* widget = dynamic_cast<QWidget*>(parent());
         assert(widget);
-        QMessageBox::information(widget, tr(""), tr(errorMsg));
+        QMessageBox::information(widget, "", tr(errorMsg));
         return false;
     }
     setCurrentFile(fileName);
@@ -543,8 +533,6 @@ bool MvDoc::maybeSave()
         shownName = info.fileName();
     }
 
-    //QWidget*                          widget = dynamic_cast<QWidget*>(parent());
-    //assert(widget);
     MainWindow* mainWindow = dynamic_cast<MainWindow*>(parent());
     assert(mainWindow);
     const QMessageBox::StandardButton ret = QMessageBox::question(mainWindow,
@@ -826,7 +814,7 @@ void MvDoc::updateAllViews(QAbstractView* sender, QObject* hint)
 }
 
 /////////////////////////////////////////////////////////////////////////////
-// Show menu
+// Show menu @todo Reorder in menu order
 
 void MvDoc::onShowNone()
 {
@@ -888,30 +876,15 @@ void MvDoc::onShowVectors(QWidget* parent)
 
 void MvDoc::onShowPathlines()
 {
-    /*
-    if (m_Manager->ArePathlinesVisible())
-    {
-        m_Manager->HidePathlines();
-        m_PathlinesDlg->Activate(FALSE);
-    }
-    else
-    {
-        m_Manager->ShowPathlines();
-        m_PathlinesDlg->Activate(TRUE);
-    }
-    UpdateAllViews(NULL);
-    setModified(TRUE);
-    */
-
     if (_manager->ArePathlinesVisible())
     {
         _manager->HidePathlines();
-        //m_PathlinesDlg->Activate(FALSE);
+        //m_PathlinesDlg->Activate(FALSE);  @todo
     }
     else
     {
         _manager->ShowPathlines();
-        //m_PathlinesDlg->Activate(TRUE);
+        //m_PathlinesDlg->Activate(TRUE);   @todo
     }
     updateAllViews(nullptr);
     setModified(true);
@@ -965,7 +938,9 @@ void MvDoc::setCurrentFile(const QString& fileName)
 
         QString shownName = _currentFile;
         if (shownName.isEmpty())
+        {
             shownName = tr("Untitled");
+        }
         mainWindow->setWindowFilePath(shownName);
     }
     updateAllViews(nullptr);
@@ -1009,15 +984,15 @@ void MvDoc::onShowGridLines()
         if (_manager->AreActivatedGridLinesVisible())
         {
             _manager->HideGridLines();
-            //m_GridDlg->m_ApplyButton.EnableWindow(FALSE);
             gridDialog->activateLines(false);
+            gridDialog->enableApplyButton(false);
         }
         else
         {
             _manager->ShowActivatedGridLines();
-            //m_GridDlg->m_ApplyButton.EnableWindow(
-            //m_GridDlg->m_PropertySheet->GetActiveIndex() == 0);
             gridDialog->activateLines(true);
+            gridDialog->enableApplyButton(gridDialog->currentTabIndex() == 0);
+            
         }
     }
     else if (_manager->GetGridType() == GridType::MV_LAYERED_GRID)
@@ -1025,14 +1000,14 @@ void MvDoc::onShowGridLines()
         if (_manager->IsGridLayerVisible())
         {
             _manager->HideGridLayer();
-            //m_GridDlg->m_ApplyButton.EnableWindow(FALSE);
             gridDialog->activateLines(false);
+            gridDialog->enableApplyButton(false);
         }
         else
         {
             _manager->ShowGridLayer();
-            //m_GridDlg->m_ApplyButton.EnableWindow(TRUE);
             gridDialog->activateLines(true);
+            gridDialog->enableApplyButton(true);
         }
     }
     updateAllViews(nullptr);
@@ -1167,31 +1142,30 @@ void MvDoc::setTimePointTo(int timePointIndex)
 
 void MvDoc::updateAnimation()
 {
-    ///POSITION pos = GetFirstViewPosition();
-    ///GetNextView(pos)->SendMessage(WM_PAINT);
-    
     for (auto view : _views)
     {
         view->onUpdate(nullptr, nullptr);
 
-        //{{
-        // added so that File->Export Animation->Preview would update the view
+        // added for animation support in File->Export Animation->Preview and Toolbox->Animation
         // this seems to do what 'GetNextView(pos)->SendMessage(WM_PAINT)' did in the MFC version
         qApp->processEvents();
-        //}}
     }
 
-    double range[2];
-    _manager->GetScalarDataRange(range);
-    //m_DataDlg->m_ScalarPage->SetRange(range);
-    _manager->GetVectorMagnitudeRange(range);
-    //m_DataDlg->m_VectorPage->SetRange(range);
-    //m_AnimationDlg->m_ControlsPage->SetAndDisplayCurrentTime(_manager->GetCurrentTimePointIndex());
+    if (dataDialog->isVisible())
+    {
+        double range[2];
+        _manager->GetScalarDataRange(range);
+        dataDialog->setScalarDataRange(range);
+        _manager->GetVectorMagnitudeRange(range);
+        dataDialog->setVectorMagnitudeRange(range);
+    }
+
+    animationDialog->setAndDisplayCurrentTime(_manager->GetCurrentTimePointIndex());
 
     if (!_isAnimating)
     {
-        bool          b;
-        switch (animationType)
+        bool b;
+        switch (_animationType)
         {
         case AnimationType::atTime:
             b = _manager->GetCurrentTimePointIndex() < _manager->GetNumberOfTimePoints() - 1;
@@ -1201,9 +1175,18 @@ void MvDoc::updateAnimation()
             break;
         }
 
-        //m_AnimationDlg->m_ControlsPage->GetDlgItem(IDC_RUN_ANIMATION)->EnableWindow(b);
-        //m_AnimationDlg->m_ControlsPage->GetDlgItem(IDC_ADVANCE_ANIMATION)->EnableWindow(b);
-        ///EndWaitCursor();
+        if (!dataDialog->isVisible())
+        {
+            double range[2];
+            _manager->GetScalarDataRange(range);
+            dataDialog->setScalarDataRange(range);
+            _manager->GetVectorMagnitudeRange(range);
+            dataDialog->setVectorMagnitudeRange(range);
+        }
+
+        animationDialog->enableRun(b);
+        animationDialog->enableAdvance(b);
+        ///QApplication::restoreOverrideCursor();
     }
 }
 
@@ -1211,7 +1194,7 @@ void MvDoc::advanceOneTimePoint()
 {
     if (!_isAnimating)
     {
-        ///BeginWaitCursor();
+        //QGuiApplication::setOverrideCursor(Qt::WaitCursor);
     }
     _manager->AdvanceOneTimePoint();
     updateAnimationPosition();
@@ -1219,53 +1202,14 @@ void MvDoc::advanceOneTimePoint()
 
 void MvDoc::updateAnimationPosition()
 {
-    //POSITION pos   = GetFirstViewPosition();
-    //CMvView* pView = (CMvView*)GetNextView(pos);
-    //pView->RotateCamera(m_AnimationDlg->m_OptionsPage->m_Rotate);
-    //pView->ElevateCamera(m_AnimationDlg->m_OptionsPage->m_Elevate);
-
-    //for(auto view : this->_views)
-    //{
-    //    pView->RotateCamera(m_AnimationDlg->m_OptionsPage->m_Rotate);
-    //    pView->ElevateCamera(m_AnimationDlg->m_OptionsPage->m_Elevate);
-
-    //    view->rotateCamera();
-    //    view->elevateCamera();
-    //}
+    for(auto view : this->_views)
+    {
+        view->rotateCamera(animationDialog->rotate);
+        view->elevateCamera(animationDialog->elevate);
+    }
     updateAnimation();
 }
 
-//void MvDoc::updateAnimation()
-//{
-//    //POSITION pos = GetFirstViewPosition();
-//    //GetNextView(pos)->SendMessage(WM_PAINT);
-//
-//    double range[2];
-//    _manager->GetScalarDataRange(range);
-//    //m_DataDlg->m_ScalarPage->SetRange(range);
-//    _manager->GetVectorMagnitudeRange(range);
-//    //m_DataDlg->m_VectorPage->SetRange(range);
-//    //m_AnimationDlg->m_ControlsPage->SetAndDisplayCurrentTime(_manager->GetCurrentTimePointIndex());
-//
-//    if (!_isAnimating)
-//    {
-//        bool          b;
-//        AnimationType at = animationType;
-//        switch (at)
-//        {
-//        case AnimationType::atTime:
-//            b = _manager->GetCurrentTimePointIndex() < _manager->GetNumberOfTimePoints() - 1;
-//            break;
-//        case AnimationType::atSpace:
-//            b = true;
-//            break;
-//        }
-//
-//        //m_AnimationDlg->m_ControlsPage->GetDlgItem(IDC_RUN_ANIMATION)->EnableWindow(b);
-//        //m_AnimationDlg->m_ControlsPage->GetDlgItem(IDC_ADVANCE_ANIMATION)->EnableWindow(b);
-//        //EndWaitCursor();
-//    }
-//}
 
 void MvDoc::updateToolDialogs(mvGUISettings* gui)
 {
@@ -1284,7 +1228,6 @@ void MvDoc::updateToolDialogs(mvGUISettings* gui)
     updateOverlayDialog();
 }
 
-
 /////////////////////////////////////////////////////////////////////////////
 // Scale
 /////////////////////////////////////////////////////////////////////////////
@@ -1292,11 +1235,6 @@ void MvDoc::updateToolDialogs(mvGUISettings* gui)
 void MvDoc::setScale(double xScale, double yScale, double zScale)
 {
     _manager->SetScale(xScale, yScale, zScale);
-    //POSITION pos   = GetFirstViewPosition();
-    //CMvView* pView = (CMvView*)GetNextView(pos);
-    //pView->ResetCameraClippingRange();
-    //UpdateAllViews(NULL);
-    //SetModifiedFlag(TRUE);
 
     for (auto view : this->_views)
     {
@@ -1519,19 +1457,9 @@ void MvDoc::updateColorBarDialog()
 { 
     assert(colorBarDialog);
 
-    //CColorBarDataSource* data_source = m_ColorBarDlg->m_DataSource;
-    //data_source->m_DataSourceIndex   = m_Manager->GetColorBarSource();
-    //data_source->CustomUpdateData(FALSE);
-
     // Source
     colorBarDialog->dataSourceIndex = _manager->GetColorBarSource();
     colorBarDialog->updateDataSource(false);
-
-    //CColorBarLimitsPage *lim = m_ColorBarDlg->m_LimitsPage;
-    //lim->m_ValueBlue = m_Manager->GetColorBarValueBlue();
-    //lim->m_ValueRed  = m_Manager->GetColorBarValueRed();
-    //lim->m_LogScaleCheckBox.SetCheck(!m_Manager->IsColorBarLinear());
-    //lim->CustomUpdateData(FALSE);
 
     // Limits
     colorBarDialog->valueBlue        = _manager->GetColorBarValueBlue();
@@ -1539,27 +1467,11 @@ void MvDoc::updateColorBarDialog()
     colorBarDialog->isColorBarLinear = _manager->IsColorBarLinear();
     colorBarDialog->updateDataLimits(false);
 
-
-    //CColorBarSizePage* size = m_ColorBarDlg->m_SizePage;
-    //size->m_Width           = m_Manager->GetColorBarWidth();
-    //size->m_Height          = m_Manager->GetColorBarHeight();
-    //size->m_Offset          = m_Manager->GetColorBarOffset();
-    //size->CustomUpdateData(FALSE);
-
     // Size
     colorBarDialog->width  = _manager->GetColorBarWidth();
     colorBarDialog->height = _manager->GetColorBarHeight();
     colorBarDialog->offset = _manager->GetColorBarOffset();
     colorBarDialog->updateDataSize(false);
-
-
-    //CColorBarTextPage* text = m_ColorBarDlg->m_TextPage;
-    //text->m_FontSize        = m_Manager->GetColorBarFontSize();
-    //text->m_NumLabels       = m_Manager->GetColorBarNumberOfLabels();
-    //text->m_Precision       = m_Manager->GetColorBarLabelPrecision();
-    //const double* rgb       = m_Manager->GetColorBarTextColor();
-    //text->m_ColorOption     = (int)(rgb[0] * 2 + 0.1);
-    //text->CustomUpdateData(FALSE);
 
     // Labels (text)
     colorBarDialog->fontSize    = _manager->GetColorBarFontSize();
@@ -1569,16 +1481,12 @@ void MvDoc::updateColorBarDialog()
     colorBarDialog->colorOption = (int)(rgb[0] * 2 + 0.1);                          // black = 0, gray = 1, white = 2
     colorBarDialog->updateDataLabels(false);
 
-
     //CColorBarColorsPage* scheme = m_ColorBarDlg->m_ColorsPage;
     //scheme->InitializeDialog();
 
     // Colors
     colorBarDialog->updateDataColors(false);
 
-
-    //m_ColorBarDlg->m_PropertySheet->SetActivePage(0);
-    //m_ColorBarDlg->Activate(TRUE);
     colorBarDialog->setCurrentIndex(0);
     colorBarDialog->activate(true);
 }
@@ -1985,48 +1893,11 @@ void MvDoc::applySubgrid(int col_min, int col_max, int row_min, int row_max, int
 
     _manager->SetScalarSubgridExtent(imin, imax, jmin, jmax, kmin, kmax);
     _manager->ScalarSubgridOn();
-    /*
-        // update the grid lines dlg box
-        int p[3];
-        m_Manager->GetGridLinePositions(p);
-        m_GridDlg->m_GridLinesPage->m_XMin = imin;
-        m_GridDlg->m_GridLinesPage->m_XMax = imax;
-        m_GridDlg->m_GridLinesPage->m_YMin = sdim[1]-jmax-1;
-        m_GridDlg->m_GridLinesPage->m_YMax = sdim[1]-jmin-1;
-        m_GridDlg->m_GridLinesPage->m_ZMin = sdim[2]-kmax-1;
-        m_GridDlg->m_GridLinesPage->m_ZMax = sdim[2]-kmin-1;
-        m_GridDlg->m_GridLinesPage->m_PositionX = p[0];
-        m_GridDlg->m_GridLinesPage->m_PositionY = sdim[1] - p[1] - 1;
-        m_GridDlg->m_GridLinesPage->m_PositionZ = sdim[2] - p[2] - 1;
-        m_GridDlg->m_GridLinesPage->CustomUpdateData(FALSE);
 
-        // Update the vector dialog box
-        if (m_Manager->HasVectorData())
-        {
-            if(m_VectorDlg->m_ControlsPage->m_col_min < col_min)
-             m_VectorDlg->m_ControlsPage->m_col_min = col_min;
-            if(m_VectorDlg->m_ControlsPage->m_col_max > col_max)
-               m_VectorDlg->m_ControlsPage->m_col_max = col_max;
-            if(m_VectorDlg->m_ControlsPage->m_row_min < row_min)
-               m_VectorDlg->m_ControlsPage->m_row_min = row_min;
-            if(m_VectorDlg->m_ControlsPage->m_row_max > row_max)
-               m_VectorDlg->m_ControlsPage->m_row_max = row_max;
-            if(m_VectorDlg->m_ControlsPage->m_lay_min < lay_min)
-               m_VectorDlg->m_ControlsPage->m_lay_min = lay_min;
-            if(m_VectorDlg->m_ControlsPage->m_lay_max > lay_max)
-               m_VectorDlg->m_ControlsPage->m_lay_max = lay_max;
-
-          m_VectorDlg->m_ControlsPage->m_col_lower_limit = col_min;
-            m_VectorDlg->m_ControlsPage->m_col_upper_limit = col_max;
-            m_VectorDlg->m_ControlsPage->m_row_lower_limit = row_min;
-            m_VectorDlg->m_ControlsPage->m_row_upper_limit = row_max;
-            m_VectorDlg->m_ControlsPage->m_lay_lower_limit = lay_min;
-            m_VectorDlg->m_ControlsPage->m_lay_upper_limit = lay_max;
-            m_VectorDlg->m_ControlsPage->CustomUpdateData(FALSE);
-
-          m_VectorDlg->m_ControlsPage->Apply();
-        }
-    */
+    //
+    // Original MvMf6 had commented code here that's been removed
+    // see CMvDoc::ApplySubgrid
+    //
 
     updateAllViews(nullptr);
     setModified(true);
@@ -2191,7 +2062,6 @@ void MvDoc::applyOverlayControl(const char* filename, int overlayType, double xo
     {
         _manager->ShowOverlay();
     }
-    //overlayDialog->m_RemoveButton.EnableWindow(TRUE);
     overlayDialog->enableRemoveButton(true);
 
     updateAllViews(nullptr);
@@ -2846,10 +2716,294 @@ void MvDoc::setCroppedAwayPiecesOpacity(double opacity)
 /////////////////////////////////////////////////////////////////////////////
 // Toolbox->Animation
 /////////////////////////////////////////////////////////////////////////////
+
+void MvDoc::onToolboxAnimation()
+{
+    assert(animationDialog);
+    if (animationDialog->isVisible())
+    {
+        animationDialog->hide();
+    }
+    else
+    {
+        animationDialog->show();
+    }
+}
+
 void MvDoc::onUpdateToolboxAnimation(QAction* action)
 {
-    // @todo
-    action->setEnabled(false);
+    assert(animationDialog);
+    action->setChecked(animationDialog->isVisible());
+}
+
+
+void MvDoc::updateAnimationDialog(mvGUISettings* gui)
+{
+    /*
+    POSITION pos = GetFirstViewPosition();
+    GetNextView(pos)->SendMessage(WM_PAINT);
+
+    double range[2];
+    m_Manager->GetScalarDataRange(range);
+    m_DataDlg->m_ScalarPage->SetRange(range);
+    m_Manager->GetVectorMagnitudeRange(range);
+    m_DataDlg->m_VectorPage->SetRange(range);
+    m_AnimationDlg->m_ControlsPage->SetAndDisplayCurrentTime(m_Manager->GetCurrentTimePointIndex());
+
+    if (!m_IsAnimating)
+    {
+        BOOL          b;
+        AnimationType at = GetAnimationType();
+        switch (at)
+        {
+        case atTime:
+            b = m_Manager->GetCurrentTimePointIndex() < m_Manager->GetNumberOfTimePoints() - 1;
+            break;
+        case atSpace:
+            b = TRUE;
+            break;
+        }
+
+        m_AnimationDlg->m_ControlsPage->GetDlgItem(IDC_RUN_ANIMATION)->EnableWindow(b);
+        m_AnimationDlg->m_ControlsPage->GetDlgItem(IDC_ADVANCE_ANIMATION)->EnableWindow(b);
+        EndWaitCursor();
+    }
+    */
+
+    /*
+    assert(animationDialog);
+
+    double range[2];
+    _manager->GetScalarDataRange(range);
+    dataDialog->setScalarDataRange(range);
+    _manager->GetVectorMagnitudeRange(range);
+    dataDialog->setVectorMagnitudeRange(range);
+    animationDialog->setAndDisplayCurrentTime(_manager->GetCurrentTimePointIndex());
+    */
+
+    /*
+    // Controls Page
+    CAnimationControlsPage* ctrl = m_AnimationDlg->m_ControlsPage;
+    ctrl->m_NumberOfTimePoints   = m_Manager->GetNumberOfTimePoints();
+    ctrl->m_TimePointLabels      = m_Manager->GetTimePointLabels();
+    ctrl->SetAndDisplayCurrentTime(m_Manager->GetCurrentTimePointIndex());
+    if (m_Manager->GetTimeLabelOption() == 0)
+    {
+        ctrl->GetDlgItem(IDC_CURRENT)->SetWindowText("Current time:");
+        ctrl->GetDlgItem(IDC_SET_TO)->SetWindowText("Set to time:");
+    }
+    else
+    {
+        ctrl->GetDlgItem(IDC_CURRENT)->SetWindowText("Current step:");
+        ctrl->GetDlgItem(IDC_SET_TO)->SetWindowText("Set to step:");
+    }
+    ctrl->SetAnimationType(m_AnimationType);
+    ctrl->m_NumberOfSteps = m_AnimationSteps;
+    ctrl->UpdateData(FALSE);
+
+    ctrl->Reset();
+
+    // Options Page
+    CAnimationOptionsPage* opt = m_AnimationDlg->m_OptionsPage;
+    opt->m_Rotate              = gui->animationRotate;
+    opt->m_Elevate             = gui->animationElevate;
+    opt->m_Delay               = gui->animationDelay;
+    opt->UpdateData(FALSE);
+    opt->Activate(TRUE);
+
+    // Animation Dlg
+    m_AnimationDlg->m_PropertySheet->SetActivePage(0);
+    */
+
+    // Controls
+    animationDialog->timePointLabels = timePointLabels();
+    animationDialog->setAndDisplayCurrentTime(_manager->GetCurrentTimePointIndex());
+
+    if (_manager->GetTimeLabelOption() == 0)
+    {
+        animationDialog->setCurrentTimeLabel(tr("Current time:"));
+        animationDialog->setTimePointsLabel(tr("Set to time:"));
+    }
+    else
+    {
+        animationDialog->setCurrentTimeLabel(tr("Current step:"));
+        animationDialog->setTimePointsLabel(tr("Set to step:"));
+    }
+
+    animationDialog->setAnimationType(_animationType);
+    animationDialog->numberOfSteps = _animationSteps;
+    animationDialog->updateDataControls(false);
+
+    animationDialog->reset();
+
+    // Options
+    animationDialog->rotate  = gui->animationRotate;
+    animationDialog->elevate = gui->animationElevate;
+    animationDialog->delay   = gui->animationDelay;
+    animationDialog->updateDataOptions(false);
+    animationDialog->activateOptions(true);
+
+    animationDialog->setCurrentTabIndex(0);
+}
+
+AnimationType MvDoc::animationType() const
+{
+    return _animationType;
+}
+
+size_t MvDoc::animationSteps() const
+{
+    return _animationSteps;
+}
+
+void MvDoc::setAnimationSteps(int value)
+{
+    _animationSteps = value;
+}
+
+void MvDoc::stopAnimation()
+{
+    qDebug() << "stopAnimation";
+    _isAnimating = false;
+}
+
+void MvDoc::setAnimationType(AnimationType value)
+{
+    _animationType = value;
+}
+
+void MvDoc::updateAnimationWithSameTime()
+{
+    if (!_isAnimating)
+    {
+        //QGuiApplication::setOverrideCursor(Qt::WaitCursor);
+    }
+    updateAnimationPosition();
+}
+
+void MvDoc::startAnimation()
+{
+    dataDialog->activate(false);
+    colorBarDialog->activate(false);
+    lightingDialog->activate(false);
+    gridDialog->activate(false);
+    geometryDialog->activate(false);
+    solidDialog->activate(false);
+    isosurfaceDialog->activate(false);
+    vectorDialog->activate(false);
+    //m_PathlinesDlg->activate(false);      @todo
+    modelFeaturesDialog->activate(false);
+    cropDialog->activate(false);
+    overlayDialog->activate(false);
+
+    _isAnimating = true;
+
+    // AfxBeginThread(ControlFunction, this);
+#if defined(USE_THREAD_FOR_ANIMATION)
+    // THIS NEEDS MORE WORK @todo
+    // https://stackoverflow.com/questions/11033971/qt-thread-with-movetothread
+    // https://riptutorial.com/qt/example/17732/basic-usage-of-qthread
+    //
+    qDebug() << "before moveToThread" << QThread::currentThread();
+    QObject* parent = this->parent();
+    this->setParent(nullptr);
+    
+    moveToThread(&animationThread);
+    animationThread.setObjectName("workerThread");
+    animationThread.start();
+
+    QMetaObject::invokeMethod(this, "animate", Qt::QueuedConnection);
+
+    QThread::msleep(10000);
+
+    this->moveToThread(QApplication::instance()->thread());
+    this->setParent(parent);
+    qDebug() << "after moveToThread" << QThread::currentThread();
+    //this->animate();
+#else
+    animate();
+#endif
+}
+
+void MvDoc::animate()
+{
+    clock_t start, finish;
+    double  duration, wait;
+
+    // Animation loop
+    if (_animationType == AnimationType::atTime)
+    {
+        while ((_manager->GetCurrentTimePointIndex() < _manager->GetNumberOfTimePoints() - 1) && _isAnimating)
+        {
+            start = clock();
+            advanceOneTimePoint();
+            finish   = clock();
+            duration = (finish - start) / (double)CLOCKS_PER_SEC;
+            wait     = animationDialog->delay - duration;
+            if (wait > 0)
+            {
+                QThread::msleep(wait * 1000);
+            }
+        }
+    }
+    else
+    {
+        for (size_t index = 0; index < _animationSteps; ++index)
+        {
+            start = clock();
+            updateAnimationWithSameTime();
+            finish   = clock();
+            duration = (finish - start) / (double)CLOCKS_PER_SEC;
+            wait     = animationDialog->delay - duration;
+            if (wait > 0)
+            {
+                QThread::msleep(wait * 1000);
+            }
+            if (!_isAnimating)
+            {
+                break;
+            }
+        }
+    }
+    if (_isAnimating)
+    {
+        _isAnimating = false;
+        animationDialog->enableStop(false);
+    }
+    if (_animationType == AnimationType::atTime)
+    {
+        if (_manager->GetCurrentTimePointIndex() < _manager->GetNumberOfTimePoints() - 1)
+        {
+            animationDialog->enableRun(true);
+            animationDialog->enableAdvance(true);
+        }
+    }
+    else
+    {
+        animationDialog->enableRun(true);
+        animationDialog->enableAdvance(true);
+    }
+    animationDialog->enableSet(true);
+    animationDialog->enableTimePointsCombo(true);
+    animationDialog->activateOptions(true);
+
+    dataDialog->activate(true);
+    colorBarDialog->activate(true);
+    lightingDialog->activate(true);
+    gridDialog->activateShell(_manager->IsGridShellVisible());
+    gridDialog->activateLines(_manager->AreActivatedGridLinesVisible());
+    gridDialog->activateSubgrid(true);
+    geometryDialog->activateScale(true);
+    geometryDialog->activateAxes(_manager->AreAxesVisible());
+    geometryDialog->activateBoundingBox(_manager->IsBoundingBoxVisible());
+    solidDialog->activate(_manager->IsSolidVisible());
+    isosurfaceDialog->activate(_manager->AreIsosurfacesVisible());
+    vectorDialog->activate(_manager->AreVectorsVisible());
+    //m_PathlinesDlg->Activate(_manager->ArePathlinesVisible());  @todo
+    modelFeaturesDialog->activate(_manager->AreModelFeaturesVisible());
+    cropDialog->activate(_manager->IsSolidVisible() || _manager->AreIsosurfacesVisible());
+    overlayDialog->activate(true);
+    overlayDialog->enableRemoveButton(_manager->HasOverlay());
 }
 
 
@@ -2865,12 +3019,6 @@ void MvDoc::getPathlineTimeRange(double* range)
 void MvDoc::getScalarDataRange(double* range)
 {
     _manager->GetScalarDataRange(range);
-}
-
-void MvDoc::updateAnimationDialog(mvGUISettings* gui)
-{
-    // @todo
-    assert(animationDialog);
 }
 
 void MvDoc::updatePathlinesDialog()

@@ -169,6 +169,18 @@ void LightingDialog::showEvent(QShowEvent *e)
     }
 }
 
+void LightingDialog::activate(bool b)
+{
+    // Lights
+    activateLights(b);
+
+    // Surface
+    activateSurface(b);
+
+    // Background
+    activateBackground(b);
+}
+
 void LightingDialog::activateLights(bool b)
 {
     ui->checkBoxHeadlight->setEnabled(b);
