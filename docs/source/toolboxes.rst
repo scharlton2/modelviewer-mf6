@@ -96,5 +96,64 @@ The **Lighting** toolbox allows adjustment of how graphic objects are illuminate
   * Specular Power: The surface shininess. (1)
 
 - The **Background** tab allows you to:
+
   * Set the background color to white by selecting the **White** option. (White is the default background color.)
   * Set the background to any color by selecting the **Custom** option and specifying the red, green, and blue components of the color.
+
+""""""""""""
+Grid Toolbox
+""""""""""""
+
+The **Grid** toolbox controls the display of the model grid.
+
+- If the **Grid** toolbox is not visible, display it by clicking the **Toolbox** menu and selecting **Grid**.
+
+- The Lines tab allows you to:
+
+  * Set the position of gridline set defined by index i, j, or k for gridlines.
+  * Click the up or down arrow to increase or decrease the i, j, or k indices. 
+  * Show or hide a gridline set by checking or unchecking the **Activate** option. 
+  * Set the gridline color to black, gray, or white. 
+
+- The **Shell** tab allows you to set the color (red, green, and blue components) and opacity of the shell that represents the outer surface of the active grid. 
+- The **Subgrid** tab allows you to:
+
+  * Check the **Activate Subgrid** option to show a subset of the grid as defined by the range of i, j, and k indices for cells. 
+  * Uncheck the **Activate Subgrid** option to show the full grid. 
+  * Specify the minimum and maximum values for the i, j, and k indices. 
+  * Click the up or down arrow to increase or decrease the i, j, or k indices. 
+
+""""""""""""""""
+Geometry Toolbox
+""""""""""""""""
+
+The **Geometry** toolbox controls the geometric aspects of the display.
+
+- If the **Geometry** toolbox is not visible, display it by clicking the **Toolbox** menu and selecting **Geometry**.
+- The **Scale** tab allows you to set the exaggeration or elongation factor in the x, y and z directions. (For no exaggeration, set all factors to 1.)
+- The **Axes Symbol** tab allows you to:
+
+  * Display the axes symbol as **tubes** or **lines**.
+  * Set the **size** of the axes symbol. (MvMf6 determines a default size of 1. To increase the size, specify a value greater than 1. To decrease the size, specify a value smaller than 1.)
+  * Set the **tube diameter** for the axes symbol. (MvMf6 determines a default tube diameter of 1. To increase the diameter, specify a value greater than 1. The decrease the diameter, specify a value smaller than 1.)
+  * Set the (x, y, z) position of the axes symbol.
+
+- The **Bounding Box** tab allows you to set the color of the bounding box. 
+
+""""""""""""""""
+Solid Toolbox
+""""""""""""""""
+
+The **Solid** toolbox controls the display of scalar data as a solid.
+
+- If the Solid toolbox is not visible, display it by clicking the **Toolbox** menu and selecting **Solid**.
+- To specify the coloring scheme, select one of the options: **Blocky**, **Smooth**, or **Banded**. (The Blocky coloring scheme is not available for finite-element models such as SUTRA.)
+- For the banded coloring scheme, you may set the number of color bands in the text box.
+- To apply thresholding:
+
+  * Check the Apply Threshold option. 
+  * Specify the minimum and maximum values of the threshold range. 
+  * Click **Apply**. 
+
+- The **Full** button sets the minimum and maximum values of the threshold range respectively to the minimum and maximum values of the scalar data at the current time step. 
+- To turn off thresholding, uncheck the **Apply Threshold** option. 
