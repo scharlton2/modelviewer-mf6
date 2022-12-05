@@ -22,7 +22,10 @@ public:
     void hideEvent(QHideEvent *event) override;
     void showEvent(QShowEvent *e) override;
 
-    void reinitialize();
+    void     activate(bool b);
+    int      currentTabIndex() const;
+    void     enableApplyButton(bool enable);
+    void     reinitialize();
 
     // Lines
     void     activateLines(bool activate);

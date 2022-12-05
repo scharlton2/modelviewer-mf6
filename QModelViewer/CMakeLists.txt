@@ -64,6 +64,7 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 set(UI_FILES
+  animationdialog.ui
   bitmapresolutiondialog.ui
   colorbardialog.ui
   cropdialog.ui
@@ -84,6 +85,7 @@ set(UI_FILES
 )
 
 set(HXX_FILES
+  animationdialog.h
   bitmapresolutiondialog.h
   colorbardialog.h
   cropdialog.h
@@ -109,6 +111,7 @@ set(HXX_FILES
 )
 
 set(CXX_FILES
+  animationdialog.cpp
   bitmapresolutiondialog.cpp
   colorbardialog.cpp
   cropdialog.cpp

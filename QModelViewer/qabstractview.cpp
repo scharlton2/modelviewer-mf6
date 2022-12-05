@@ -134,15 +134,6 @@ void QAbstractView::resetCameraClippingRange()
 
 void QAbstractView::PlaceHeadlightWithCamera()
 {
-    /*
-    vtkCamera*          camera = m_Renderer->GetActiveCamera();
-    vtkLightCollection* lights = m_Renderer->GetLights();
-    lights->InitTraversal();
-    vtkLight* light = lights->GetNextItem();
-    light->SetPosition(camera->GetPosition());
-    light->SetFocalPoint(camera->GetFocalPoint());
-    */
-
     vtkCamera*          camera = this->renderer->GetActiveCamera();
     vtkLightCollection* lights = this->renderer->GetLights();
     lights->InitTraversal();
@@ -246,4 +237,35 @@ void QAbstractView::discardSavedViewpoint()
 void QAbstractView::setBackgroundColor(double red, double green, double blue)
 {
     renderer->SetBackground(red, green, blue);
+}
+
+void QAbstractView::rotateCamera(double angle)
+{
+    if (angle != 0)
+    {
+        vtkLightCollection* lights = renderer->GetLights();
+        lights->InitTraversal();
+        vtkLight*  light  = lights->GetNextItem();
+        assert(light == this->headlight);
+        vtkCamera* camera = renderer->GetActiveCamera();
+        camera->Azimuth(angle);
+        light->SetPosition(camera->GetPosition());
+        light->SetFocalPoint(camera->GetFocalPoint());
+    }
+}
+
+void QAbstractView::elevateCamera(double angle)
+{
+    if (angle != 0)
+    {
+        vtkLightCollection* lights = renderer->GetLights();
+        lights->InitTraversal();
+        vtkLight*  light  = lights->GetNextItem();
+        assert(light == this->headlight);
+        vtkCamera* camera = renderer->GetActiveCamera();
+        camera->Elevation(angle);
+        camera->OrthogonalizeViewUp();
+        light->SetPosition(camera->GetPosition());
+        light->SetFocalPoint(camera->GetFocalPoint());
+    }
 }

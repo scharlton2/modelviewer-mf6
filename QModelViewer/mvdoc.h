@@ -6,9 +6,15 @@
 #include <vector>
 #include <string>
 
+//#define USE_THREAD_FOR_ANIMATION
+
 #include <QDir>
 #include <QObject>
 #include <QString>
+
+#if defined(USE_THREAD_FOR_ANIMATION)
+#include <QThread>
+#endif
 
 #include <vtkColor.h>
 #include <vtkSmartPointer.h>
@@ -90,7 +96,7 @@ public:
     void                               updateAnimation();
     void                               advanceOneTimePoint();
     void                               updateAnimationPosition();
-
+    void                               updateAnimationWithSameTime();
 
     // File menu
     void                               onFileClose();
@@ -308,7 +314,17 @@ public:
     /////////////////////////////////////////////////////////////////////////////
     // Toolbox->Animation
     /////////////////////////////////////////////////////////////////////////////
+    void                               onToolboxAnimation();
     void                               onUpdateToolboxAnimation(QAction* action);
+    void                               startAnimation();
+    void                               stopAnimation();
+#if !defined(USE_THREAD_FOR_ANIMATION)
+    void                               animate();
+#endif
+    size_t                             animationSteps() const;
+    void                               setAnimationSteps(int value);    
+    AnimationType                      animationType() const;
+    void                               setAnimationType(AnimationType value);
 
 
 
@@ -324,9 +340,11 @@ public:
     bool                               hasPathlineData() const;
 
 
-
-
 public slots:
+
+#if defined(USE_THREAD_FOR_ANIMATION)
+    void animate();
+#endif
 
     void onShowIsosurfaces();
     void onShowNone();
@@ -345,16 +363,18 @@ public slots:
     void onShowTime();
     void onShowColorBar();
 
-public:
-
-    //int           GetAnimationSteps();
-    //AnimationType GetAnimationType();
-    //void          CropVectors(double xmin, double xmax,
-    //                          double ymin, double ymax, double zmin, double zmax, int cropangle);
-
-signals:
+//public:
+//
+//    //void          CropVectors(double xmin, double xmax,
+//    //                          double ymin, double ymax, double zmin, double zmax, int cropangle);
+//
+//signals:
 
 private:
+
+#if defined(USE_THREAD_FOR_ANIMATION)
+    QThread animationThread;
+#endif
 
     friend class MainWindow;
 
@@ -367,8 +387,8 @@ private:
     bool                      _modified;            // CDocument::m_bModified
 
 
-    AnimationType            animationType;         // m_AnimationType
-    size_t                   animationSteps;        // m_AnimationSteps
+    AnimationType            _animationType;        // m_AnimationType
+    size_t                   _animationSteps;        // m_AnimationSteps
     MouseMode                _interactorStyle;      // m_InteractorStyle
     ProjectionType           projectionMode;        // m_ProjectionMode
     size_t                   numberOfModels;        // m_NumberOfModels

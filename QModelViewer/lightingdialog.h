@@ -21,6 +21,7 @@ public:
     void hideEvent(QHideEvent *event) override;
     void showEvent(QShowEvent *e) override;
 
+    void activate(bool b);
     void onDefault();
     void reinitialize();
     void setCurrentIndex(int index);

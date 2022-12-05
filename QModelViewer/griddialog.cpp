@@ -323,6 +323,28 @@ void GridDialog::reinitialize()
     activateSubgrid(false);
 }
 
+void GridDialog::activate(bool b)
+{
+    // Lines
+    activateLines(b);
+
+    // Shell
+    activateShell(b);
+
+    // Subgrid
+    activateSubgrid(b);
+}
+
+int GridDialog::currentTabIndex() const
+{
+    return ui->tabWidget->currentIndex();
+}
+
+void GridDialog::enableApplyButton(bool enable)
+{
+    ui->pushButtonApply->setEnabled(enable);
+}
+
 void GridDialog::activateLines(bool activate)
 {
     bool bx = ui->checkBoxActivateX->isChecked();

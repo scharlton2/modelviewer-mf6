@@ -425,7 +425,7 @@ void MainWindow::createActions()
     animationAction = new QAction(tr("&Animation"), this);
     animationAction->setCheckable(true);
     animationAction->setStatusTip(tr("Show or hide the Animtion Toolbox"));
-    // connect(animationAction, &QAction::triggered, doc, &MvDoc::onToolboxVector);  // @todo
+    connect(animationAction, &QAction::triggered, doc, &MvDoc::onToolboxAnimation);
 }
 
 void MainWindow::updateFileActions()
@@ -757,6 +757,10 @@ void MainWindow::createMenus()
     QMenu *actionMenu = menuBar()->addMenu(tr("&Action"));
     connect(actionMenu, &QMenu::aboutToShow, this, &MainWindow::updateActionActions);
 
+    // TODO Action->&Copy Display To Clipboard\tCtrl+C
+
+    // TODO Action->Reset &Viewpoint\tCtrl+V
+
     // Action->Set Size of Display Area...
     actionMenu->addAction(setSizeAction);
 
@@ -849,8 +853,8 @@ void MainWindow::createMenus()
     // Toolbox->Crop
     toolboxMenu->addAction(cropAction);
 
-    //// Toolbox->Animation
-    //toolboxMenu->addAction(animationAction);
+    // Toolbox->Animation
+    toolboxMenu->addAction(animationAction);
 }
 
 void MainWindow::createStatusBar()
@@ -1171,7 +1175,7 @@ void MainWindow::onShowPathlines()
 
 void MainWindow::onModelFeatures()
 {
-    doc->onModelFeatures();
+    doc->onModelFeatures();     // @todo Edit->Refactor->Rename...
 }
 
 void MainWindow::onShowAxes()
