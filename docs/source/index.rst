@@ -12,3 +12,5 @@ Model Viewer for MODFLOW 6
    cellindex
    data
    toolboxes
+   viewcontrol
+   exporting

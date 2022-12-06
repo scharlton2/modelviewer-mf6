@@ -140,9 +140,9 @@ The **Geometry** toolbox controls the geometric aspects of the display.
 
 - The **Bounding Box** tab allows you to set the color of the bounding box. 
 
-""""""""""""""""
+"""""""""""""
 Solid Toolbox
-""""""""""""""""
+"""""""""""""
 
 The **Solid** toolbox controls the display of scalar data as a solid.
 
@@ -157,3 +157,112 @@ The **Solid** toolbox controls the display of scalar data as a solid.
 
 - The **Full** button sets the minimum and maximum values of the threshold range respectively to the minimum and maximum values of the scalar data at the current time step. 
 - To turn off thresholding, uncheck the **Apply Threshold** option. 
+
+""""""""""""""""""
+Isosurface Toolbox
+""""""""""""""""""
+
+The **Isosurface** toolbox is used to create isosurfaces.
+
+- If the **Isosurface** toolbox is not visible, display it by clicking the **Toolbox** menu and selecting **Isosurface**.
+- The **Regular** tab allows you to create isosurfaces at scalar values uniformly spaced between a minimum and a maximum value. For example, if Min Value = 0, Max Value = 50, No. of Isosurfaces = 6, then isosurfaces will be created for scalar values of 0, 10, 20, 30, 40, and 50.
+- The **Custom** tab allows you to create isosurfaces for arbitrary scalar values. These values are shown in the list box on the right.
+  * To add an isosurface, enter the scalar value in the text box on the left and click **Add**.
+  * To delete an isosurface, select the scalar value in the list box on the right and click **Delete**. 
+
+""""""""""""""
+Vector Toolbox
+""""""""""""""
+The Vector toolbox controls the display of vector data.
+
+- If the **Vector** toolbox is not visible, display it by clicking the **Toolbox** menu and selecting **Vector**.
+- Clicking **Default** will assign default settings to the selected tab. Default settings are given in parentheses below.
+- The **Subsample** tab allows you to display a subset of vectors.
+
+  * The subset of vectors is defined by the minimum value (Min), maximum value (Max), and the sampling rate for the i, j, and k indices. For example, if Min = 3, Max = 20, and Rate = 4 for index i, then vectors will be displayed at i values of 3, 7, 11, 15 and 19. (By default, Min, Max and Rate are set to show all vectors.)
+  * You may also click the up or down arrow to increase or decrease the Min or Max values. For SUTRA models with irregular meshes, only the k rate is active and the nodes throughout the mesh will be subampled based on their node numbers.
+
+- The **Appearance** tab allows you to: 
+
+  * Set the **Scale Factor** for the vectors. (See note 1 below.) Check of uncheck the Log Transform option to either apply a log transformation to the ratio of the vector to the smallest vector or to use the vector magnitudes without transformation. 
+  * Check or uncheck the **Show Base** option to show or hide small cubes at the starting point of each vector. 
+  * Check the up or down arrow to increase or decrease the size of the base cubes. 
+  * Set the vector color to black, gray, or white. (black) 
+
+- The Threshold tab allows you to: 
+
+  * Check the **Apply Threshold** option to display only those vectors having magnitudes within the threshold range. 
+  * Uncheck the **Apply Threshold** option to turn off thresholding. 
+  * Specify the minimum and maximum vector magnitudes to define the threshold range. 
+
+- The Crop tab allows you to: 
+  * Select which vectors are displayed using a cropping procedure similar to that used to crop isosurfaces or solids. 
+
+.. note::
+    #. When model data are loaded, MvMf6 computes a default scale factor based on the maximum vector magnitude at the selected time to display data. The actual value of the scale factor is unimportant. To lengthen the vectors, simply increase the scale factor. To shorten the vectors, decrease the scale factor. 
+
+
+""""""""""""""""""""""
+Model Features Toolbox
+""""""""""""""""""""""
+
+The **Model Features** toolbox controls the display of model features.
+
+- If the **Model Features** toolbox is not visible, display it by clicking the **Toolbox** menu and selecting **Model Features**.
+- The **Model Features** toolbox contains two lists: the **Show** list on the left and the **Hide** list on the right.
+- Model features in the Show list are visible; those in the Hide list are invisible.
+- To show a model feature in the Hide list, select the item and click **Show**.
+- To hide a model feature in the Show list, select the item and click the **Hide**.
+- If several model features occupy the same cell or node, the uppermost item in the Show list will be displayed.
+- The position of a model feature in the Show list may be changed by selecting the item and then clicking
+
+  * **Top**: Move the item to the top of the list
+  * **Up**: Move the item up one position
+  * **Down**: Move the item down one position
+  * **Bot**: Move the item to the bottom of the list
+
+- To change the color of a model feature, select the item, click **Color**, and then select the color. 
+- In finite element meshes, to change the size of a model feature click the arrows next to **Size**. 
+
+""""""""""""
+Crop Toolbox
+""""""""""""
+
+The **Crop** toolbox is used for cropping solid or isosurfaces.
+
+- If the **Crop** toolbox is not visible, display it by clicking the **Toolbox** menu and selecting **Crop**.
+- Clicking **Default** will assign default settings to the selected tab. Default settings are given in parentheses below.
+- The **Controls** tab allows you to:
+
+  * Specify the **Min** and **Max** positions of the x, y, and z cropping planes. (Min = 0, Max = 1)
+  * Specify the **Delta** value, which is used to increase or decrease the Min or Max position when the up or down arrow is clicked. (0.1)
+  * Check or uncheck the option **Min=Max**. When checked, the Min position is set equal to the Max position. When the up or down arrow is clicked to change Min (or Max) position, the Max (or Min) position is also changed by the same amount.
+  * Specify the **Crop Angle** to rotate the x and y cropping planes. The crop angle can be from -45 to 45 degrees. (0)   
+
+- The **Cropped-Away Pieces** tab allows you to:
+
+  * Check or uncheck the Show to show or hide the cropped-away pieces. (By default, the cropped-away pieces are not shown.)
+  * Set the color (red, green, and blue components) and the opacity of the cropped-away pieces. (The default settings are: red = 1, green = 0.8, blue = 0.6, opacity = 0.2.)
+
+"""""""""""""""""
+Animation Toolbox
+"""""""""""""""""
+
+The **Animation** toolbox controls the display of model results at successive times to create an animation.
+
+- If the **Animation** toolbox is not visible, display it by clicking the **Toolbox** menu and selecting **Animation**.
+- The **Controls** tab allows you to do the following:
+
+  * To choose whether the animation will advance through time or change the viewpoint without advancing through time, set the **Animation type** to "time" or "viewpoint."
+  * If the animation type is set to "viewpoint" you can set the **Number of steps** in the animation.
+  * To advance to the next time or position, click **Advance**.
+  * To run an animation (continuously advance to the next time), click **Run**.
+  * To stop a animation, click **Stop**.
+  * To set the display to a particular time, select that time from the drop-list box, and then click **Set**.
+
+- The **Options** tab allows you to do the following:
+
+  * Specify a **Delay** (in seconds) between successive times. This will slow down the animation. To animate at the fastest speed, specify a delay of zero.
+  * Specify an angle increment to **Rotate** (horizontally) the viewpoint between between successive times.
+  * Specify an angle increment to **Elevate** (vertically) the viewpoint between between successive times.
+  * For a stationary viewpoint during animation, enter 0 in the Rotate and Elevate text boxes.

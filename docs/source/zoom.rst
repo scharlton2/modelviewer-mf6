@@ -46,6 +46,6 @@ In joystick-mode interaction, the speed and direction of zooming, rotation, and 
 Changing Interaction Mode
 """""""""""""""""""""""""
 
-1. Click the File menu and select Preferences. 
-2. Select the type of mouse interaction, either Trackball-Mode or Joystick-Mode. 
-3. Click OK. 
+#. Click the File menu and select Preferences. 
+#. Select the type of mouse interaction, either Trackball-Mode or Joystick-Mode. 
+#. Click OK. 

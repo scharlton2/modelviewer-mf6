@@ -39,9 +39,9 @@ Scalar Data
 
 **To specify or change the type of scalar data to display**
 
-1. If the **Data** toolbox is not visible, display it by clicking the **Toolbox** menu and selecting **Data**.
-2. Click the **Scalar** tab.
-3. From the drop-list box, select the type of scalar data to display.
+#. If the **Data** toolbox is not visible, display it by clicking the **Toolbox** menu and selecting **Data**.
+#. Click the **Scalar** tab.
+#. From the drop-list box, select the type of scalar data to display.
 
 """""""""
 Color Bar
@@ -128,7 +128,10 @@ Cropping
 - By default, the pair of x cropping planes is perpendicular to the x axis, and similarly for the y and z cropping planes.
 - However, the x and y cropping planes may also be rotated.
 - When cropping is enabled, only the portion between a pair of cropping planes is displayed.
-- The locations of the pair of x cropping planes, in their unrotated state, are specified as x = value1 (Min position) and x = value2 (Max position), where value1 is less than or equal to value2. The locations of the pair of y and z cropping planes are specified similarily. Note that the x, y, and z axes are normalized to range from 0 to 1.
+- The locations of the pair of x cropping planes, in their unrotated state, are specified as x = value1 (Min position) and x = value2 (Max position), where value1 is less than or equal to value2. The locations of the pair of y and z cropping planes are specified similarily.
+
+.. note::
+    - The x, y, and z axes are normalized to range from 0 to 1.
 
 The figure below illustrates cropping a solid using the pair of y cropping planes at y = 0.3 (Min position) and y = 0.7 (Max position). 
 
@@ -151,11 +154,14 @@ Vector Data
 .. image:: vectors.png
    :alt: vectors
 
-- MvMf6 displays a vector as a line oriented in the direction of the vector. The length of the line is proportional to the vector magnitude or, if choosen by the user, the logarithm of the ratio of the vector magnitude to the smallest vector magnitude. (How to control vector display) 
-- The starting point of the vector is the center of a cell. A small cube (called the **base**) may be displayed at the starting point. 
-- Note: Showing all vectors in the grid may result in a very cluttered picture. 
-- For models with structured discretization (DIS grid) , vectors can be displayed for a selected range of i, j, and k indices of the grid or cropped i the same way as scalar data may be cropped. In addition, the vector data may be "subsampled" by showing every n-th vector (n > 1) along the i, j, and k directions. 
-- Thresholding may be applied to display only those vectors having magnitudes within a specified range. 
+- MvMf6 displays a vector as a line oriented in the direction of the vector. The length of the line is proportional to the vector magnitude or, if choosen by the user, the logarithm of the ratio of the vector magnitude to the smallest vector magnitude. (How to control vector display)
+- The starting point of the vector is the center of a cell. A small cube (called the **base**) may be displayed at the starting point.
+
+.. note::
+    - Showing all vectors in the grid may result in a very cluttered picture.
+
+- For models with structured discretization (DIS grid) , vectors can be displayed for a selected range of i, j, and k indices of the grid or cropped i the same way as scalar data may be cropped. In addition, the vector data may be "subsampled" by showing every n-th vector (n > 1) along the i, j, and k directions.
+- Thresholding may be applied to display only those vectors having magnitudes within a specified range.
 
 """"""""""""""
 Model Features
