@@ -50,7 +50,7 @@ The **Color Bar** toolbox controls the properties of the :ref:`color bar <color_
 
   * Set the **width** of the color bar in pixels. (20)
   * Set the **height** of the color bar in pixels. (200)
-  * Set the **offset** distance in pixels from the right edge of the color bar to the right side of the :ref:`display area <user_interface>`. (100)
+  * Set the **offset** distance in pixels from the right edge of the color bar to the right side of the :ref:`display area <display_area>`. (100)
 
 - The **Labels** tab allows you to: 
 

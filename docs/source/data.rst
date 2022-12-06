@@ -239,5 +239,5 @@ Simulation Time
 
 To alternately show or hide the simulation time, click the **Show** menu and select **Time**.
 
-- The simulation time is displayed near the lower left corner of the :ref:`display area <user_interface>`
+- The simulation time is displayed near the lower left corner of the :ref:`display area <display_area>`
 - The time unit is that assumed in the model. 

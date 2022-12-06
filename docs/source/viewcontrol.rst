@@ -32,7 +32,7 @@ Resetting the Viewpoint
 #. Click the **Action** menu and select **Reset Viewpoint**.
 
 .. note::
-    - This command changes the viewpoint so that all visible graphic objects can be seen in the :ref:`display area <user_interface>`.
+    - This command changes the viewpoint so that all visible graphic objects can be seen in the :ref:`display area <display_area>`.
 
 .. _setting_size_of_display_area:
 
