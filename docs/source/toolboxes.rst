@@ -1,3 +1,5 @@
+.. _toolboxes:
+
 Toolboxes
 =========
 
@@ -22,11 +24,13 @@ The **Data** toolbox displays the maximum and minimum data values at the current
 - The **Vector** tab displays the minimum and maximum magnitude of vectors at the current time. 
 - The **Pathline** tab displays the minimum and maximum travel times for all pathlines. 
 
+.. _color_bar_toolbox:
+
 """""""""""""""""
 Color Bar Toolbox
 """""""""""""""""
 
-The **Color Bar** toolbox controls the properties of the color bar.
+The **Color Bar** toolbox controls the properties of the :ref:`color bar <color_bar>`.
 
 - If the **Color Bar** toolbox is not visible, display it by clicking the **Toolbox** menu and selecting **Color Bar**.
 - Clicking **Default** will assign default settings to the selected tab. Default settings are given in parentheses below.
@@ -46,7 +50,7 @@ The **Color Bar** toolbox controls the properties of the color bar.
 
   * Set the **width** of the color bar in pixels. (20)
   * Set the **height** of the color bar in pixels. (200)
-  * Set the **offset** distance in pixels from the right edge of the color bar to the right side of the display area. (100)
+  * Set the **offset** distance in pixels from the right edge of the color bar to the right side of the :ref:`display area <user_interface>`. (100)
 
 - The **Labels** tab allows you to: 
 
@@ -100,6 +104,8 @@ The **Lighting** toolbox allows adjustment of how graphic objects are illuminate
   * Set the background color to white by selecting the **White** option. (White is the default background color.)
   * Set the background to any color by selecting the **Custom** option and specifying the red, green, and blue components of the color.
 
+.. _grid_toolbox:
+
 """"""""""""
 Grid Toolbox
 """"""""""""
@@ -110,7 +116,7 @@ The **Grid** toolbox controls the display of the model grid.
 
 - The Lines tab allows you to:
 
-  * Set the position of gridline set defined by index i, j, or k for gridlines.
+  * Set the position of :ref:`gridline set <the_i_j_k_index_system_for_gridlines>` defined by index i, j, or k for gridlines.
   * Click the up or down arrow to increase or decrease the i, j, or k indices. 
   * Show or hide a gridline set by checking or unchecking the **Activate** option. 
   * Set the gridline color to black, gray, or white. 
@@ -122,6 +128,8 @@ The **Grid** toolbox controls the display of the model grid.
   * Uncheck the **Activate Subgrid** option to show the full grid. 
   * Specify the minimum and maximum values for the i, j, and k indices. 
   * Click the up or down arrow to increase or decrease the i, j, or k indices. 
+
+.. _geometry_toolbox:
 
 """"""""""""""""
 Geometry Toolbox
@@ -140,40 +148,91 @@ The **Geometry** toolbox controls the geometric aspects of the display.
 
 - The **Bounding Box** tab allows you to set the color of the bounding box. 
 
+.. _overlay_toolbox:
+
+"""""""""""""""
+Overlay Toolbox
+"""""""""""""""
+
+The **Overlay** toolbox is used to import an :ref:`overlay <overlay>` contained in either an ESRI Shapefile or a DXF file.
+
+To import an overlay:
+
+1. If the **Overlay** toolbox is not visible, display it by clicking the **Toolbox** menu and selecting Overlay.
+2. Click the **File** tab.
+3. Select the **Type** of file (ESRI Shapefile or DXF file) to be imported.
+4. Click the **Browse** button and navigate to the file you want to import. Double click the file.
+5. Click the **Control** tab.
+6. Enter the following information:
+
+  * **X0** and **Y0** are the x and y coordinates in the overlay file (that is, the Shapefile or DXF file) of the point that coincides with the lower left corner of the grid, when the grid is viewed from directly above.
+  * **Scale** is the conversion factor that converts the length unit used in the overlay file to the length unit of the model grid. For example, if the overlay file data are in meters, and the grid is in feet, then "scale" should be 3.2808.
+  * **Angle** is the angle in degrees to rotate the overlay. A positive value cause rotation in the clockwise direction.
+
+7. Next, select either:
+
+  * **Flat** : The overlay is displayed on a flat plane, or
+  * **Drape** : The overlay is displayed on the top of the grid.
+
+8. If you select Flat then:
+
+  * Enter a value for **Elev**, which is the elevation (in length unit used by the grid) of the plane on which the overlay is displayed.
+  * If you check the **Trim** option, the overlay will be trimmed so that any portion outside the grid (when viewed from directly above) is removed. If you activate the subgrid (using the Grid Toolbox), then the overlay will be trimmed to the subgrid.
+  * If you uncheck the **Trim** option, the entire overlay will be displayed. (Even if you activate the subgrid, the overlay will not be trimmed.)
+
+9. If you select **Drape** then:
+
+  * The **Trim** option is automatically turned on and cannot be turned off. This is necessary because the program doesn't know how to drape the overlay for those portions outside the grid. Therefore, any portion of the overlay outside the grid (or subgrid) is removed.
+  * You may want to raise the overlay slightly above the top of the grid. This can be done by specifying the **drape gap**. When the drape gap is zero, the overlay is exactly on the top surface of the grid. If you set the drape gap to 1.5, the overlay is 1.5 length units (whatever length unit used in the model) above the top surface of the grid. (In solid display, the overlay should be slightly above the top of the grid so that the grid does not partially cover the overlay.)
+
+10. If desired, select **Crop**:
+
+  * If the you click the **Crop** option, portions of the overlay are removed so that the overlay appears only above the cropped solid.
+
+11. Click the **Apply** button.
+
+.. _solid_toolbox:
+
 """""""""""""
 Solid Toolbox
 """""""""""""
 
-The **Solid** toolbox controls the display of scalar data as a solid.
+The **Solid** toolbox controls the display of scalar data as a :ref:`solid <solid>`.
 
 - If the Solid toolbox is not visible, display it by clicking the **Toolbox** menu and selecting **Solid**.
-- To specify the coloring scheme, select one of the options: **Blocky**, **Smooth**, or **Banded**. (The Blocky coloring scheme is not available for finite-element models such as SUTRA.)
+- To specify the :ref:`coloring scheme <coloring_schemes>`, select one of the options: **Blocky**, **Smooth**, or **Banded**. (The Blocky coloring scheme is not available for finite-element models such as SUTRA.)
 - For the banded coloring scheme, you may set the number of color bands in the text box.
-- To apply thresholding:
+- To apply :ref:`thresholding <thresholding>`:
 
-  * Check the Apply Threshold option. 
-  * Specify the minimum and maximum values of the threshold range. 
-  * Click **Apply**. 
+  * Check the Apply Threshold option.
+  * Specify the minimum and maximum values of the threshold range.
+  * Click **Apply**.
 
 - The **Full** button sets the minimum and maximum values of the threshold range respectively to the minimum and maximum values of the scalar data at the current time step. 
-- To turn off thresholding, uncheck the **Apply Threshold** option. 
+- To turn off :ref:`thresholding <thresholding>`, uncheck the **Apply Threshold** option.
+
+.. _isosurface_toolbox:
 
 """"""""""""""""""
 Isosurface Toolbox
 """"""""""""""""""
 
-The **Isosurface** toolbox is used to create isosurfaces.
+The **Isosurface** toolbox is used to create :ref:`isosurfaces <isosurface>`.
 
 - If the **Isosurface** toolbox is not visible, display it by clicking the **Toolbox** menu and selecting **Isosurface**.
 - The **Regular** tab allows you to create isosurfaces at scalar values uniformly spaced between a minimum and a maximum value. For example, if Min Value = 0, Max Value = 50, No. of Isosurfaces = 6, then isosurfaces will be created for scalar values of 0, 10, 20, 30, 40, and 50.
 - The **Custom** tab allows you to create isosurfaces for arbitrary scalar values. These values are shown in the list box on the right.
+
   * To add an isosurface, enter the scalar value in the text box on the left and click **Add**.
-  * To delete an isosurface, select the scalar value in the list box on the right and click **Delete**. 
+  * To delete an isosurface, select the scalar value in the list box on the right and click **Delete**.
+
+.. _vector_toolbox:
 
 """"""""""""""
 Vector Toolbox
 """"""""""""""
-The Vector toolbox controls the display of vector data.
+
+The Vector toolbox controls the :ref:`display of vector data <vector_data>`.
 
 - If the **Vector** toolbox is not visible, display it by clicking the **Toolbox** menu and selecting **Vector**.
 - Clicking **Default** will assign default settings to the selected tab. Default settings are given in parentheses below.
@@ -184,29 +243,33 @@ The Vector toolbox controls the display of vector data.
 
 - The **Appearance** tab allows you to: 
 
-  * Set the **Scale Factor** for the vectors. (See note 1 below.) Check of uncheck the Log Transform option to either apply a log transformation to the ratio of the vector to the smallest vector or to use the vector magnitudes without transformation. 
-  * Check or uncheck the **Show Base** option to show or hide small cubes at the starting point of each vector. 
-  * Check the up or down arrow to increase or decrease the size of the base cubes. 
-  * Set the vector color to black, gray, or white. (black) 
+  * Set the **Scale Factor** for the vectors. (:ref:`See note 1 below. <vector_toolbox_notes>`) Check of uncheck the Log Transform option to either apply a log transformation to the ratio of the vector to the smallest vector or to use the vector magnitudes without transformation.
+  * Check or uncheck the **Show Base** option to show or hide small cubes at the starting point of each vector.
+  * Check the up or down arrow to increase or decrease the size of the base cubes.
+  * Set the vector color to black, gray, or white. (black)
 
-- The Threshold tab allows you to: 
+- The Threshold tab allows you to:
 
-  * Check the **Apply Threshold** option to display only those vectors having magnitudes within the threshold range. 
-  * Uncheck the **Apply Threshold** option to turn off thresholding. 
-  * Specify the minimum and maximum vector magnitudes to define the threshold range. 
+  * Check the **Apply Threshold** option to display only those vectors having magnitudes within the threshold range.
+  * Uncheck the **Apply Threshold** option to turn off thresholding.
+  * Specify the minimum and maximum vector magnitudes to define the threshold range.
 
-- The Crop tab allows you to: 
-  * Select which vectors are displayed using a cropping procedure similar to that used to crop isosurfaces or solids. 
+- The Crop tab allows you to:
+
+  * Select which vectors are displayed using a :ref:`cropping procedure similar to that used to crop isosurfaces or solids <crop_toolbox>`.
+
+.. _vector_toolbox_notes:
 
 .. note::
-    #. When model data are loaded, MvMf6 computes a default scale factor based on the maximum vector magnitude at the selected time to display data. The actual value of the scale factor is unimportant. To lengthen the vectors, simply increase the scale factor. To shorten the vectors, decrease the scale factor. 
+    #. When model data are loaded, MvMf6 computes a default scale factor based on the maximum vector magnitude at the selected time to display data. The actual value of the scale factor is unimportant. To lengthen the vectors, simply increase the scale factor. To shorten the vectors, decrease the scale factor.
 
+.. _model_features_toolbox:
 
 """"""""""""""""""""""
 Model Features Toolbox
 """"""""""""""""""""""
 
-The **Model Features** toolbox controls the display of model features.
+The **Model Features** toolbox controls the :ref:`display of model features <model_features>`.
 
 - If the **Model Features** toolbox is not visible, display it by clicking the **Toolbox** menu and selecting **Model Features**.
 - The **Model Features** toolbox contains two lists: the **Show** list on the left and the **Hide** list on the right.
@@ -224,11 +287,13 @@ The **Model Features** toolbox controls the display of model features.
 - To change the color of a model feature, select the item, click **Color**, and then select the color. 
 - In finite element meshes, to change the size of a model feature click the arrows next to **Size**. 
 
+.. _crop_toolbox:
+
 """"""""""""
 Crop Toolbox
 """"""""""""
 
-The **Crop** toolbox is used for cropping solid or isosurfaces.
+The **Crop** toolbox is used for :ref:`cropping solid or isosurfaces <cropping>`.
 
 - If the **Crop** toolbox is not visible, display it by clicking the **Toolbox** menu and selecting **Crop**.
 - Clicking **Default** will assign default settings to the selected tab. Default settings are given in parentheses below.

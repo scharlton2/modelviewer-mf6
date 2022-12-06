@@ -3,12 +3,14 @@ View Control
 
 The **Action** menu provides commands to overall aspects of the display.
 
-- Copying the Display to Clipboard
-- Resetting the Viewpoint
-- Setting Size of Display Area
-- Viewing From Preset Directions
-- Perspective Versus Parallel Projection
-- Saving and Restoring a Viewpoint
+- :ref:`Copying the Display to Clipboard <copying_the_display_to_clipboard>`
+- :ref:`Resetting the Viewpoint <resetting_the_viewpoint>`
+- :ref:`Setting Size of Display Area <setting_size_of_display_area>`
+- :ref:`Viewing From Preset Directions <viewing_from_preset_directions>`
+- :ref:`Perspective Versus Parallel Projection <perspective_versus_parallel_projection>`
+- :ref:`Saving and Restoring a Viewpoint <saving_and_restoring_a_viewpoint>`
+
+.. _copying_the_display_to_clipboard:
 
 """"""""""""""""""""""""""""""""
 Copying the Display to Clipboard
@@ -21,6 +23,8 @@ Copying the Display to Clipboard
     - The clipboard content may be pasted to another application that accepts graphical images.
 
 
+.. _resetting_the_viewpoint:
+
 """""""""""""""""""""""
 Resetting the Viewpoint
 """""""""""""""""""""""
@@ -28,13 +32,15 @@ Resetting the Viewpoint
 #. Click the **Action** menu and select **Reset Viewpoint**.
 
 .. note::
-    - This command changes the viewpoint so that all visible graphic objects can be seen in the display area.
+    - This command changes the viewpoint so that all visible graphic objects can be seen in the :ref:`display area <user_interface>`.
+
+.. _setting_size_of_display_area:
 
 """"""""""""""""""""""""""""
 Setting Size of Display Area
 """"""""""""""""""""""""""""
 
-.. image:: displayarea.png
+.. image:: images/displayarea.png
    :alt: displayarea
 
 #. Click the **Action** menu and select **Set Size of Display Area...**.
@@ -43,6 +49,8 @@ Setting Size of Display Area
 
 .. note::
     - This command is useful for exporting a bitmap of a specific size.
+
+.. _viewing_from_preset_directions:
 
 """"""""""""""""""""""""""""""
 Viewing From Preset Directions
@@ -56,6 +64,8 @@ The viewpoint may be set to view from one of six preset directions.
     - For example, if you select the **+x** option, the viewpoint will be set to view from the +x axis direction towards the -x axis direction.
     - You may switch the viewpoint from one preset direction to the next by clicking **View From Next Direction** from the **Action** menu, or by holding down the **Ctrl** key and pressing the **V** key.
 
+.. _perspective_versus_parallel_projection:
+
 """"""""""""""""""""""""""""""""""""""
 Perspective Versus Parallel Projection
 """"""""""""""""""""""""""""""""""""""
@@ -66,6 +76,8 @@ Perspective Versus Parallel Projection
 
 .. note::
     - Zooming is not synchronized between perspective and parallel projection modes. The amount of zooming in one projection mode is independent of the amount of zooming in the other projection mode.
+
+.. _saving_and_restoring_a_viewpoint:
 
 """"""""""""""""""""""""""""""""
 Saving and Restoring a Viewpoint

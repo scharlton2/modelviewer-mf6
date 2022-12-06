@@ -12,24 +12,29 @@ Getting Started
 """""""""""""""""
 
 #. To use MvMf6 (**Model Viewer for Modflow 6**), you must first run a Modflow 6 model to generate simulation results. 
-#. `Create a new mvmf6 file`_.
-#. Load Modflow 6 data (simulation results).
-#. Learn to zoom, rotate, and pan.
-#. View scalar data (heads) as a solid or a set of isosurfaces.
-#. View vector data (flows), if available.
-#. View cells that contain model features such as streams and wells.
-#. View auxiliary graphic objects such as grid lines and bounding box.
-#. Learn how to use the toolboxes for data exploration and for controlling various aspects of the display.
-#. Save the mvmf6 file.
+#. :ref:`Create a new mvmf6 file <the_mvmf6_file>`.
+#. :ref:`Load Modflow 6 data (simulation results). <loading_modflow_6_data>`
+#. :ref:`Learn to zoom, rotate, and pan. <zoom>`
+#. :ref:`View scalar data (heads) as a solid or a set of isosurfaces. <scalar_data>`
+#. :ref:`View vector data (flows), if available. <vector_data>`
+#. :ref:`View cells that contain model features such as streams and wells. <model_features>`
+#. :ref:`View auxiliary graphic objects such as grid lines and bounding box. <auxiliary_graphic_objects>`
+#. :ref:`Learn how to use the toolboxes for data exploration and for controlling various aspects of the display. <toolboxes>`
+#. :ref:`Save the mvmf6 file. <the_mvmf6_file>`
 
 .. _Create a new mvmf6 file: `The mvmf6 File`_
 
-"""""""""""""""""
-User Interface
-"""""""""""""""""
-- Model results are shown in the Display Area.
+.. _user_interface:
 
-.. image:: displayarea.png
+""""""""""""""
+User Interface
+""""""""""""""
+
+.. _display_area:
+
+- Model results are shown in the **Display Area**.
+
+.. image:: images/displayarea.png
 
 - Model Viewer provides five menus (File, Show, Action, Toolbox, Help).
 
@@ -41,8 +46,9 @@ User Interface
 
 - The type of model and type of scalar data are indicated at the lower right corner of the program window.
 
-.. image:: interface.png
+.. image:: images/interface.png
 
+.. _the_mvmf6_file:
 
 """""""""""""""""
 The mvmf6 File
@@ -60,6 +66,8 @@ The mvmf6 File
 - When you **open** an mvmf6 file, **Model Viewer for Modflow 6** loads the model data and sets the display according to the information saved in the mvmf6 file.
 - When you **close** an mvmf6 file, **Model Viewer for Modflow 6** terminates the display of data. The program window becomes blank. The Close command is useful during repeated cycles of running a model and viewing the results. While model results are displayed in Model Viewer, the model data files cannot be over-written by another program. Closing the mvmf6 file releases the model data files so that the model can run to generate a new set of results.
 - Every time you change a display setting (for example, the color bar limits), the current mvmf6 file is considered to have been changed. If you did not saved the mvmf6 file after the changes, and you try to (a) create a new mvmf6 file, or (b) close the current mvmf6 file, or (c) exit **Model Viewer for Modflow 6**, you will be prompted to save the mvmf6 file before continuing.
+
+.. _loading_modflow_6_data:
 
 """"""""""""""""""""""
 Loading Modflow 6 Data
