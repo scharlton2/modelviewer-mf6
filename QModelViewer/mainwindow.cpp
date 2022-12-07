@@ -426,6 +426,11 @@ void MainWindow::createActions()
     animationAction->setCheckable(true);
     animationAction->setStatusTip(tr("Show or hide the Animtion Toolbox"));
     connect(animationAction, &QAction::triggered, doc, &MvDoc::onToolboxAnimation);
+
+    // Help->Contents
+    contentsAction = new QAction(tr("&Contents"), this);
+    contentsAction->setStatusTip(tr("Display the online help"));
+    connect(contentsAction, &QAction::triggered, this, &MainWindow::onHelpContents);
 }
 
 void MainWindow::updateFileActions()
@@ -855,6 +860,17 @@ void MainWindow::createMenus()
 
     // Toolbox->Animation
     toolboxMenu->addAction(animationAction);
+
+    ///////////////////////////////////////////////////////////////////////////
+    // Help
+
+    QMenu *helpMenu = menuBar()->addMenu(tr("&Help"));
+
+    // Help->Contents
+    helpMenu->addAction(contentsAction);
+
+    // Help->About Model Viewer
+    // helpMenu->addAction(aboutAction);  TODO
 }
 
 void MainWindow::createStatusBar()
@@ -1131,6 +1147,11 @@ void MainWindow::onViewFromNz()
 void MainWindow::onViewFromNextDirection()
 {
     view->onViewFromNextDirection();
+}
+
+void MainWindow::onHelpContents()
+{
+    QDesktopServices::openUrl(QUrl(tr("https://prerelease-modelviewer-mv6.readthedocs.io/en/latest/")));    // TODO update url
 }
 
 void MainWindow::onShowNone()

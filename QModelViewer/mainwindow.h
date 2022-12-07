@@ -74,6 +74,10 @@ private slots:
     void onViewFromNz();
     void onViewFromNextDirection();
 
+    // Help
+
+    void onHelpContents();
+
     // Toolbox
     void onToolboxGeometry();
 
@@ -190,20 +194,27 @@ private:
 
     // Toolbox
     QAction *            dataAction;
+
     QAction *            colorBarAction;
-    QAction *            geometryAction;
     QAction *            lightingAction;
+
     QAction *            gridAction;
+    QAction *            geometryAction;
     QAction *            overlayAction;
+
     QAction *            solidAction;
     QAction *            isosurfaceAction;
     QAction *            vectorAction;
+    QAction *            modelFeaturesAction;
+
+    QAction *            cropAction;
+    QAction *            animationAction;
 
     // @todo
     QAction *            pathlinesAction;
-    QAction *            modelFeaturesAction;
-    QAction *            cropAction;
-    QAction *            animationAction;
+
+    // Help
+    QAction *            contentsAction;
 };
 
 #endif // MAINWINDOW_H
