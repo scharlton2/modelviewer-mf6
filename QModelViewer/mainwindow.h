@@ -35,6 +35,8 @@ private slots:
     bool onFileSave();         // save
     bool onFileSaveAs();       // saveAs
     void onFileExportAsBmp();
+    void onFileExportAsPng();
+
     void onExportAnimation();
 
     void onPreferences();
@@ -64,6 +66,9 @@ private slots:
     void onShowTime();
     void onShowColorBar();
 
+    void onActionCopyDisplay();
+    void onActionResetViewpoint();
+
     void setSize();
 
     void onViewFromPx();
@@ -75,7 +80,7 @@ private slots:
     void onViewFromNextDirection();
 
     // Help
-
+    void onHelpAbout();
     void onHelpContents();
 
     // Toolbox
@@ -137,6 +142,7 @@ private:
     QAction *       saveAsAction;
 
     QAction *       exportAsBmpAction;
+    QAction *       exportAsPngAction;
     QAction *       exportAnimationAction;
 
     QAction *       printAction;
@@ -174,7 +180,9 @@ private:
     QAction *       showColorBarAction;
 
 
-    // Action
+    // Action (menu order)
+    QAction *       copyDisplayAction;
+    QAction *       resetViewpointAction;
     QAction *       setSizeAction;
 
     QAction *       viewFromPx;
@@ -215,6 +223,8 @@ private:
 
     // Help
     QAction *            contentsAction;
+
+    QAction *            aboutAction;
 };
 
 #endif // MAINWINDOW_H

@@ -2,6 +2,8 @@
 #define QABSTRACTVIEW_H
 
 
+#include <QImage>
+#include <QPixmap>
 #include <QPointer>
 #include <QObject>
 
@@ -61,6 +63,12 @@ public:
 
     void         rotateCamera(double angle);
     void         elevateCamera(double angle);
+
+    void         copySnapshotToClipboard();
+    QImage       getImage();
+    QPixmap      snapshot();
+
+    void         resetCamera();
 
 signals:
 

@@ -47,6 +47,7 @@
 #include <vtkRenderer.h>
 #include <vtkVersion.h>
 
+#include "aboutdialog.h"
 #include "mvdoc.h"
 #include "mvview.h"
 #include "displaysizedialog.h"
@@ -141,15 +142,21 @@ void MainWindow::createActions()
 
     // -----------------------------
 
+#if 0
     // File->Export As Bmp...
     exportAsBmpAction = new QAction(tr("Export As &Bmp..."), this);
     exportAsBmpAction->setStatusTip(tr("Export the current display as a bitmap file"));
     connect(exportAsBmpAction, &QAction::triggered, this, &MainWindow::onFileExportAsBmp);
+#endif
 
+    // File->Export As PNG...
+    exportAsPngAction = new QAction(tr("Export As &PNG..."), this);
+    exportAsPngAction->setStatusTip(tr("Export the current display as a PNG file"));
+    connect(exportAsPngAction, &QAction::triggered, this, &MainWindow::onFileExportAsPng);
 
     // File->Export Ani&mation...
     exportAnimationAction = new QAction(tr("Export Ani&mation..."), this);
-    exportAnimationAction->setStatusTip(tr("Export an animation as a sequence of bitmap files"));
+    exportAnimationAction->setStatusTip(tr("Export an animation as a sequence of PNG files"));
     connect(exportAnimationAction, &QAction::triggered, this, &MainWindow::onExportAnimation);
 
     // File->Preferences...
@@ -272,12 +279,22 @@ void MainWindow::createActions()
     showColorBarAction->setStatusTip(tr("Show or hide the color bar"));
     connect(showColorBarAction, &QAction::triggered, this, &MainWindow::onShowColorBar);
 
+    // Action->Reset Viewpoint
+    resetViewpointAction = new QAction(tr("Reset &Viewpoint"), this);
+    resetViewpointAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_R));
+    resetViewpointAction->setStatusTip(tr("Resets the viewpoint so the entire model grid is visible"));
+    connect(resetViewpointAction, &QAction::triggered, this, &MainWindow::onActionResetViewpoint);
+
+    // Action->Copy Display To Clipboard
+    copyDisplayAction = new QAction(tr("&Copy Display To Clipboard"), this);
+    copyDisplayAction->setShortcuts(QKeySequence::Copy);
+    copyDisplayAction->setStatusTip(tr("Copy the current display to the clipboard"));
+    connect(copyDisplayAction, &QAction::triggered, this, &MainWindow::onActionCopyDisplay);
 
     // Action->Set Size of Display Area...
     setSizeAction    = new QAction(tr("Set Si&ze of Display Area..."), this);
     setSizeAction->setStatusTip(tr("Set the size of the display area"));
     connect(setSizeAction, &QAction::triggered, this, &MainWindow::setSize);
-
 
     // Action->View From Direction->+x
     viewFromPx = new QAction(tr("+x"), this);
@@ -431,6 +448,11 @@ void MainWindow::createActions()
     contentsAction = new QAction(tr("&Contents"), this);
     contentsAction->setStatusTip(tr("Display the online help"));
     connect(contentsAction, &QAction::triggered, this, &MainWindow::onHelpContents);
+
+    // Help->About
+    aboutAction = new QAction(tr("&About Model Viewer for Modflow 6"), this);
+    aboutAction->setStatusTip(tr("Display program information"));
+    connect(aboutAction, &QAction::triggered, this, &MainWindow::onHelpAbout);
 }
 
 void MainWindow::updateFileActions()
@@ -453,8 +475,14 @@ void MainWindow::updateFileActions()
     saveAsAction->setEnabled(this->doc->_manager->GetDataFileList() != nullptr &&
                                       !this->isAnimating());
 
+#if 0
     // File->Export As Bmp...
     exportAsBmpAction->setEnabled(this->view->renderer->VisibleActorCount() > 0 &&
+                                  !this->isAnimating());
+#endif
+
+    // File->Export As PNG...
+    exportAsPngAction->setEnabled(this->view->renderer->VisibleActorCount() > 0 &&
                                   !this->isAnimating());
 
     // File->Export Animation...
@@ -551,6 +579,12 @@ void MainWindow::updateActionActions()
     qDebug() << "updateActionActions\n";
 #endif
 
+    // Action->Copy Display To Clipboard
+    view->onUpdateCopyDisplay(copyDisplayAction);
+
+    // Action->Reset Viewpoint
+    view->onUpdateResetViewpoint(resetViewpointAction);
+
     // Action->View From Direction->+x
     view->onUpdateViewFrom(viewFromPx);
 
@@ -577,6 +611,9 @@ void MainWindow::updateActionActions()
 
     // Action->Set Projection To->Parallel
     doc->onUpdateParallelProjection(setProjectionToParallel);
+
+    // Action->Save Viewpoint
+    view->onUpdateSaveViewpoint(saveViewpoint);
 
     // Action->Recall Viewpoint
     view->onUpdateRecallViewport(recallViewpoint);
@@ -658,8 +695,13 @@ void MainWindow::createMenus()
     // -----------------------------
     fileMenu->addSeparator();
 
+#if 0
     // File->Export As Bmp...
     fileMenu->addAction(exportAsBmpAction);
+#endif
+
+    // File->Export As PNG...
+    fileMenu->addAction(exportAsPngAction);
 
     // File->Export Animation...
     fileMenu->addAction(exportAnimationAction);
@@ -762,9 +804,11 @@ void MainWindow::createMenus()
     QMenu *actionMenu = menuBar()->addMenu(tr("&Action"));
     connect(actionMenu, &QMenu::aboutToShow, this, &MainWindow::updateActionActions);
 
-    // TODO Action->&Copy Display To Clipboard\tCtrl+C
+    // Action->Copy Display To Clipboard
+    actionMenu->addAction(copyDisplayAction);
 
-    // TODO Action->Reset &Viewpoint\tCtrl+V
+    // Action->Reset &Viewpoint\tCtrl+V
+    actionMenu->addAction(resetViewpointAction);
 
     // Action->Set Size of Display Area...
     actionMenu->addAction(setSizeAction);
@@ -869,8 +913,11 @@ void MainWindow::createMenus()
     // Help->Contents
     helpMenu->addAction(contentsAction);
 
+    // -----------------------------
+    helpMenu->addSeparator();
+
     // Help->About Model Viewer
-    // helpMenu->addAction(aboutAction);  TODO
+    helpMenu->addAction(aboutAction);
 }
 
 void MainWindow::createStatusBar()
@@ -1051,6 +1098,11 @@ void MainWindow::onFileExportAsBmp()
     view->onFileExportAsBmp(this);
 }
 
+void MainWindow::onFileExportAsPng()
+{
+    view->onFileExportAsPng(this);
+}
+
 void MainWindow::onExportAnimation()
 {
     view->onFileExportAnimation(this);
@@ -1092,6 +1144,16 @@ void MainWindow::writeSettings()
     // default settings use QCoreApplication::organizationName() and QCoreApplication::applicationName()
     QSettings settings;
     settings.setValue(MainWindow::geometryKey, saveGeometry());
+}
+
+void MainWindow::onActionResetViewpoint()
+{
+    view->resetCamera();
+}
+
+void MainWindow::onActionCopyDisplay()
+{
+    view->copySnapshotToClipboard();
 }
 
 void MainWindow::setSize()
@@ -1149,9 +1211,15 @@ void MainWindow::onViewFromNextDirection()
     view->onViewFromNextDirection();
 }
 
+void MainWindow::onHelpAbout()
+{
+    AboutDialog dlg(this);
+    dlg.exec();
+}
+
 void MainWindow::onHelpContents()
 {
-    QDesktopServices::openUrl(QUrl(tr("https://prerelease-modelviewer-mv6.readthedocs.io/en/latest/")));    // TODO update url
+    QDesktopServices::openUrl(QUrl(tr("https://modelviewer-mf6.readthedocs.io/en/latest/")));
 }
 
 void MainWindow::onShowNone()

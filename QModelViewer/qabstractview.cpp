@@ -8,10 +8,12 @@
 #include <vtkLightCollection.h>
 #include <vtkRenderer.h>
 #include <vtkRenderWindow.h>
+#include <vtkUnsignedCharArray.h>
 
-#include <QVTKOpenGLNativeWidget.h>
 #include <QAction>
-
+#include <QApplication>
+#include <QClipboard>
+#include <QVTKOpenGLNativeWidget.h>
 
 #include <cassert>
 
@@ -268,4 +270,48 @@ void QAbstractView::elevateCamera(double angle)
         light->SetPosition(camera->GetPosition());
         light->SetFocalPoint(camera->GetFocalPoint());
     }
+}
+
+QImage QAbstractView::getImage()
+{
+    vtkRenderWindow* rw = widget->renderWindow();
+    //	rw->OffScreenRenderingOn();
+    rw->Render();
+
+    int*                  vtk_size = rw->GetSize();
+    int                   w        = *(vtk_size);
+    int                   h        = *(vtk_size + 1);
+
+    QImage                img(w, h, QImage::Format_RGB32);
+    vtkUnsignedCharArray* pixels = vtkUnsignedCharArray::New();
+    pixels->SetArray(img.bits(), w * h * 4, 1);
+
+    rw->GetRGBACharPixelData(0, 0, w - 1, h - 1, 1, pixels);
+    pixels->Delete();
+    img = img.rgbSwapped();
+    img = img.mirrored();
+
+    //	rw->OffScreenRenderingOff();
+    return img;
+}
+
+void QAbstractView::copySnapshotToClipboard()
+{
+    QPixmap     pixmap    = snapshot();
+    QClipboard* clipboard = QApplication::clipboard();
+    clipboard->setPixmap(pixmap);
+}
+
+QPixmap QAbstractView::snapshot()
+{
+    QImage                    img    = getImage();
+    QPixmap                   pixmap = QPixmap::fromImage(img);
+    pixmap.setDevicePixelRatio(widget->devicePixelRatioF());
+    return pixmap;
+}
+
+void QAbstractView::resetCamera()
+{
+    renderer->ResetCamera();
+    onUpdate(nullptr, nullptr);
 }

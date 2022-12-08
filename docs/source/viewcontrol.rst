@@ -48,7 +48,7 @@ Setting Size of Display Area
 #. Click **OK**.
 
 .. note::
-    - This command is useful for exporting a bitmap of a specific size.
+    - This command is useful for exporting a PNG file of a specific size.
 
 .. _viewing_from_preset_directions:
 
