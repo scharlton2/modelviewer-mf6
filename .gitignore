@@ -33,6 +33,9 @@ Help/mvmf6.chm
 # local cmake presets
 CMakeUserPresets.json
 
+# read-the-docs
+docs/build
+
 # Backup files
 *.BAK
 

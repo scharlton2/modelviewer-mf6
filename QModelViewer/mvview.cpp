@@ -13,6 +13,8 @@
 #include <vtkInteractorStyleSwitch.h>
 #include <vtkLight.h>
 #include <vtkLightCollection.h>
+
+#include <vtkPNGWriter.h>
 #include <vtkProp.h>
 #include <vtkRenderer.h>
 #include <vtkRenderLargeImage.h>
@@ -380,6 +382,108 @@ void MvView::WriteBmp(const char* filename, bool useScreenResolution)
     this->widget->renderWindow()->SetUseOffScreenBuffers(false);
 }
 
+void MvView::WritePng(const char* filename, bool useScreenResolution)
+{
+    widget->renderWindow()->SetUseOffScreenBuffers(true);
+
+    int size[2];
+    size[0]             = widget->renderWindow()->GetSize()[0];
+    size[1]             = widget->renderWindow()->GetSize()[1];
+
+    // Parameters for writing bitmap at screen resolution
+    int   width         = size[0];
+    int   height        = size[1];
+    float magnification = 1;
+
+    if (!useScreenResolution)
+    {
+        if (bitmapResolutionOption == ResolutionType::rt150ppi)
+        {
+            // 150 ppi
+            if (bitmapSideOption == SideType::stWidth)
+            {
+                width         = bitmapWidthInInches * 150;
+                height        = (((long)width) * size[1]) / size[0];
+                magnification = ((float)width) / size[0];
+            }
+            else
+            {
+                height        = bitmapHeightInInches * 150;
+                width         = (((long)height) * size[0]) / size[1];
+                magnification = ((float)height) / size[1];
+            }
+        }
+        else if (bitmapResolutionOption == ResolutionType::rt300ppi)
+        {
+            // 300 ppi
+            if (bitmapSideOption == SideType::stWidth)
+            {
+                width         = bitmapWidthInInches * 300;
+                height        = (((long)width) * size[1]) / size[0];
+                magnification = ((float)width) / size[0];
+            }
+            else
+            {
+                height        = bitmapHeightInInches * 300;
+                width         = (((long)height) * size[0]) / size[1];
+                magnification = ((float)height) / size[1];
+            }
+        }
+    }
+    int           dataWidth         = ((width * 3 + 3) / 4) * 4;
+
+    // temporarily change color bar and text size
+    MvDoc*        doc               = GetDocument();
+    int           colorBarWidth     = doc->GetColorBarWidth();
+    int           colorBarHeight    = doc->GetColorBarHeight();
+    int           colorBarOffset    = doc->GetColorBarOffset();
+    int           colorBarFontSize  = doc->GetColorBarFontSize();
+    int           timeLabelFontSize = doc->GetTimeLabelFontSize();
+    const double* pos               = doc->GetTimeLabelPosition();
+    double        timeLabelPos[2];
+    timeLabelPos[0] = pos[0];
+    timeLabelPos[1] = pos[1];
+    if (magnification != 1)
+    {
+        doc->SetColorBarSize((int)(colorBarWidth * magnification),
+                             (int)(colorBarHeight * magnification),
+                             (int)(colorBarOffset * magnification), false);
+        doc->SetColorBarFontSize((int)(colorBarFontSize * magnification), false);
+        doc->SetTimeLabelFontSize((int)(timeLabelFontSize * magnification), false);
+        doc->SetTimeLabelPosition(timeLabelPos[0] * magnification,
+                                  timeLabelPos[1] * magnification, false);
+    }
+
+    // render to memory and write bitmap data
+    widget->renderWindow()->Render();
+    {
+        // vtkRenderLargeImage
+        widget->renderWindow()->SetSize(width, height);
+
+        vtkNew<vtkRenderLargeImage> renderLarge;
+        renderLarge->SetInput(renderer);
+        renderLarge->SetMagnification(1);
+
+        vtkNew<vtkPNGWriter> pngWriter;
+
+        pngWriter->SetFileName(filename);
+        pngWriter->SetInputConnection(renderLarge->GetOutputPort());
+        pngWriter->Write();
+    }
+    if (magnification != 1)
+    {
+        doc->SetColorBarSize(colorBarWidth, colorBarHeight, colorBarOffset, false);
+        doc->SetColorBarFontSize(colorBarFontSize, false);
+        doc->SetTimeLabelFontSize(timeLabelFontSize, false);
+        doc->SetTimeLabelPosition(timeLabelPos[0], timeLabelPos[1], false);
+    }
+    if (magnification != 1)
+    {
+        widget->renderWindow()->SetSize(size);
+    }
+    widget->renderWindow()->SetUseOffScreenBuffers(false);
+}
+
 void MvView::onFileExportAsBmp(QWidget* parent)
 {
     BitmapResolutionDialog dlg(parent);
@@ -400,6 +504,10 @@ void MvView::onFileExportAsBmp(QWidget* parent)
                                                 tr("Save As"),
                                                 tr(""),
                                                 tr("Bitmap Files (*.bmp);;All Files (*.*)"));
+    if (fileName.isEmpty())
+    {
+        return;
+    }
 
     PlaceHeadlightWithCamera();
 
@@ -430,13 +538,73 @@ void MvView::onFileExportAsBmp(QWidget* parent)
     light->SetFocalPoint(camera->GetFocalPoint());
 
     QApplication::setOverrideCursor(Qt::WaitCursor);
-    WriteBmp(fileName.toLocal8Bit().data(), this->bitmapResolutionOption == ResolutionType::rtScreen);
+    WriteBmp(fileName.toLocal8Bit().data(), bitmapResolutionOption == ResolutionType::rtScreen);
     QApplication::restoreOverrideCursor();
 }
 
+void MvView::onFileExportAsPng(QWidget* parent)
+{
+    BitmapResolutionDialog dlg(parent);
+    dlg.resolutionOption = bitmapResolutionOption;
+    dlg.sideOption       = bitmapSideOption;
+    dlg.widthInInches    = bitmapWidthInInches;
+    dlg.heightInInches   = bitmapHeightInInches;
+    if (dlg.exec() != QDialog::Accepted)
+    {
+        return;
+    }
+    bitmapResolutionOption = dlg.resolutionOption;
+    bitmapSideOption       = dlg.sideOption;
+    bitmapWidthInInches    = dlg.widthInInches;
+    bitmapHeightInInches   = dlg.heightInInches;
+
+    QString fileName       = QFileDialog::getSaveFileName(parent,
+                                                    tr("Save As"),
+                                                    tr(""),
+                                                    tr("PNG (*.png);;All Files (*.*)"));
+    if (fileName.isEmpty())
+    {
+        return;
+    }
+
+    PlaceHeadlightWithCamera();
+
+    vtkLightCollection* lights = this->renderer->GetLights();
+    lights->InitTraversal();
+
+    // get headlight
+    assert(lights->IsItemPresent(this->headlight));
+    vtkLight* light = lights->GetNextItem();
+    assert(light == this->headlight);
+
+    // get auxilliary light
+    assert(lights->IsItemPresent(this->auxiliaryLight));
+    light = lights->GetNextItem();
+    assert(light == this->auxiliaryLight);
+
+    vtkCamera* camera = this->renderer->GetActiveCamera();
+
+    camera->Azimuth(this->rotate);
+    camera->Elevation(this->elevate);
+
+    if (this->elevate != 0)
+    {
+        camera->OrthogonalizeViewUp();
+    }
+
+    light->SetPosition(camera->GetPosition());
+    light->SetFocalPoint(camera->GetFocalPoint());
+
+    QApplication::setOverrideCursor(Qt::WaitCursor);
+    WritePng(fileName.toLocal8Bit().data(), bitmapResolutionOption == ResolutionType::rtScreen);
+    QApplication::restoreOverrideCursor();
+}
+
+
 void MvView::onFileExportAnimation(QWidget* parent)
 {
-    const double          MB_PER_PIXEL = 2.88e-6;
+    //const double          MB_PER_PIXEL = 2.88e-6;
+    const double          MB_PER_PIXEL = 8.43e-8;
     int                   width        = this->widget->renderWindow()->GetSize()[0];
     int                   height       = this->widget->renderWindow()->GetSize()[1];
     double                MBPerFile    = (width * height) * MB_PER_PIXEL;
@@ -554,7 +722,8 @@ void MvView::onFileExportAnimation(QWidget* parent)
             {
                 strcat(b1, "0");
             }
-            WriteBmp((path + b1 + b2 + ".bmp").toLocal8Bit().data(), true);
+            //WriteBmp((path + b1 + b2 + ".bmp").toLocal8Bit().data(), true);
+            WritePng((path + b1 + b2 + ".png").toLocal8Bit().data(), true);
             fileNumber++;
         }
         i++;
@@ -586,12 +755,24 @@ void MvView::onFileExportAnimation(QWidget* parent)
     QApplication::restoreOverrideCursor();
 }
 
-void MvView::onUpdateViewFrom(QAction* action)
+void MvView::onUpdateCopyDisplay(QAction* action)
 {
     action->setEnabled(renderer->VisibleActorCount() > 0 &&
                        !GetDocument()->isAnimating());
 }
 
+
+void MvView::onUpdateResetViewpoint(QAction* action)
+{
+    action->setEnabled(renderer->VisibleActorCount() > 0 &&
+                       !GetDocument()->isAnimating());
+}
+
+void MvView::onUpdateViewFrom(QAction* action)
+{
+    action->setEnabled(renderer->VisibleActorCount() > 0 &&
+                       !GetDocument()->isAnimating());
+}
 
 void MvView::onViewFromNextDirection()
 {
@@ -620,6 +801,13 @@ void MvView::onViewFromNextDirection()
         break;
     }
 }
+
+void MvView::onUpdateSaveViewpoint(QAction* action)
+{
+    action->setEnabled(renderer->VisibleActorCount() > 0 &&
+                       !GetDocument()->isAnimating());
+}
+
 
 void MvView::invalidate(bool erase /* = true */)
 {

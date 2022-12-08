@@ -66,6 +66,9 @@ public:
 
 
     void                    onFileExportAsBmp(QWidget* parent);
+
+    void                    onFileExportAsPng(QWidget* parent);
+
     void                    onFileExportAnimation(QWidget* parent);
 
 
@@ -78,6 +81,10 @@ public:
     void                    onViewFromPy();
     void                    onViewFromPz();
 
+    void                    onUpdateCopyDisplay(QAction* action);
+
+    void                    onUpdateResetViewpoint(QAction* action);
+
     void                    onUpdateViewFromNextDirection(QAction* action);
 
     void                    onUpdateViewFrom(QAction* action);
@@ -85,6 +92,8 @@ public:
     void                    invalidate(bool erase = true);
 
     void                    onSaveViewpoint();
+    void                    onUpdateSaveViewpoint(QAction* action);
+
     void                    onRecallViewpoint();
     void                    onUpdateRecallViewport(QAction* action);
 
@@ -100,6 +109,7 @@ protected:
 
     //void           PlaceHeadlightWithCamera();
     void           WriteBmp(const char* filename, bool useScreenResolution);
+    void           WritePng(const char* filename, bool useScreenResolution);
 
 
     // Parameters for exporting bitmap

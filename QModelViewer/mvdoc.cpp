@@ -435,6 +435,13 @@ void MvDoc::loadFile(const QString& fileName)
 {
     QApplication::setOverrideCursor(Qt::WaitCursor);
 
+    QString native = QDir::toNativeSeparators(fileName);
+    int     pos    = native.lastIndexOf(QDir::separator());
+    if (pos != -1)
+    {
+        QDir::setCurrent(native.left(pos));
+    }
+
     MainWindow* mainWindow = dynamic_cast<MainWindow*>(parent());
     assert(mainWindow);
 
@@ -2735,7 +2742,6 @@ void MvDoc::onUpdateToolboxAnimation(QAction* action)
     assert(animationDialog);
     action->setChecked(animationDialog->isVisible());
 }
-
 
 void MvDoc::updateAnimationDialog(mvGUISettings* gui)
 {
