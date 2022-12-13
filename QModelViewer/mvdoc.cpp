@@ -283,6 +283,8 @@ void MvDoc::onFileNew()
     _manager = new mvManager;
 
     reinitializeToolDialogs();
+    setCurrentFile("");
+
 
     char selectedModel[20];
     // This version of Model View is customized to display only Modflow 6 results.
