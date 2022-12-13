@@ -456,7 +456,7 @@ const char *Modflow6DataSource::ExtractModflowOutputFileNames(char *nameFile,
                 strcpy(gridFile, aline + 5);
                 mvUtil::TrimLeft(gridFile);
 #endif
-                strcat(gridFile, ".grb");                       // @todo check this (seems to me that the strcat should be after the ExtractFileName call
+                strcat(gridFile, ".grb");
                 ExtractFileName(gridFile);
                 m_GridType = GridType::MV_UNSTRUCTURED_GRID;
             }
