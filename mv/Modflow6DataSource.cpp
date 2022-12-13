@@ -456,8 +456,8 @@ const char *Modflow6DataSource::ExtractModflowOutputFileNames(char *nameFile,
                 strcpy(gridFile, aline + 5);
                 mvUtil::TrimLeft(gridFile);
 #endif
-                strcat(gridFile, ".grb");
                 ExtractFileName(gridFile);
+                strcat(gridFile, ".grb");
                 m_GridType = GridType::MV_UNSTRUCTURED_GRID;
             }
             if (!mvUtil::strnicmp(aline, "oc6 ", 4))
