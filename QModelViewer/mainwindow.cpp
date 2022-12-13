@@ -32,6 +32,10 @@
 // call QWidget::update() to schedule a paint event
 // call QWidget::repaint() to force a paint event
 
+#if defined(Q_OS_WINDOWS)
+#include <Shlwapi.h>
+#endif
+
 #include <QtWidgets>
 
 #include <vtkConeSource.h>
@@ -231,7 +235,7 @@ void MainWindow::createActions()
     showModelFeaturesAction = new QAction(tr("Model &Features"), this);
     showModelFeaturesAction->setCheckable(true);
     showModelFeaturesAction->setStatusTip(tr("Show or hide model features"));
-    connect(showModelFeaturesAction, &QAction::triggered, this, &MainWindow::onModelFeatures);
+    connect(showModelFeaturesAction, &QAction::triggered, this, &MainWindow::onShowModelFeatures);
 
     // -----------------------------
 
@@ -424,7 +428,7 @@ void MainWindow::createActions()
     pathlinesAction = new QAction(tr("&Pathlines"), this);
     pathlinesAction->setCheckable(true);
     pathlinesAction->setStatusTip(tr("Show or hide the Pathlines Toolbox"));
-    // connect(pathlinesAction, &QAction::triggered, doc, &MvDoc::onToolboxVector);  // @todo
+    // connect(pathlinesAction, &QAction::triggered, doc, &MvDoc::onToolboxXXX);  // @todo PATHLINES
 
     // Toolbox->Model Features
     modelFeaturesAction = new QAction(tr("Model &Features"), this);
@@ -746,7 +750,7 @@ void MainWindow::createMenus()
     // Show->Vectors
     showMenu->addAction(showVectorsAction);
 
-#if 0 // @todo
+#if 0 // @todo PATHLINES
     // Show->Pathlines
     showMenu->addAction(showPathlinesAction);
 #endif
@@ -971,14 +975,6 @@ void MainWindow::closeEvent(QCloseEvent *event)
     }
 }
 
-//void MainWindow::newFile()
-//{
-//    if (maybeSave())
-//    {
-//        setCurrentFile(QString());
-//    }
-//}
-
 void MainWindow::onFileNew()
 {
     if (doc->maybeSave())
@@ -1010,48 +1006,6 @@ void MainWindow::onFileNew()
 
 void MainWindow::onFileOpen()
 {
-    //if (!maybeSave()) return;
-
-    //QString fileName = QFileDialog::getOpenFileName(this, tr("Open"), QString(), tr("MvMf6 Files (*.mvmf6)"));
-
-    //if (fileName.isEmpty())
-    //{
-    //    return;
-    //}
-
-    ////{{ application MainWindow::loadFile(QString fileName) -> MvDoc::openDocument(QString fileName, QWidget* parent = nullptr)
-    //delete doc->_manager;
-    //delete doc->_gui;
-
-    //QApplication::setOverrideCursor(Qt::WaitCursor);
-
-    //std::string errorMsg;
-    //doc->_gui     = new mvGUISettings();
-    //doc->_manager = new mvManager();
-    //doc->_manager->Deserialize(QDir::toNativeSeparators(fileName).toLocal8Bit().data(), doc->_gui, errorMsg);
-    //if (errorMsg.size())
-    //{
-    //    QMessageBox::information(this, "Error", errorMsg.c_str());
-    //}
-
-    //// view->renderer->GetViewProps()->RemoveAllItems();
-    //view->renderer->RemoveAllViewProps();
-    //vtkSmartPointer<vtkPropCollection> props = doc->_manager->GetPropCollection();
-    //props->InitTraversal();
-    //for (int i = 0; i < props->GetNumberOfItems(); i++)
-    //{
-    //    view->addViewProp(props->GetNextProp());
-    //}
-    //view->applyViewSettings(doc->_gui);
-
-    //this->updateActions();
-    //this->updateStatusBar();
-    //this->setCurrentFile(fileName);
-
-    //QApplication::restoreOverrideCursor();
-    ////}} application MainWindow::loadFile(QString fileName)
-
-    //////
     doc->onFileOpen();
 }
 
@@ -1259,12 +1213,12 @@ void MainWindow::onShowVectors()
 
 void MainWindow::onShowPathlines()
 {
-    doc->onShowPathlines();     // @todo check this see MvDoc::onShowPathlines
+    doc->onShowPathlines();     // @todo PATHLINES check this see MvDoc::onShowPathlines
 }
 
-void MainWindow::onModelFeatures()
+void MainWindow::onShowModelFeatures()
 {
-    doc->onModelFeatures();     // @todo Edit->Refactor->Rename...
+    doc->onShowModelFeatures();
 }
 
 void MainWindow::onShowAxes()
@@ -1317,84 +1271,15 @@ void MainWindow::updateAllViews()
     this->view->mainWidget()->renderWindow()->Render();
 }
 
-//// bool MainWindow::saveFile(const char *lpszPathName)
-//bool MainWindow::saveFile(const QString &fileName)
-//{
-//    /*
-//    * BOOL CMvDoc::OnSaveDocument(LPCTSTR lpszPathName)
-//    *
-//    // Note: The base class method CDocument::OnSaveDocument is not called
-//    // because serialization is done by the visualization pipeline doc->_manager.
-//    // Thus, the method CMvDoc::Serialize is not used in this program.
-//
-//    // Copy the gui settings from the doc
-//    mvGUISettings *gui = new mvGUISettings;
-//    m_CropDlg->UpdateData(TRUE);
-//    gui->cropBoundsXDelta = m_CropDlg->m_ControlsPage->m_XDelta;
-//    gui->cropBoundsYDelta = m_CropDlg->m_ControlsPage->m_YDelta;
-//    gui->cropBoundsZDelta = m_CropDlg->m_ControlsPage->m_ZDelta;
-//    m_AnimationDlg->m_OptionsPage->UpdateData(TRUE);
-//    gui->animationRotate  = m_AnimationDlg->m_OptionsPage->m_Rotate;
-//    gui->animationElevate = m_AnimationDlg->m_OptionsPage->m_Elevate;
-//    gui->animationDelay   = m_AnimationDlg->m_OptionsPage->m_Delay;
-//    m_LightingDlg->m_LightsPage->UpdateData(TRUE);
-//    gui->headlightOn             = m_LightingDlg->m_LightsPage->m_HeadlightOn;
-//    gui->auxiliaryLightOn        = m_LightingDlg->m_LightsPage->m_AuxiliaryLightOn;
-//    gui->headlightIntensity      = m_LightingDlg->m_LightsPage->m_HeadlightIntensity * 0.01;
-//    gui->auxiliaryLightIntensity = m_LightingDlg->m_LightsPage->m_AuxiliaryLightIntensity * 0.01;
-//    m_LightingDlg->m_BackgroundPage->UpdateData(TRUE);
-//    gui->customBackground = m_LightingDlg->m_BackgroundPage->m_Background;
-//
-//    // Copy the gui settings from the view
-//    POSITION pos          = GetFirstViewPosition();
-//    CMvView *pView        = (CMvView *)GetNextView(pos);
-//    pView->GetViewSettings(gui);
-//
-//    // The visualization pipeline doc->_manager will serialize everything along
-//    // with the gui settings
-//    char *errorMsg = m_Manager->Serialize(lpszPathName, gui);
-//    delete gui;
-//    if (errorMsg != 0)
-//    {
-//        AfxMessageBox(errorMsg);
-//        return FALSE;
-//    }
-//
-//    // Mark this document as saved
-//    SetModifiedFlag(FALSE);
-//    return TRUE;
-//    */
-//
-//    assert(doc->_gui);
-//    mvGUISettings settings(*doc->_gui);
-//
-//    // @todo replace this with m_CropDlg
-//    // @todo replace this with m_AnimationDlg->m_OptionsPage
-//    // @todo replace this with m_LightingDlg->m_LightsPage
-//    // @todo replace this with m_LightingDlg->m_BackgroundPage
-//
-//    this->view->getViewSettings(&settings);
-//
-//    // The visualization pipeline doc->_manager will serialize everything along
-//    // with the gui settings
-//    ///char *errorMsg = this->doc->_manager->Serialize(lpszPathName, &settings);
-//    char *errorMsg = this->doc->_manager->Serialize(fileName.toLocal8Bit().data(), &settings);
-//    if (errorMsg != 0)
-//    {
-//        QMessageBox::information(this, tr(""), tr(errorMsg));
-//        return false;
-//    }
-//    setCurrentFile(fileName);
-//    setModifiedFlag(false);
-//    return true;
-//}
-
 void MainWindow::openRecentFile()
 {
     QAction *action = qobject_cast<QAction *>(sender());
     if (action)
     {
-        doc->loadFile(action->data().toString());
+        if (doc->maybeSave())
+        {
+            doc->loadFile(action->data().toString());
+        }
     }
 }
 
@@ -1412,6 +1297,17 @@ void MainWindow::updateRecentFileActions()
         recentFileActions[i]->setText(text);
         recentFileActions[i]->setData(files[i]);
         recentFileActions[i]->setVisible(true);
+#if defined(Q_OS_WINDOWS)
+        QString native = QDir::toNativeSeparators(files[i]);
+        char    path_in[MAX_PATH];
+        char    path_out[MAX_PATH];
+        strncpy(path_in, native.toLocal8Bit().data(), MAX_PATH - 1);
+        BOOL    b      = PathCompactPathExA(path_out, path_in, 90, 0);
+        QString status = tr("Open %1").arg(path_out);
+#else
+        QString status = tr("Open %1").arg(QDir::toNativeSeparators(files[i]));
+#endif
+        recentFileActions[i]->setStatusTip(status);
     }
     for (int j = numRecentFiles; j < MainWindow::MaxRecentFiles; ++j)
     {

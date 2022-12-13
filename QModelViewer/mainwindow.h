@@ -55,7 +55,7 @@ private slots:
 
     void onShowVectors();
     void onShowPathlines();
-    void onModelFeatures();
+    void onShowModelFeatures();
 
     void onShowAxes();
     void onShowGridLines();
@@ -107,8 +107,6 @@ private:
 
     void            readSettings();
     void            writeSettings();
-    //bool            maybeSave();
-    //bool            saveFile(const QString &fileName);
     void            setCurrentFile(const QString &fileName);
     QString         strippedName(const QString &fullFileName);
 
@@ -218,7 +216,7 @@ private:
     QAction *            cropAction;
     QAction *            animationAction;
 
-    // @todo
+    // @todo PATHLINES
     QAction *            pathlinesAction;
 
     // Help

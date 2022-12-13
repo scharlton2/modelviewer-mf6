@@ -373,13 +373,11 @@ void MvDoc::onFileNew()
     QApplication::restoreOverrideCursor();
 }
 
-
 void MvDoc::onFileOpen()
 {
     MainWindow* mainWindow = dynamic_cast<MainWindow*>(parent());
     assert(mainWindow);
 
-    //if (!mainWindow->maybeSave()) return;
     if (!maybeSave()) return;
 
     QString fileName = QFileDialog::getOpenFileName(mainWindow, tr("Open"), QString(), tr("MvMf6 Files (*.mvmf6)"));
@@ -389,48 +387,7 @@ void MvDoc::onFileOpen()
         return;
     }
 
-#if 0
-    //{{ application MainWindow::loadFile(QString fileName) -> MvDoc::openDocument(QString fileName, QWidget* parent = nullptr)
-    delete _manager;
-    delete _gui;
-
-    QApplication::setOverrideCursor(Qt::WaitCursor);
-
-    std::string errorMsg;
-    _gui     = new mvGUISettings();
-    _manager = new mvManager();
-    _manager->Deserialize(QDir::toNativeSeparators(fileName).toLocal8Bit().data(), _gui, errorMsg);
-    if (errorMsg.size())
-    {
-        QMessageBox::information(mainWindow, "Error", errorMsg.c_str());
-        return;
-    }
-
-    for (auto view : _views)
-    {
-        view->removeAllViewProps();
-        vtkSmartPointer<vtkPropCollection> props = _manager->GetPropCollection();
-        props->InitTraversal();
-        for (int i = 0; i < props->GetNumberOfItems(); i++)
-        {
-            view->addViewProp(props->GetNextProp());
-        }
-        view->applyViewSettings(_gui);
-        view->onUpdate(nullptr, nullptr);
-    }
-
-    //{{
-    updateToolDialogs(_gui);
-    //}}
-    //mainWindow->updateActions();
-    mainWindow->updateStatusBar();
-    setCurrentFile(fileName);
-
-    QApplication::restoreOverrideCursor();
-
-#else
     loadFile(fileName);
-#endif
 }
 
 void MvDoc::loadFile(const QString& fileName)
@@ -456,7 +413,8 @@ void MvDoc::loadFile(const QString& fileName)
     _manager->Deserialize(QDir::toNativeSeparators(fileName).toLocal8Bit().data(), _gui, errorMsg);
     if (errorMsg.size())
     {
-        QMessageBox::information(mainWindow, "Error", errorMsg.c_str());
+        QApplication::restoreOverrideCursor();
+        QMessageBox::information(mainWindow, tr("Error"), errorMsg.c_str());
         return;
     }
 
@@ -534,7 +492,7 @@ bool MvDoc::maybeSave()
     QString shownName = this->_currentFile;
     if (shownName.isEmpty())
     {
-        shownName = "Untitled";
+        shownName = tr("Untitled");
     }
     else
     {
@@ -888,18 +846,18 @@ void MvDoc::onShowPathlines()
     if (_manager->ArePathlinesVisible())
     {
         _manager->HidePathlines();
-        //m_PathlinesDlg->Activate(FALSE);  @todo
+        //m_PathlinesDlg->Activate(FALSE);  @todo PATHLINES
     }
     else
     {
         _manager->ShowPathlines();
-        //m_PathlinesDlg->Activate(TRUE);   @todo
+        //m_PathlinesDlg->Activate(TRUE);   @todo PATHLINES
     }
     updateAllViews(nullptr);
     setModified(true);
 }
 
-void MvDoc::onModelFeatures()
+void MvDoc::onShowModelFeatures()
 {
     if (_manager->AreModelFeaturesVisible())
     {
@@ -925,7 +883,8 @@ void MvDoc::setCurrentFile(const QString& fileName)
     _currentFile = QDir::toNativeSeparators(fileName);
     setModified(false);
 
-    MainWindow* mainWindow = dynamic_cast<MainWindow*>(parent());
+    //MainWindow* mainWindow = dynamic_cast<MainWindow*>(parent());
+    MainWindow* mainWindow = qobject_cast<MainWindow*>(parent());
     assert(mainWindow);
     if (mainWindow)
     {
@@ -1967,7 +1926,6 @@ void MvDoc::onToolboxOverlay()
 
 void MvDoc::updateOverlayDialog()
 {
-    // @todo
     assert(overlayDialog);
 
     // Controls
@@ -2449,7 +2407,7 @@ void MvDoc::onToolboxPathlines()
 
 void MvDoc::onUpdateToolboxPathlines(QAction* action)
 {
-    // @todo
+    // @todo PATHLINES
     action->setEnabled(false);
     //pCmdUI->SetCheck(m_PathlinesDlg->IsWindowVisible());
     //pCmdUI->Enable(m_Manager->HasPathlineData());
@@ -2899,7 +2857,7 @@ void MvDoc::startAnimation()
     solidDialog->activate(false);
     isosurfaceDialog->activate(false);
     vectorDialog->activate(false);
-    //m_PathlinesDlg->activate(false);      @todo
+    //m_PathlinesDlg->activate(false);      @todo PATHLINES
     modelFeaturesDialog->activate(false);
     cropDialog->activate(false);
     overlayDialog->activate(false);
@@ -3007,7 +2965,7 @@ void MvDoc::animate()
     solidDialog->activate(_manager->IsSolidVisible());
     isosurfaceDialog->activate(_manager->AreIsosurfacesVisible());
     vectorDialog->activate(_manager->AreVectorsVisible());
-    //m_PathlinesDlg->Activate(_manager->ArePathlinesVisible());  @todo
+    //m_PathlinesDlg->Activate(_manager->ArePathlinesVisible());  @todo PATHLINES
     modelFeaturesDialog->activate(_manager->AreModelFeaturesVisible());
     cropDialog->activate(_manager->IsSolidVisible() || _manager->AreIsosurfacesVisible());
     overlayDialog->activate(true);

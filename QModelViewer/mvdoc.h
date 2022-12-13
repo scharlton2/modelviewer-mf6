@@ -352,7 +352,7 @@ public slots:
 
     void onShowVectors(QWidget* parent);
     void onShowPathlines();
-    void onModelFeatures();
+    void onShowModelFeatures();
 
     void onShowAxes();
     void onShowGridLines();

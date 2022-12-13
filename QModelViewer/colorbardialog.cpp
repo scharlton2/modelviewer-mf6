@@ -22,9 +22,8 @@ ColorBarDialog::ColorBarDialog(QWidget *parent, MvDoc *doc)
     ui->setupUi(this);
 
     // Source
-    // @todo need pathlines to test 
+    // @todo PATHLINES need pathlines to test
     // ui->comboBoxSource
-
 
     // Limits
     connect(ui->pushButtonReverse, &QAbstractButton::clicked, this, &ColorBarDialog::onReverse);
@@ -177,12 +176,12 @@ bool ColorBarDialog::updateDataSource(bool saveAndValidate)
     {
         // Source
         dataSourceIndex = ui->comboBoxSource->currentIndex();
-        assert(dataSourceIndex == 0); // @todo pathlines
+        assert(dataSourceIndex == 0); // @todo PATHLINES
     }
     else
     {
         // Source
-        assert(dataSourceIndex == 0); // @todo pathlines
+        assert(dataSourceIndex == 0); // @todo PATHLINES
         ui->comboBoxSource->setCurrentIndex(dataSourceIndex);
     }
     return true;
@@ -523,7 +522,7 @@ void ColorBarDialog::setCurrentIndex(int index)
 
 void ColorBarDialog::applyDataSource()
 {
-    // @todo need pathlines
+    // @todo PATHLINES need pathlines
 }
 
 void ColorBarDialog::applyDataLimits()
@@ -604,7 +603,7 @@ void ColorBarDialog::onLogScale(int state)
         }
         else
         {
-            // doc->SetPathlineLogTransform(!isColorBarLinear);  @todo pathlines
+            // doc->SetPathlineLogTransform(!isColorBarLinear);  @todo PATHLINES
             doc->updatePathlinesDialog();
         }
     }

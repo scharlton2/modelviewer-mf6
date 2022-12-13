@@ -56,7 +56,7 @@ public:
     int    fontSize;
     int    numLabels;
     int    precision;
-    int    colorOption;     // @todo
+    int    colorOption;     // @todo (enum?)
 
     // Colors
     QColor firstColor;
