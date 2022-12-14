@@ -1302,7 +1302,7 @@ void MainWindow::updateRecentFileActions()
         char    path_in[MAX_PATH];
         char    path_out[MAX_PATH];
         strncpy(path_in, native.toLocal8Bit().data(), MAX_PATH - 1);
-        BOOL    b      = PathCompactPathExA(path_out, path_in, 90, 0);
+        BOOL    b      = PathCompactPathExA(path_out, path_in, 140, 0);
         QString status = tr("Open %1").arg(path_out);
 #else
         QString status = tr("Open %1").arg(QDir::toNativeSeparators(files[i]));
