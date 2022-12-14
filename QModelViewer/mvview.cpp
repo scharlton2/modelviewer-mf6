@@ -656,14 +656,12 @@ void MvView::onFileExportAnimation(QWidget* parent)
     QString path;
     if (!dlg.outputFolder.isEmpty())
     {
-        path = dlg.outputFolder;
+        path = dlg.outputFolder + QDir::separator() + filePrefix;
     }
     else
     {
-        path = GetDocument()->defaultDir().absolutePath() + filePrefix;
+        path = QDir::toNativeSeparators(GetDocument()->defaultDir().absolutePath()) + QDir::separator() + filePrefix;
     }
-    if (!filePrefix.isEmpty()) path += QDir::separator() + filePrefix;
-    path += QDir::separator();
 
     if (!dlg.preview)
     {
@@ -710,6 +708,7 @@ void MvView::onFileExportAnimation(QWidget* parent)
 
     char b1[10];
     char b2[10];
+    QString filename;
 
     while (1)
     {
@@ -722,8 +721,8 @@ void MvView::onFileExportAnimation(QWidget* parent)
             {
                 strcat(b1, "0");
             }
-            //WriteBmp((path + b1 + b2 + ".bmp").toLocal8Bit().data(), true);
-            WritePng((path + b1 + b2 + ".png").toLocal8Bit().data(), true);
+            filename = path + b1 + b2 + ".png";
+            WritePng(filename.toLocal8Bit().data(), true);
             fileNumber++;
         }
         i++;
