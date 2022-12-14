@@ -6,7 +6,7 @@ if(POLICY CMP0020)
 endif()
 
 # project (
-#   QModelViewer
+#   ModelViewer
 #   LANGUAGES CXX
 # )
 
@@ -27,11 +27,11 @@ endif()
 # )
 
 # if(NOT VTK_FOUND)
-#   message(FATAL_ERROR "QModelViewer: Unable to find the VTK build folder.")
+#   message(FATAL_ERROR "ModelViewer: Unable to find the VTK build folder.")
 # endif()
 
 if(NOT(TARGET VTK::GUISupportQt))
-  message(FATAL_ERROR "QModelViewer: VTK not built with Qt support.")
+  message(FATAL_ERROR "ModelViewer: VTK not built with Qt support.")
 endif()
 
 if(NOT DEFINED VTK_QT_VERSION)
@@ -207,7 +207,7 @@ if(WIN32)
 endif()
 
 # set icon for windows
-set(APP_ICON_RESOURCE_WINDOWS "${CMAKE_CURRENT_SOURCE_DIR}/QModelViewer.rc")
+set(APP_ICON_RESOURCE_WINDOWS "${CMAKE_CURRENT_SOURCE_DIR}/ModelViewer.rc")
 
 set(MACOSX_BUNDLE_ICON_FILE ModelViewer.icns)
 
@@ -216,50 +216,50 @@ set_source_files_properties(${APP_ICON_RESOURCE_MACOS} PROPERTIES
        MACOSX_PACKAGE_LOCATION "Resources")
 
 # CMAKE_AUTOMOC in ON so the MOC headers will be automatically wrapped.
-add_executable(QModelViewer MACOSX_BUNDLE WIN32
+add_executable(ModelViewer MACOSX_BUNDLE WIN32
   ${CXX_FILES} ${HXX_FILES} ${UI_FILES} ${QRC_FILES} ${APP_ICON_RESOURCE_WINDOWS} ${APP_ICON_RESOURCE_MACOS}
 )
 
 if (Qt${VTK_QT_VERSION}Widgets_VERSION VERSION_LESS "5.11.0")
-  qt5_use_modules(QModelViewer ${qt_components})
+  qt5_use_modules(ModelViewer ${qt_components})
 else()
-  target_link_libraries(QModelViewer ${qt_modules})
+  target_link_libraries(ModelViewer ${qt_modules})
 endif()
 
-target_include_directories(QModelViewer PRIVATE ${CMAKE_BINARY_DIR}/mv)
-target_include_directories(QModelViewer PRIVATE ${CMAKE_SOURCE_DIR}/mv)
+target_include_directories(ModelViewer PRIVATE ${CMAKE_BINARY_DIR}/mv)
+target_include_directories(ModelViewer PRIVATE ${CMAKE_SOURCE_DIR}/mv)
 
-target_link_libraries(QModelViewer ${VTK_LIBRARIES})
-target_link_libraries(QModelViewer mv)
+target_link_libraries(ModelViewer ${VTK_LIBRARIES})
+target_link_libraries(ModelViewer mv)
 
-set_target_properties(QModelViewer PROPERTIES VS_DEBUGGER_ENVIRONMENT "PATH=$(SolutionDir)\\mv\\$(Configuration);C:\\QT-VTK-9.1.0-leaks-vs2019-x64\\bin;C:\\Qt\\5.15.2\\msvc2019_64\\bin;%PATH%")
+set_target_properties(ModelViewer PROPERTIES VS_DEBUGGER_ENVIRONMENT "PATH=$(SolutionDir)\\mv\\$(Configuration);C:\\QT-VTK-9.1.0-leaks-vs2019-x64\\bin;C:\\Qt\\5.15.2\\msvc2019_64\\bin;%PATH%")
 
 if(UNIX AND NOT APPLE)
-  set_target_properties(QModelViewer PROPERTIES INSTALL_RPATH "\$ORIGIN/../lib")
+  set_target_properties(ModelViewer PROPERTIES INSTALL_RPATH "\$ORIGIN/../lib")
 endif()
 
 # vtk_module_autoinit is needed
 vtk_module_autoinit(
-  TARGETS QModelViewer
+  TARGETS ModelViewer
   MODULES ${VTK_LIBRARIES}
 )
 
 # install
-install(TARGETS QModelViewer
+install(TARGETS ModelViewer
   BUNDLE DESTINATION ${CMAKE_INSTALL_BINDIR}
   LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
   RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 )
 
 if(APPLE)
-  target_sources(QModelViewer
+  target_sources(ModelViewer
     PUBLIC
       ${examples_ex-gwf-csub-p04}
   )
   set_source_files_properties(${examples_ex-gwf-csub-p04} PROPERTIES
     MACOSX_PACKAGE_LOCATION SharedSupport/examples/ex-gwf-csub-p04
   )
-  target_sources(QModelViewer
+  target_sources(ModelViewer
     PUBLIC
       ${examples_ex-gwf-disvmesh}
   )
@@ -267,7 +267,7 @@ if(APPLE)
     MACOSX_PACKAGE_LOCATION SharedSupport/examples/ex-gwf-disvmesh
   )
   
-  target_sources(QModelViewer
+  target_sources(ModelViewer
     PUBLIC
       ${doc_files}
   )
@@ -298,4 +298,4 @@ endif()
 include(InstallRequiredSystemLibraries)
 
 include(CTest)
-add_test(NAME QModelViewer COMMAND QModelViewer)
+add_test(NAME ModelViewer COMMAND ModelViewer)

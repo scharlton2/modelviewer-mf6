@@ -71,7 +71,7 @@ int main(int argc, char** argv)
 
   QApplication app(argc, argv);
   app.setOrganizationName("USGS");
-  app.setApplicationName("QModel Viewer for Modflow 6");
+  app.setApplicationName("Model Viewer for Modflow 6");
   app.setOrganizationDomain("gov.usgs.ModelViewer");
   QGuiApplication::setApplicationDisplayName(QObject::tr("Model Viewer for Modflow 6"));
 

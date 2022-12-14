@@ -1,37 +1,6 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
-//#include <QCloseEvent>
-//#include <QDebug.h>
-//#include <QFileDialog>
-//#include <QMessageBox>
-//#include <QSaveFile>
-//#include <QScreen>
-
-//
-// vtkMFCWindow*    m_MFCWindow                        ->   QVTKOpenGLNativeWidget*   mainWidget
-//                  m_MFCWindow->GetRenderWindow()                                    mainWidget->renderWindow()
-//                  m_MFCWindow->GetInteractor()                                      mainWidget->interactor()
-//
-// CMainFrame                                          ->   MainWindow
-//
-// vtkRenderer *m_Renderer                             ->   MvView::renderer
-
-//
-// connect(fileMenu, SIGNAL(aboutToShow()), this, SLOT(updateFileActions()));                       // Qt4-style
-// connect(fileMenu, SIGNAL(aboutToShow), this, SLOT(updateFileActions));                           // Qt4-style -- error -- QObject::connect: Parentheses expected
-// connect(fileMenu, &QMenu::aboutToShow, this, &MainWindow::updateFileActions);                    // New-style
-// connect(fileMenu, qOverload<int>(&QMenu::aboutToShow), this, &MainWindow::updateFileActions);    // New-style with overload
-
-// 
-// MainWindow::setCurrentFile   ->  mvDoc::setCurrentFile
-// MainWindow::onFileOpen       ->  mvDoc::onFileOpen
-// MainWindow::onFileNew        ->  mvDoc::onFileNew
-//
-
-// call QWidget::update() to schedule a paint event
-// call QWidget::repaint() to force a paint event
-
 #if defined(Q_OS_WINDOWS)
 #include <Shlwapi.h>
 #endif
@@ -69,17 +38,9 @@ MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , doc{nullptr}
     , view{nullptr}
-    //, gui{nullptr}
-    //, _modifiedFlag{false}
 
 {
 #if defined(Q_OS_WINDOWS)
-    //{{ unit testing
-    // std::string mvSaveCurrentDirectory::GetFullPath(const char *szMore, const char *szDirectory)
-    std::string            s = mvSaveCurrentDirectory::GetFullPath(".\\New folder\\Greenport_Domain.shp", "D:\\Issues\\modflow\\model viewer for mf6\\issue-51");
-    assert(s.compare("D:\\Issues\\modflow\\model viewer for mf6\\issue-51\\New folder\\Greenport_Domain.shp") == 0);
-    //}}
-
     // Disables the window ghosting feature for the calling GUI process
     // (Don't display '(Not Responding)' in window caption)
     DisableProcessWindowsGhosting();

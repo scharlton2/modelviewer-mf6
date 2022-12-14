@@ -101,7 +101,7 @@ add_subdirectory(mv)
 add_subdirectory(QModelViewer)
 
 # set default startup project
-set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT QModelViewer)
+set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT ModelViewer)
 
 # based on code from CMake's QtDialog/CMakeLists.txt
 macro(install_qt5_plugin _qt_plugin_name _qt_plugins_var)
@@ -111,7 +111,7 @@ macro(install_qt5_plugin _qt_plugin_name _qt_plugins_var)
     get_filename_component(_qt_plugin_type "${_qt_plugin_path}" PATH)
     get_filename_component(_qt_plugin_type "${_qt_plugin_type}" NAME)
     if(APPLE)
-      set(_qt_plugin_dest "QModelViewer.app/Contents/PlugIns/${_qt_plugin_type}")
+      set(_qt_plugin_dest "ModelViewer.app/Contents/PlugIns/${_qt_plugin_type}")
     elseif(UNIX)
       set(_qt_plugin_dest "plugins/${_qt_plugin_type}")
     elseif(WIN32)
@@ -151,11 +151,11 @@ endif()
 
 # set executable
 if(APPLE)
-  set(APP "\$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/QModelViewer.app")
+  set(APP "\$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/ModelViewer.app")
 elseif(UNIX)
-  set(APP "\$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/bin/QModelViewer")
+  set(APP "\$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/bin/ModelViewer")
 elseif(WIN32)
-  set(APP "\$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/bin/QModelViewer.exe")
+  set(APP "\$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/bin/ModelViewer.exe")
 endif()
 
 # add qt5 dir to DIRS
@@ -194,7 +194,7 @@ elseif(UNIX)
   install(CODE "
     cmake_policy(SET CMP0057 NEW)  # Add support for IN_LIST operator.
     file(GET_RUNTIME_DEPENDENCIES
-      EXECUTABLES $<TARGET_FILE:QModelViewer>
+      EXECUTABLES $<TARGET_FILE:ModelViewer>
       LIBRARIES ${QT_PLUGINS}
       RESOLVED_DEPENDENCIES_VAR _resolves
       UNRESOLVED_DEPENDENCIES_VAR _u_deps
@@ -220,7 +220,7 @@ elseif(WIN32)
   set(CPACK_GENERATOR "ZIP")
 endif()
 
-set(CPACK_PACKAGE_NAME "QModelViewer")
+set(CPACK_PACKAGE_NAME "ModelViewer")
 include(CPack)
 
 # cmake variable debugging
