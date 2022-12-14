@@ -2989,7 +2989,7 @@ void MvDoc::getScalarDataRange(double* range)
 
 void MvDoc::updatePathlinesDialog()
 {
-    // @todo
+    // @todo PATHLINES
     //assert(pathlinesDialog);
 }
 
