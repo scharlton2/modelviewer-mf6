@@ -2,7 +2,7 @@
 #include "ui_mainwindow.h"
 
 #if defined(Q_OS_WINDOWS)
-#include <Shlwapi.h>
+#include <shlwapi.h>
 #endif
 
 #include <QtWidgets>

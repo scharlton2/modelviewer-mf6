@@ -4,7 +4,7 @@ cmake_policy(SET CMP0057 NEW)
 
 project (
   QMvProject${VTK_SUFFIX}
-  VERSION 1.1.0
+  VERSION 1.2.0
   LANGUAGES CXX C
 )
 
@@ -220,7 +220,9 @@ elseif(WIN32)
   set(CPACK_GENERATOR "ZIP")
 endif()
 
-set(CPACK_PACKAGE_NAME "ModelViewer")
+set(CPACK_PACKAGE_NAME "mvmf6")
+SET(CPACK_PACKAGE_VERSION "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}${MV_VERSION_PRERELEASE}")
+
 include(CPack)
 
 # cmake variable debugging

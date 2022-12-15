@@ -2,10 +2,12 @@
 #include "mvSaveCurrentDirectory.h"
 #include "mvUtil.h"
 
+#if defined(QT_GUI_LIB)
 #include <QDir>
 #include <QFileInfo>
 #include <QString>
 #include <QStringLiteral>
+#endif
 
 #include <cassert>
 
@@ -15,13 +17,13 @@
 
 
 mvSaveCurrentDirectory::mvSaveCurrentDirectory(void)
-#if 0
+#if defined(_AFXDLL)
     : m_path(0)
 #else
     : _path(QDir::currentPath())
 #endif
 {
-#if 0
+#if defined(_AFXDLL)
 
     DWORD len = ::GetCurrentDirectory(0, nullptr);
     if (len)
@@ -38,13 +40,13 @@ mvSaveCurrentDirectory::mvSaveCurrentDirectory(void)
 }
 
 mvSaveCurrentDirectory::mvSaveCurrentDirectory(const char* lpszNewPath)
-#if 0
+#if defined(_AFXDLL)
     : m_path(0)
 #else
     : _path(QDir::currentPath())
 #endif
 {
-#if 0
+#if defined(_AFXDLL)
 
     DWORD len = ::GetCurrentDirectory(0, nullptr);
     if (len)
@@ -64,7 +66,7 @@ mvSaveCurrentDirectory::mvSaveCurrentDirectory(const char* lpszNewPath)
 
 mvSaveCurrentDirectory::~mvSaveCurrentDirectory(void)
 {
-#if 0
+#if defined(_AFXDLL)
 
     if (m_path)
     {
@@ -92,7 +94,7 @@ mvSaveCurrentDirectory::~mvSaveCurrentDirectory(void)
 
 bool mvSaveCurrentDirectory::changeDir(const char* lpPathName)
 {
-#if 0
+#if defined(_AFXDLL)
     bool bRet = false;
     if (lpPathName)
     {
@@ -136,7 +138,7 @@ bool mvSaveCurrentDirectory::changeDir(const char* lpPathName)
 
 std::string mvSaveCurrentDirectory::GetDirName(const char* fullPath)
 {
-#if 0
+#if defined(_AFXDLL)
 
     char szOut[MAX_PATH];
     char szDrive[_MAX_DRIVE];
@@ -185,7 +187,7 @@ std::string mvSaveCurrentDirectory::GetDirName(const char* fullPath)
 
 std::string mvSaveCurrentDirectory::GetRelativePath(const char* pszFrom, const char* pszTo)
 {
-#if 0
+#if defined(_AFXDLL)
 
     char szOut[MAX_PATH + 1] = "";
     if (strlen(pszTo) && PathIsSameRoot(pszFrom, pszTo))
@@ -233,7 +235,7 @@ std::string mvSaveCurrentDirectory::GetRelativePath(const char* pszFrom, const c
 
 std::string mvSaveCurrentDirectory::GetFullPath(const char* szMore, const char* szDirectory)
 {
-#if 0
+#if defined(_AFXDLL)
     if (PathIsRelative(szMore))
     {
         assert(szDirectory);

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>365</width>
-    <height>435</height>
+    <width>373</width>
+    <height>423</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -30,7 +30,7 @@
        <number>6</number>
       </property>
       <item row="0" column="0">
-       <widget class="QLabel" name="label_6">
+       <widget class="QLabel" name="labelNotice">
         <property name="text">
          <string>This software uses the Visualization Toolkit (vtk), written and copyrighted by Ken Martin, Will Schroeder and Bill Lorensen. The authors of vtk have granted permission to use, copy, and distribute vtk while retaining their copyright. </string>
         </property>
@@ -68,7 +68,7 @@
        <number>6</number>
       </property>
       <item row="0" column="0">
-       <widget class="QLabel" name="label_5">
+       <widget class="QLabel" name="labelCredits">
         <property name="text">
          <string>Model Viewer for Modflow 6 was developed by
 Paul A. Hsieh (pahsieh@usgs.gov) and 
@@ -98,23 +98,23 @@ Scott R. Charlton (charlton@usgs.gov)</string>
    <item row="0" column="1">
     <layout class="QVBoxLayout" name="verticalLayout_2">
      <item>
-      <widget class="QLabel" name="label_2">
+      <widget class="QLabel" name="labelTitle">
        <property name="text">
         <string>Model Viewer for Modflow 6</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="label_3">
+      <widget class="QLabel" name="labelVersion">
        <property name="text">
         <string>Version 1.2.0-prerelease.1</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="label_4">
+      <widget class="QLabel" name="labelDate">
        <property name="text">
-        <string>05/04/2022 (compiled May 04 2022 16:35:19)</string>
+        <string>YYYY-mm-dd (compiled bbb dd YYYY HH:MM:SS)</string>
        </property>
       </widget>
      </item>
@@ -136,7 +136,7 @@ Scott R. Charlton (charlton@usgs.gov)</string>
        <number>6</number>
       </property>
       <item>
-       <widget class="QLabel" name="label_7">
+       <widget class="QLabel" name="labelDisclaimer">
         <property name="text">
          <string>This software is preliminary or provisional and is subject to revision. It is being provided to meet the need for timely best science. The software has not received final approval by the U.S. Geological Survey (USGS).
 

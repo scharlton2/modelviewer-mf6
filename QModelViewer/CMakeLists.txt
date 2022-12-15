@@ -5,31 +5,6 @@ if(POLICY CMP0020)
   cmake_policy(SET CMP0071 NEW)
 endif()
 
-# project (
-#   ModelViewer
-#   LANGUAGES CXX
-# )
-
-# find_package(VTK
-#   COMPONENTS
-#     CommonColor
-#     CommonCore
-#     FiltersSources
-#     GUISupportQt
-#     InteractionStyle
-#     RenderingContextOpenGL2
-#     RenderingCore
-#     RenderingFreeType
-#     RenderingGL2PSOpenGL2
-#     RenderingOpenGL2
-#     GUISupportQt
-#     RenderingQt
-# )
-
-# if(NOT VTK_FOUND)
-#   message(FATAL_ERROR "ModelViewer: Unable to find the VTK build folder.")
-# endif()
-
 if(NOT(TARGET VTK::GUISupportQt))
   message(FATAL_ERROR "ModelViewer: VTK not built with Qt support.")
 endif()
@@ -197,6 +172,8 @@ source_group("Resources"
     ${UI_FILES}
 )
 
+configure_file(mv_version.h.in mv_version.h)
+
 # For VTK versions greater than or equal to 8.90.0:
 #  CMAKE_AUTOUIC is ON so we handle uic automatically for Qt targets.
 #  CMAKE_AUTOMOC is ON so we handle moc automatically for Qt targets.
@@ -226,6 +203,7 @@ else()
   target_link_libraries(ModelViewer ${qt_modules})
 endif()
 
+target_include_directories(ModelViewer PUBLIC "${PROJECT_BINARY_DIR}")
 target_include_directories(ModelViewer PRIVATE ${CMAKE_BINARY_DIR}/mv)
 target_include_directories(ModelViewer PRIVATE ${CMAKE_SOURCE_DIR}/mv)
 
