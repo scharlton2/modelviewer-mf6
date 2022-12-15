@@ -250,8 +250,8 @@ jobs:
       - name: Set env vars
         shell: bash
         run: |
-          echo "MV_SHORT_SHA1=$(git rev-parse --short HEAD)" >> $env:GITHUB_ENV
-          echo "MV_DATE_COMPILED=$(date --rfc-3339=date) (compiled $(date "+%b %d %Y %H:%M:%S"))" >> $env:GITHUB_ENV
+          echo "MV_SHORT_SHA1=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
+          echo "MV_DATE_COMPILED=$(date --rfc-3339=date) (compiled $(date "+%b %d %Y %H:%M:%S"))" >> $GITHUB_ENV
 
         # the shell needs to be set to use ninja on windows
       - name: Set up Visual Studio shell
