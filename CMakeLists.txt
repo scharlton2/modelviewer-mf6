@@ -151,11 +151,11 @@ endif()
 
 # set executable
 if(APPLE)
-  set(APP "\$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/ModelViewer.app")
+  set(APP "\$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/mvmf6.app")
 elseif(UNIX)
-  set(APP "\$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/bin/ModelViewer")
+  set(APP "\$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/bin/mvmf6")
 elseif(WIN32)
-  set(APP "\$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/bin/ModelViewer.exe")
+  set(APP "\$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/bin/mvmf6.exe")
 endif()
 
 # add qt5 dir to DIRS
