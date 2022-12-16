@@ -31,6 +31,7 @@
 
 #include "colorbardialog.h"
 #include "datadialog.h"
+#include "dataselectiondialog.h"
 #include "geometrydialog.h"
 #include "griddialog.h"
 #include "lightingdialog.h"
@@ -315,9 +316,17 @@ void MvDoc::onFileNew()
     }
 
     // Display dialog box for user to select time and type of data to view
-    // @todo
-    _manager->SetTimePointTo(0);
-    _manager->SetScalarDataTypeTo(0);
+    QApplication::restoreOverrideCursor();
+
+    DataSelectionDialog dlg(timePointLabels(), dataTypeLabels(), mainWindow);
+    dlg.exec();
+
+    QApplication::setOverrideCursor(Qt::WaitCursor);
+    _manager->SetTimePointTo(dlg.selectedTimePoint);
+    _manager->SetScalarDataTypeTo(dlg.selectedDataType);
+    Q_ASSERT(_manager->GetTimeLabelOption() == 0);      // Modflow6DataSource doesn't override GetTimeLabelOption
+
+    mainWindow->updateStatusBar();
 
     // Apply default settings and then turn on bounding box
     _manager->ApplyDefaultSettings();

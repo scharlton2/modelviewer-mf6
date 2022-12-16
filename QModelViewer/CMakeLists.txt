@@ -45,6 +45,7 @@ set(UI_FILES
   colorbardialog.ui
   cropdialog.ui
   datadialog.ui
+  dataselectiondialog.ui
   displaysizedialog.ui
   exportanimationdialog.ui
   geometrydialog.ui
@@ -68,6 +69,7 @@ set(HXX_FILES
   cropdialog.h
   datadialog.h
   datafilesdialog.h
+  dataselectiondialog.h
   displaysizedialog.h
   exportanimationdialog.h
   geometrydialog.h
@@ -94,6 +96,7 @@ set(CXX_FILES
   colorbardialog.cpp
   cropdialog.cpp
   datadialog.cpp
+  dataselectiondialog.cpp
   datafilesdialog.cpp
   displaysizedialog.cpp
   exportanimationdialog.cpp
