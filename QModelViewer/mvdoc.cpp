@@ -1648,6 +1648,7 @@ void MvDoc::updateGridDialog()
 
     // Using row-col-lay convention of Modflow
     const int* sdim = _manager->GetScalarGridDimensions(); // recall these are dimensions of vtk points
+    Q_ASSERT(sdim);
 
     // Lines
     if (_manager->IsScalarSubgridOn())
@@ -1802,6 +1803,8 @@ void MvDoc::activateGridLines(int slice, bool b)
 void MvDoc::setGridLinePositions(int col, int row, int lay)
 {
     const int* sdim = _manager->GetScalarGridDimensions(); // returns point dimensions
+    Q_ASSERT(sdim);
+
     int        posX = col;
     int        posY = (sdim[1] - 1) - row;
     int        posZ = (sdim[2] - 1) - lay;
@@ -1838,6 +1841,8 @@ void MvDoc::applySubgrid(int col_min, int col_max, int row_min, int row_max, int
     if (_manager->GetGridType() == GridType::MV_STRUCTURED_GRID)
     {
         const int* sdim = _manager->GetScalarGridDimensions();
+        Q_ASSERT(sdim);
+
         // note that imin, imax, jmin, etc refer to point dimensions
         imin            = col_min - 1;
         imax            = col_max;
@@ -1886,6 +1891,8 @@ void MvDoc::subgridOff()
 
     // update the grid lines dlg box
     const int* sdim  = _manager->GetScalarGridDimensions(); // keep in mind these are dimensions of points
+    Q_ASSERT(sdim);
+
     gridDialog->XMin = 0;
     gridDialog->XMax = sdim[0] - 1;
     gridDialog->YMin = 0;
@@ -2801,6 +2808,7 @@ void MvDoc::updateAnimationDialog(mvGUISettings* gui)
     }
     else
     {
+        Q_ASSERT(false);    // currently Modflow6DataSource doesn't override GetTimeLabelOption
         animationDialog->setCurrentTimeLabel(tr("Current step:"));
         animationDialog->setTimePointsLabel(tr("Set to step:"));
     }
