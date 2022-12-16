@@ -201,7 +201,7 @@ add_executable(ModelViewer MACOSX_BUNDLE WIN32
 )
 
 # modify ModelViewer executable name
-set_target_properties(ModelViewer PROPERTIES OUTPUT_NAME mvmf6)
+##set_target_properties(ModelViewer PROPERTIES OUTPUT_NAME mvmf6)
 
 if (Qt${VTK_QT_VERSION}Widgets_VERSION VERSION_LESS "5.11.0")
   qt5_use_modules(ModelViewer ${qt_components})
