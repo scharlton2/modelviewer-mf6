@@ -37,22 +37,22 @@ GridDialog::GridDialog(QWidget * parent, MvDoc * doc)
     // Size
     connect(ui->spinBoxPositionX, QOverload<int>::of(&QSpinBox::valueChanged),
             [=](int val) {
-                assert(structuredGrid);
-                positionX = std::max(val, XMin);
-                positionX = std::min(val, XMax);
+                Q_ASSERT(structuredGrid);
+                Q_ASSERT(XMin <= val && val <= XMax);
+                positionX = val;
                 doc->setGridLinePositions(positionX, positionY, positionZ);
             });
     connect(ui->spinBoxPositionY, QOverload<int>::of(&QSpinBox::valueChanged),
             [=](int val) {
                 assert(structuredGrid);
-                positionY = std::max(val, YMin);
-                positionY = std::min(val, YMax);
+                Q_ASSERT(YMin <= val && val <= YMax);
+                positionY = val;
                 doc->setGridLinePositions(positionX, positionY, positionZ);
             });
     connect(ui->spinBoxPositionZ, QOverload<int>::of(&QSpinBox::valueChanged),
             [=](int val) {
-                positionZ = std::max(val, ZMin);
-                positionZ = std::min(val, ZMax);
+                Q_ASSERT(ZMin <= val && val <= ZMax);
+                positionZ = val;
                 if (structuredGrid)
                     doc->setGridLinePositions(positionX, positionY, positionZ);
                 else
@@ -166,6 +166,11 @@ bool GridDialog::updateDataLines(bool saveAndValidate)
     }
     else
     {
+        QSignalBlocker blockSpinX(ui->spinBoxPositionX);
+        QSignalBlocker blockSpinY(ui->spinBoxPositionY);
+        QSignalBlocker blockSpinZ(ui->spinBoxPositionZ);
+
+        // these could emit QSpinBox::valueChanged signals
         ui->spinBoxPositionX->setRange(XMin, XMax);
         ui->spinBoxPositionY->setRange(YMin, YMax);
         ui->spinBoxPositionZ->setRange(ZMin, ZMax);
@@ -174,6 +179,7 @@ bool GridDialog::updateDataLines(bool saveAndValidate)
         ui->checkBoxActivateY->setChecked(isActiveY);
         ui->checkBoxActivateZ->setChecked(isActiveZ);
 
+        // these could emit QSpinBox::valueChanged signals
         ui->spinBoxPositionX->setValue(positionX);
         ui->spinBoxPositionY->setValue(positionY);
         ui->spinBoxPositionZ->setValue(positionZ);
@@ -255,6 +261,7 @@ bool GridDialog::updateDataSubgrid(bool saveAndValidate)
                 ui->spinBoxHighJ->setRange(1, row_upper_limit);
             }
 
+            // Why not still block here?
             ui->spinBoxLowI->setValue(col_min);
             ui->spinBoxHighI->setValue(col_max);
             ui->spinBoxLowJ->setValue(row_min);
@@ -292,6 +299,9 @@ void GridDialog::reinitialize()
     ui->checkBoxActivateZ->setChecked(false);
 
     colorOption = 0;
+
+    // TODO may need to block signals here
+    // or possibly in the updateData routines
 
     updateDataLines(false);
     activateLines(false);
