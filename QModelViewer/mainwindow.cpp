@@ -599,11 +599,14 @@ void MainWindow::updateToolboxActions()
     // Toolbox->Color Bar
     doc->onUpdateToolboxColorBar(colorBarAction);
 
-    // Toolbox->Geometry
-    doc->onUpdateToolboxGeometry(geometryAction);
+    // Toolbox->Lighting
+    doc->onUpdateToolboxLighting(lightingAction);
 
     // Toolbox->Grid
     doc->onUpdateToolboxGrid(gridAction);
+
+    // Toolbox->Geometry
+    doc->onUpdateToolboxGeometry(geometryAction);
 
     // Toolbox->Overlay
     doc->onUpdateToolboxOverlay(overlayAction);
