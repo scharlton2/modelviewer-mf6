@@ -4,11 +4,13 @@ on:
   push:
     branches:
       - 'main'
-      - '_develop-qt-refactor'
+      - 'develop'
+      - '_develop-*'
   pull_request:
     branches:
       - 'main'
-      - '_develop-qt-refactor'
+      - 'develop'
+      - '_develop-*'
 
   workflow_dispatch:
 
@@ -260,13 +262,13 @@ jobs:
         with:
           arch: x64
 
-      - name: "*** Configure modelviewer-mf6 with cmake ***"
+      - name: "*** Configure modelviewer-mf6 for release ***"
         if: ${{ github.ref_name == 'master' }}
         env:
           VTK_DIR: ${{ runner.workspace }}/qt5-vtk-${{ env.VTK_VER }}/lib/cmake
         run: cmake -S . -B ./_ninja_multi -G "Ninja Multi-Config" -DMV_SHORT_SHA1="${{ env.MV_SHORT_SHA1 }}" -DMV_DATE_COMPILED="${{ env.MV_DATE_COMPILED }}"
 
-      - name: "*** Configure modelviewer-mf6 with cmake ***"
+      - name: "*** Configure modelviewer-mf6 for prerelease ***"
         if: ${{ github.ref_name != 'master' }}
         env:
           VTK_DIR: ${{ runner.workspace }}/qt5-vtk-${{ env.VTK_VER }}/lib/cmake
