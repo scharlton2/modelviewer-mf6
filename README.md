@@ -24,12 +24,12 @@ Download the VTK 9.1.0 Source (https://github.com/Kitware/VTK/releases/tag/v9.1.
 Download the modelviewer-mf6 source version 1.1 or later
 
 Copy the misc/CMakePresets-vtk-9.1.0-qt-5.15.2.json file to the top-level
-of the vtk source tree and rename it to CMakePresets.json.
+of the VTK source tree and rename it to CMakePresets.json.
 
 Set the following environment variables or manually edit
 the default presets in the CMakePresets.json file:
 
-      $env{RUNNER_WORKSPACE}  = location to build vtk
+      $env{RUNNER_WORKSPACE}  = <location to build vtk>
       $env{VTK_VER}           = 9.1.0
       $env{AQT_VER}           = 5.15.2
 
