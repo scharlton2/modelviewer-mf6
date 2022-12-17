@@ -275,12 +275,6 @@ jobs:
           MV_VERSION_PRERELEASE: -prerelease.${{ github.run_number }}
         run: cmake -S . -B ./_ninja_multi -G "Ninja Multi-Config" -DMV_SHORT_SHA1="${{ env.MV_SHORT_SHA1 }}" -DMV_DATE_COMPILED="${{ env.MV_DATE_COMPILED }}" -DMV_VERSION_PRERELEASE="${{ env.MV_VERSION_PRERELEASE }}"
 
-      - name: "*** Configure modelviewer-mf6 with cmake ***"
-        if: runner.os == 'Windows'
-        env:
-          VTK_DIR: ${{ runner.workspace }}/qt5-vtk-${{ env.VTK_VER }}/lib/cmake
-        run: cmake -S . -B ./_ninja_multi -G "Ninja Multi-Config" -DMV_SHORT_SHA1="${{ env.MV_SHORT_SHA1 }}" -DMV_DATE_COMPILED="${{ env.MV_DATE_COMPILED }}"
-
       - name: "*** Build modelviewer-mf6 debug with cmake ***"
         run: cmake --build ./_ninja_multi --config Debug
 

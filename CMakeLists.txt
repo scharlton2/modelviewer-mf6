@@ -4,7 +4,7 @@ cmake_policy(SET CMP0057 NEW)
 
 project (
   QMvProject${VTK_SUFFIX}
-  VERSION 1.2.0
+  VERSION 1.1.0
   LANGUAGES CXX C
 )
 
