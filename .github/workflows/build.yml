@@ -42,12 +42,6 @@ jobs:
       matrix:
         config:
         - {
-            os: macos-11,
-            aqt_host: mac,
-            aqt_arch: clang_64,
-            package_suffix: "dmg"
-          }
-        - {
             os: macos-12,
             aqt_host: mac,
             aqt_arch: clang_64,
