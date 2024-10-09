@@ -7,6 +7,18 @@
 #include <stdlib.h>
 #include <string.h>
 
+#if defined(mvModflow6Reader_EXPORTS)
+#include <vtkCubeSource.h>
+#include <vtkGlyph3D.h>
+#include <vtkLookupTable.h>
+#include <vtkStructuredGrid.h>
+#include <vtkThreshold.h>
+#include <vtkThresholdPoints.h>
+#include <vtkTransform.h>
+#include <vtkTransformPolyDataFilter.h>
+#include <vtkUnstructuredGrid.h>
+#endif
+
 #if defined(QT_GUI_LIB)
 #include <QDebug>
 #include <QDir>
